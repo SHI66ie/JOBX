@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { Button } from "@/components/ui/button";
+import { buttonVariants } from "@/components/ui/button";
 
 export default function Home() {
   return (
@@ -12,9 +12,9 @@ export default function Home() {
           <Link className="text-sm font-medium hover:underline underline-offset-4" href="/login">
             Login
           </Link>
-          <Button asChild>
-            <Link href="/signup">Sign Up</Link>
-          </Button>
+          <Link href="/signup" className={buttonVariants()}>
+            Sign Up
+          </Link>
         </nav>
       </header>
       <main className="flex-1 flex flex-col items-center justify-center p-6 lg:p-12 text-center">
@@ -28,12 +28,12 @@ export default function Home() {
             Create your profile, post a job, and start connecting today.
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center pt-4">
-            <Button size="lg" className="px-8" asChild>
-              <Link href="/signup?role=candidate">Find a Job</Link>
-            </Button>
-            <Button size="lg" variant="outline" className="px-8" asChild>
-              <Link href="/signup?role=employer">Post a Job</Link>
-            </Button>
+            <Link href="/signup?role=candidate" className={buttonVariants({ size: "lg", className: "px-8" })}>
+              Find a Job
+            </Link>
+            <Link href="/signup?role=employer" className={buttonVariants({ size: "lg", variant: "outline", className: "px-8" })}>
+              Post a Job
+            </Link>
           </div>
         </div>
       </main>
