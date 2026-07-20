@@ -103,3 +103,25 @@ export async function applyForJob(jobId: string) {
 
   revalidatePath("/dashboard/seeker");
 }
+
+export async function updateApplicationStatus(applicationId: string, status: string, jobId: string) {
+  const supabase = await createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+
+  if (!user) {
+    throw new Error("Unauthorized");
+  }
+
+  // The RLS policy on applications table ensures only the employer who created the job can update it.
+  const { error } = await supabase
+    .from("applications")
+    .update({ status })
+    .eq("id", applicationId);
+
+  if (error) {
+    console.error("Error updating application status:", error);
+    throw new Error(error.message);
+  }
+
+  revalidatePath(`/dashboard/company/jobs/${jobId}`);
+}

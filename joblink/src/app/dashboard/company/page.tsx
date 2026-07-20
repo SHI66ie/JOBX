@@ -71,6 +71,13 @@ export default async function CompanyDashboard() {
     .eq("company_id", company.id)
     .order("created_at", { ascending: false });
 
+  // Fetch total applicants for these jobs
+  const jobIds = jobs?.map(job => job.id) || [];
+  const { count: totalApplicants } = await supabase
+    .from("applications")
+    .select("*", { count: "exact", head: true })
+    .in("job_id", jobIds);
+
   return (
     <div className="space-y-8">
       <div className="flex items-center justify-between">
@@ -97,7 +104,7 @@ export default async function CompanyDashboard() {
             <CardTitle className="text-sm font-medium">Total Applicants</CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">0</div>
+            <div className="text-2xl font-bold">{totalApplicants || 0}</div>
           </CardContent>
         </Card>
       </div>
@@ -119,7 +126,9 @@ export default async function CompanyDashboard() {
                   <span className="text-xs px-2 py-1 bg-zinc-100 dark:bg-zinc-800 rounded-full font-medium">
                     {job.status}
                   </span>
-                  <Button variant="outline" size="sm">View Applicants</Button>
+                  <Button variant="outline" size="sm" asChild>
+                    <Link href={`/dashboard/company/jobs/${job.id}`}>View Applicants</Link>
+                  </Button>
                 </div>
               </Card>
             ))}

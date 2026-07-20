@@ -49,6 +49,14 @@ export default async function DashboardLayout({
                 Post a Job
               </Link>
             )}
+            {role === "candidate" && (
+              <Link
+                href="/dashboard/seeker/applications"
+                className="text-sm font-medium text-muted-foreground hover:text-primary transition-colors"
+              >
+                My Applications
+              </Link>
+            )}
           </nav>
         </div>
         <div className="flex items-center gap-4">
