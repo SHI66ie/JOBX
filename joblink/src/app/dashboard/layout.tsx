@@ -57,6 +57,14 @@ export default async function DashboardLayout({
                 My Applications
               </Link>
             )}
+            {role === "admin" && (
+              <Link
+                href="/admin"
+                className="text-sm font-medium text-muted-foreground hover:text-primary transition-colors"
+              >
+                Admin Panel
+              </Link>
+            )}
           </nav>
         </div>
         <div className="flex items-center gap-4">
