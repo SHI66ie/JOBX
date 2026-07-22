@@ -1,7 +1,12 @@
+"use client";
+
 import Link from "next/link";
+import { useState } from "react";
 import { login } from "./login/actions";
 
 export default function Home() {
+  const [role, setRole] = useState<"candidate" | "employer">("candidate");
+
   return (
     <div className="landing-split flex min-h-screen">
       {/* ===== LEFT PANEL: Branding ===== */}
@@ -32,7 +37,6 @@ export default function Home() {
         </svg>
 
         {/* Floating decorative shapes */}
-        {/* Pink/red rounded square — top right area */}
         <div
           className="landing-shape landing-shape-1"
           style={{ top: "12%", right: "18%", width: 44, height: 44 }}
@@ -50,7 +54,6 @@ export default function Home() {
           </svg>
         </div>
 
-        {/* Blue small circle — top area */}
         <div
           className="landing-shape landing-shape-2"
           style={{ top: "18%", left: "38%", width: 16, height: 16 }}
@@ -60,7 +63,6 @@ export default function Home() {
           </svg>
         </div>
 
-        {/* Cyan/teal square — left mid area */}
         <div
           className="landing-shape landing-shape-4"
           style={{ top: "48%", left: "8%", width: 24, height: 24 }}
@@ -78,7 +80,6 @@ export default function Home() {
           </svg>
         </div>
 
-        {/* Orange hexagon — bottom left */}
         <div
           className="landing-shape landing-shape-3"
           style={{ bottom: "15%", left: "12%", width: 48, height: 48 }}
@@ -92,7 +93,6 @@ export default function Home() {
           </svg>
         </div>
 
-        {/* Small pink circle — far right */}
         <div
           className="landing-shape landing-shape-5"
           style={{ top: "35%", right: "8%", width: 20, height: 20 }}
@@ -186,6 +186,32 @@ export default function Home() {
         {/* Form section */}
         <div className="flex-1 flex items-start justify-center px-8 lg:px-16 pt-8 lg:pt-16">
           <div className="w-full max-w-sm">
+            {/* Role Selection Tabs */}
+            <div className="flex bg-zinc-100 p-1 rounded-lg mb-8">
+              <button
+                type="button"
+                onClick={() => setRole("candidate")}
+                className={`flex-1 text-center py-2 text-sm font-semibold rounded-md transition-all duration-200 ${
+                  role === "candidate"
+                    ? "bg-white shadow text-[#00838f]"
+                    : "text-zinc-500 hover:text-zinc-800"
+                }`}
+              >
+                Job Seeker
+              </button>
+              <button
+                type="button"
+                onClick={() => setRole("employer")}
+                className={`flex-1 text-center py-2 text-sm font-semibold rounded-md transition-all duration-200 ${
+                  role === "employer"
+                    ? "bg-white shadow text-[#00838f]"
+                    : "text-zinc-500 hover:text-zinc-800"
+                }`}
+              >
+                Company / Employer
+              </button>
+            </div>
+
             <h2
               className="text-3xl font-bold mb-1"
               style={{ color: "#1a1a1a" }}
@@ -195,10 +221,13 @@ export default function Home() {
             <p className="mb-8" style={{ color: "#666", fontSize: "0.95rem" }}>
               Please{" "}
               <span style={{ color: "#00838f", fontWeight: 500 }}>login</span>{" "}
-              to your account.
+              as a {role === "candidate" ? "Job Seeker" : "Company representative"}.
             </p>
 
             <form action={login} className="space-y-5">
+              {/* Hidden role field if needed by backend actions */}
+              <input type="hidden" name="role" value={role} />
+
               {/* Email */}
               <div>
                 <label
@@ -297,7 +326,7 @@ export default function Home() {
             >
               Don&apos;t have an account?{" "}
               <Link
-                href="/signup"
+                href={`/signup?role=${role}`}
                 className="font-semibold hover:underline"
                 style={{ color: "#1a1a1a" }}
               >
