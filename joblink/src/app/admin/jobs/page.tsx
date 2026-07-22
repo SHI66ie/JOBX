@@ -1,7 +1,7 @@
 import { createClient } from "@/utils/supabase/server";
 import { redirect } from "next/navigation";
 import Link from "next/link";
-import { Button } from "@/components/ui/button";
+import { buttonVariants } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 
 export default async function AdminJobsPage() {
@@ -39,9 +39,9 @@ export default async function AdminJobsPage() {
             Review all job listings and their status across the platform.
           </p>
         </div>
-        <Button asChild>
-          <Link href="/admin">Back to Admin</Link>
-        </Button>
+        <Link href="/admin" className={buttonVariants({ variant: "default" })}>
+          Back to Admin
+        </Link>
       </div>
 
       <div className="grid gap-4">

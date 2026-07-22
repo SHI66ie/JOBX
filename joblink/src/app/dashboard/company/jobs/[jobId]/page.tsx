@@ -1,7 +1,7 @@
 import { createClient } from "@/utils/supabase/server";
 import { redirect } from "next/navigation";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
+import { buttonVariants } from "@/components/ui/button";
 import Link from "next/link";
 import { updateApplicationStatus } from "../../../actions";
 
@@ -47,9 +47,9 @@ export default async function ViewApplicantsPage({ params }: { params: { jobId: 
           <h1 className="text-3xl font-bold tracking-tight">Applicants for {job.title}</h1>
           <p className="text-muted-foreground">Review and manage candidates who have applied for this position.</p>
         </div>
-        <Button variant="outline" asChild>
-          <Link href="/dashboard/company">Back to Dashboard</Link>
-        </Button>
+        <Link href="/dashboard/company" className={buttonVariants({ variant: "outline" })}>
+          Back to Dashboard
+        </Link>
       </div>
 
       <div className="grid gap-6">

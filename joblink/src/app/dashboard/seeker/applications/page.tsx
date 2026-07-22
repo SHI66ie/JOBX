@@ -3,7 +3,7 @@ import { redirect } from "next/navigation";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Building2, MapPin, Clock } from "lucide-react";
 import Link from "next/link";
-import { Button } from "@/components/ui/button";
+import { buttonVariants } from "@/components/ui/button";
 
 export default async function MyApplicationsPage() {
   const supabase = await createClient();
@@ -49,9 +49,9 @@ export default async function MyApplicationsPage() {
           <h1 className="text-3xl font-bold tracking-tight">My Applications</h1>
           <p className="text-muted-foreground">Track the status of your job applications.</p>
         </div>
-        <Button variant="outline" asChild>
-          <Link href="/dashboard/seeker">Browse More Jobs</Link>
-        </Button>
+        <Link href="/dashboard/seeker" className={buttonVariants({ variant: "outline" })}>
+          Browse More Jobs
+        </Link>
       </div>
 
       {applications && applications.length > 0 ? (
@@ -97,9 +97,9 @@ export default async function MyApplicationsPage() {
             <CardDescription>You haven't applied to any jobs yet. Head over to the job board to find your next opportunity!</CardDescription>
           </CardHeader>
           <CardContent>
-            <Button asChild>
-              <Link href="/dashboard/seeker">Browse Jobs</Link>
-            </Button>
+            <Link href="/dashboard/seeker" className={buttonVariants({ variant: "default" })}>
+              Browse Jobs
+            </Link>
           </CardContent>
         </Card>
       )}

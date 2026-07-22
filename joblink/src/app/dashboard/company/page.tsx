@@ -1,6 +1,6 @@
 import { createClient } from "@/utils/supabase/server";
 import { redirect } from "next/navigation";
-import { Button } from "@/components/ui/button";
+import { buttonVariants, Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
@@ -85,9 +85,9 @@ export default async function CompanyDashboard() {
           <h1 className="text-3xl font-bold tracking-tight">Dashboard</h1>
           <p className="text-muted-foreground">Manage your job postings and applicants for {company.name}.</p>
         </div>
-        <Button asChild>
-          <Link href="/dashboard/company/post-job">Post a Job</Link>
-        </Button>
+        <Link href="/dashboard/company/post-job" className={buttonVariants({ variant: "default" })}>
+          Post a Job
+        </Link>
       </div>
 
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
@@ -126,9 +126,9 @@ export default async function CompanyDashboard() {
                   <span className="text-xs px-2 py-1 bg-zinc-100 dark:bg-zinc-800 rounded-full font-medium">
                     {job.status}
                   </span>
-                  <Button variant="outline" size="sm" asChild>
-                    <Link href={`/dashboard/company/jobs/${job.id}`}>View Applicants</Link>
-                  </Button>
+                  <Link href={`/dashboard/company/jobs/${job.id}`} className={buttonVariants({ variant: "outline", size: "sm" })}>
+                    View Applicants
+                  </Link>
                 </div>
               </Card>
             ))}
@@ -140,9 +140,9 @@ export default async function CompanyDashboard() {
               <CardDescription>Create your first job posting to start finding candidates.</CardDescription>
             </CardHeader>
             <CardContent>
-              <Button asChild>
-                <Link href="/dashboard/company/post-job">Post a Job</Link>
-              </Button>
+              <Link href="/dashboard/company/post-job" className={buttonVariants({ variant: "default" })}>
+                Post a Job
+              </Link>
             </CardContent>
           </Card>
         )}

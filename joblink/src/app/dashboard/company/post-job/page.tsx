@@ -1,6 +1,6 @@
 import { createClient } from "@/utils/supabase/server";
 import { redirect } from "next/navigation";
-import { Button } from "@/components/ui/button";
+import { buttonVariants, Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
@@ -31,9 +31,9 @@ export default async function PostJobPage() {
     <div className="max-w-3xl mx-auto space-y-6">
       <div className="flex items-center justify-between">
         <h1 className="text-3xl font-bold tracking-tight">Post a New Job</h1>
-        <Button variant="outline" asChild>
-          <Link href="/dashboard/company">Cancel</Link>
-        </Button>
+        <Link href="/dashboard/company" className={buttonVariants({ variant: "outline" })}>
+          Cancel
+        </Link>
       </div>
 
       <Card>

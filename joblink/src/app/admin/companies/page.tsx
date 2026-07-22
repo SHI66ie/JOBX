@@ -1,5 +1,7 @@
 import { createClient } from "@/utils/supabase/server";
 import { redirect } from "next/navigation";
+import Link from "next/link";
+import { buttonVariants } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 
 export default async function AdminCompaniesPage() {
@@ -30,11 +32,16 @@ export default async function AdminCompaniesPage() {
 
   return (
     <div className="space-y-8">
-      <div className="space-y-2">
-        <h1 className="text-3xl font-bold tracking-tight">Companies</h1>
-        <p className="text-muted-foreground">
-          Review registered company profiles and verify any pending information.
-        </p>
+      <div className="flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
+        <div className="space-y-2">
+          <h1 className="text-3xl font-bold tracking-tight">Companies</h1>
+          <p className="text-muted-foreground">
+            Review registered company profiles and verify any pending information.
+          </p>
+        </div>
+        <Link href="/admin" className={buttonVariants({ variant: "default" })}>
+          Back to Admin
+        </Link>
       </div>
 
       <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">

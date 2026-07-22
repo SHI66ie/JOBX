@@ -42,7 +42,6 @@ export default async function SeekerDashboard() {
             <JobCard 
               job={job} 
               hasApplied={appliedJobIds.has(job.id)} 
-              onApply={() => {}} 
             />
           </form>
         ))}
