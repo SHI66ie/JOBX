@@ -1,7 +1,7 @@
 import { createClient } from "@/utils/supabase/server";
 import { redirect } from "next/navigation";
 import { JobCard } from "@/components/job-card";
-import { applyForJob } from "../actions";
+import { applyForJob } from "./actions";
 
 export default async function SeekerDashboard() {
   const supabase = await createClient();

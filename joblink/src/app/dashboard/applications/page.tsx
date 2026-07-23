@@ -49,7 +49,7 @@ export default async function MyApplicationsPage() {
           <h1 className="text-3xl font-bold tracking-tight">My Applications</h1>
           <p className="text-muted-foreground">Track the status of your job applications.</p>
         </div>
-        <Link href="/dashboard/seeker" className={buttonVariants({ variant: "outline" })}>
+        <Link href="/dashboard" className={buttonVariants({ variant: "outline" })}>
           Browse More Jobs
         </Link>
       </div>
@@ -97,7 +97,7 @@ export default async function MyApplicationsPage() {
             <CardDescription>You haven't applied to any jobs yet. Head over to the job board to find your next opportunity!</CardDescription>
           </CardHeader>
           <CardContent>
-            <Link href="/dashboard/seeker" className={buttonVariants({ variant: "default" })}>
+            <Link href="/dashboard" className={buttonVariants({ variant: "default" })}>
               Browse Jobs
             </Link>
           </CardContent>

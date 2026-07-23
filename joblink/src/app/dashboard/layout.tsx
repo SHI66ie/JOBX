@@ -18,14 +18,7 @@ export default async function DashboardLayout({
     redirect("/login");
   }
 
-  // Fetch the user's role from the public.users table
-  const { data: userProfile } = await supabase
-    .from("users")
-    .select("role, first_name")
-    .eq("id", user.id)
-    .single();
-
-  const role = userProfile?.role || "candidate";
+  const firstName = user.user_metadata?.first_name || "Applicant";
 
   return (
     <div className="min-h-screen flex flex-col bg-zinc-50 dark:bg-zinc-950">
@@ -36,40 +29,28 @@ export default async function DashboardLayout({
           </Link>
           <nav className="hidden md:flex gap-4">
             <Link
-              href={`/dashboard/${role}`}
+              href="/dashboard"
               className="text-sm font-medium text-muted-foreground hover:text-primary transition-colors"
             >
               Dashboard
             </Link>
-            {role === "employer" && (
-              <Link
-                href="/dashboard/company/post-job"
-                className="text-sm font-medium text-muted-foreground hover:text-primary transition-colors"
-              >
-                Post a Job
-              </Link>
-            )}
-            {role === "candidate" && (
-              <Link
-                href="/dashboard/seeker/applications"
-                className="text-sm font-medium text-muted-foreground hover:text-primary transition-colors"
-              >
-                My Applications
-              </Link>
-            )}
-            {role === "admin" && (
-              <Link
-                href="/admin"
-                className="text-sm font-medium text-muted-foreground hover:text-primary transition-colors"
-              >
-                Admin Panel
-              </Link>
-            )}
+            <Link
+              href="/dashboard/applications"
+              className="text-sm font-medium text-muted-foreground hover:text-primary transition-colors"
+            >
+              My Applications
+            </Link>
+            <Link
+              href="/admin"
+              className="text-sm font-medium text-muted-foreground hover:text-primary transition-colors"
+            >
+              Admin Panel
+            </Link>
           </nav>
         </div>
         <div className="flex items-center gap-4">
           <span className="text-sm text-muted-foreground hidden sm:inline-block">
-            Welcome, {userProfile?.first_name || "User"}
+            Welcome, {firstName}
           </span>
           <form action="/auth/signout" method="post">
             <Button variant="outline" size="sm">
