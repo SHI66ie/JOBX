@@ -1,10 +1,14 @@
 "use client";
 
 import Link from "next/link";
-import { useState } from "react";
+import { Suspense } from "react";
+import { useSearchParams } from "next/navigation";
 import { login } from "./login/actions";
 
-export default function Home() {
+function LoginForm() {
+  const searchParams = useSearchParams();
+  const message = searchParams.get("message");
+
   return (
     <div className="landing-split flex min-h-screen">
       {/* ===== LEFT PANEL: Branding ===== */}
@@ -257,6 +261,12 @@ export default function Home() {
                 </Link>
               </div>
 
+              {message && (
+                <p className="text-sm font-medium text-destructive bg-destructive/10 p-3 rounded-md">
+                  {message}
+                </p>
+              )}
+
               {/* Login button */}
               <button type="submit" className="landing-login-btn">
                 Login
@@ -309,5 +319,13 @@ export default function Home() {
         </div>
       </div>
     </div>
+  );
+}
+
+export default function Home() {
+  return (
+    <Suspense fallback={<div className="min-h-screen flex items-center justify-center">Loading...</div>}>
+      <LoginForm />
+    </Suspense>
   );
 }
