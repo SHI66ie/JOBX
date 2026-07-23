@@ -194,9 +194,9 @@ function SignupForm() {
               Sign Up
             </h2>
             <p className="mb-8" style={{ color: "#666", fontSize: "0.95rem" }}>
-              Create your account as a{" "}
+              Create your account as an{" "}
               <span style={{ color: "#00838f", fontWeight: 500 }}>
-                Job Seeker
+                Applicant
               </span>.
             </p>
 

@@ -193,7 +193,7 @@ export default function Home() {
             <p className="mb-8" style={{ color: "#666", fontSize: "0.95rem" }}>
               Please{" "}
               <span style={{ color: "#00838f", fontWeight: 500 }}>login</span>{" "}
-              as a Job Seeker.
+              as an Applicant.
             </p>
 
             <form action={login} className="space-y-5">
