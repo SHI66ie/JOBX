@@ -60,3 +60,21 @@ export async function signup(formData: FormData) {
   revalidatePath('/', 'layout')
   redirect('/onboarding')
 }
+
+import { headers } from 'next/headers'
+
+export async function signInWithGoogle() {
+  const supabase = await createClient()
+  const origin = (await headers()).get('origin') || process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000'
+  
+  const { data, error } = await supabase.auth.signInWithOAuth({
+    provider: 'google',
+    options: {
+      redirectTo: `${origin}/auth/callback`,
+    },
+  })
+
+  if (data.url) {
+    redirect(data.url)
+  }
+}

@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { Suspense } from "react";
 import { useSearchParams } from "next/navigation";
-import { signup } from "../login/actions";
+import { signup, signInWithGoogle } from "../login/actions";
 
 function SignupForm() {
   const searchParams = useSearchParams();
@@ -320,8 +320,8 @@ function SignupForm() {
             <div className="landing-divider">Or continue with</div>
 
             {/* Google button */}
-            <div className="flex justify-center">
-              <button type="button" className="landing-google-btn">
+            <form action={signInWithGoogle} className="flex justify-center">
+              <button type="submit" className="landing-google-btn">
                 <svg width="18" height="18" viewBox="0 0 48 48">
                   <path
                     fill="#EA4335"
@@ -342,7 +342,7 @@ function SignupForm() {
                 </svg>
                 Google
               </button>
-            </div>
+            </form>
 
             {/* Back to Login link */}
             <div
