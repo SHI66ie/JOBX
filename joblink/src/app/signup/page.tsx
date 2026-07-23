@@ -1,11 +1,11 @@
 "use client";
 
 import Link from "next/link";
-import { useState, useEffect } from "react";
+import { useState, useEffect, Suspense } from "react";
 import { useSearchParams } from "next/navigation";
 import { signup } from "../login/actions";
 
-export default function SignupPage() {
+function SignupForm() {
   const searchParams = useSearchParams();
   const message = searchParams.get("message");
   const initialRole = searchParams.get("role") === "employer" ? "employer" : "candidate";
@@ -392,5 +392,13 @@ export default function SignupPage() {
         </div>
       </div>
     </div>
+  );
+}
+
+export default function SignupPage() {
+  return (
+    <Suspense fallback={<div className="min-h-screen flex items-center justify-center">Loading...</div>}>
+      <SignupForm />
+    </Suspense>
   );
 }
