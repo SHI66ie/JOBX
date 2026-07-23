@@ -65,7 +65,13 @@ import { headers } from 'next/headers'
 
 export async function signInWithGoogle() {
   const supabase = await createClient()
-  const origin = (await headers()).get('origin') || process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000'
+  
+  // Try to get the origin from headers, or fallback to Vercel URL, or localhost
+  let origin = (await headers()).get('origin')
+  if (!origin) {
+    origin = process.env.NEXT_PUBLIC_SITE_URL || 
+      (process.env.NEXT_PUBLIC_VERCEL_URL ? `https://${process.env.NEXT_PUBLIC_VERCEL_URL}` : 'http://localhost:3000')
+  }
   
   const { data, error } = await supabase.auth.signInWithOAuth({
     provider: 'google',
