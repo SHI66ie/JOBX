@@ -5,8 +5,6 @@ import { useState } from "react";
 import { login } from "./login/actions";
 
 export default function Home() {
-  const [role, setRole] = useState<"candidate" | "employer">("candidate");
-
   return (
     <div className="landing-split flex min-h-screen">
       {/* ===== LEFT PANEL: Branding ===== */}
@@ -186,32 +184,6 @@ export default function Home() {
         {/* Form section */}
         <div className="flex-1 flex items-start justify-center px-8 lg:px-16 pt-8 lg:pt-16">
           <div className="w-full max-w-sm">
-            {/* Role Selection Tabs */}
-            <div className="flex bg-zinc-100 p-1 rounded-lg mb-8">
-              <button
-                type="button"
-                onClick={() => setRole("candidate")}
-                className={`flex-1 text-center py-2 text-sm font-semibold rounded-md transition-all duration-200 ${
-                  role === "candidate"
-                    ? "bg-white shadow text-[#00838f]"
-                    : "text-zinc-500 hover:text-zinc-800"
-                }`}
-              >
-                Job Seeker
-              </button>
-              <button
-                type="button"
-                onClick={() => setRole("employer")}
-                className={`flex-1 text-center py-2 text-sm font-semibold rounded-md transition-all duration-200 ${
-                  role === "employer"
-                    ? "bg-white shadow text-[#00838f]"
-                    : "text-zinc-500 hover:text-zinc-800"
-                }`}
-              >
-                Company / Employer
-              </button>
-            </div>
-
             <h2
               className="text-3xl font-bold mb-1"
               style={{ color: "#1a1a1a" }}
@@ -221,12 +193,12 @@ export default function Home() {
             <p className="mb-8" style={{ color: "#666", fontSize: "0.95rem" }}>
               Please{" "}
               <span style={{ color: "#00838f", fontWeight: 500 }}>login</span>{" "}
-              as a {role === "candidate" ? "Job Seeker" : "Company representative"}.
+              as a Job Seeker.
             </p>
 
             <form action={login} className="space-y-5">
               {/* Hidden role field if needed by backend actions */}
-              <input type="hidden" name="role" value={role} />
+              <input type="hidden" name="role" value="candidate" />
 
               {/* Email */}
               <div>
@@ -326,7 +298,7 @@ export default function Home() {
             >
               Don&apos;t have an account?{" "}
               <Link
-                href={`/signup?role=${role}`}
+                href="/signup"
                 className="font-semibold hover:underline"
                 style={{ color: "#1a1a1a" }}
               >

@@ -1,22 +1,13 @@
 "use client";
 
 import Link from "next/link";
-import { useState, useEffect, Suspense } from "react";
+import { Suspense } from "react";
 import { useSearchParams } from "next/navigation";
 import { signup } from "../login/actions";
 
 function SignupForm() {
   const searchParams = useSearchParams();
   const message = searchParams.get("message");
-  const initialRole = searchParams.get("role") === "employer" ? "employer" : "candidate";
-
-  const [role, setRole] = useState<"candidate" | "employer">("candidate");
-
-  useEffect(() => {
-    if (initialRole) {
-      setRole(initialRole);
-    }
-  }, [initialRole]);
 
   return (
     <div className="landing-split flex min-h-screen">
@@ -196,32 +187,6 @@ function SignupForm() {
         {/* Form section */}
         <div className="flex-1 flex items-start justify-center px-8 lg:px-16 pt-8 lg:pt-16">
           <div className="w-full max-w-sm">
-            {/* Role Selection Tabs */}
-            <div className="flex bg-zinc-100 p-1 rounded-lg mb-8">
-              <button
-                type="button"
-                onClick={() => setRole("candidate")}
-                className={`flex-1 text-center py-2 text-sm font-semibold rounded-md transition-all duration-200 ${
-                  role === "candidate"
-                    ? "bg-white shadow text-[#00838f]"
-                    : "text-zinc-500 hover:text-zinc-800"
-                }`}
-              >
-                Job Seeker
-              </button>
-              <button
-                type="button"
-                onClick={() => setRole("employer")}
-                className={`flex-1 text-center py-2 text-sm font-semibold rounded-md transition-all duration-200 ${
-                  role === "employer"
-                    ? "bg-white shadow text-[#00838f]"
-                    : "text-zinc-500 hover:text-zinc-800"
-                }`}
-              >
-                Company / Employer
-              </button>
-            </div>
-
             <h2
               className="text-3xl font-bold mb-1"
               style={{ color: "#1a1a1a" }}
@@ -231,13 +196,13 @@ function SignupForm() {
             <p className="mb-8" style={{ color: "#666", fontSize: "0.95rem" }}>
               Create your account as a{" "}
               <span style={{ color: "#00838f", fontWeight: 500 }}>
-                {role === "candidate" ? "Job Seeker" : "Company representative"}
+                Job Seeker
               </span>.
             </p>
 
             <form action={signup} className="space-y-5">
               {/* Role hidden field */}
-              <input type="hidden" name="role" value={role} />
+              <input type="hidden" name="role" value="candidate" />
 
               {/* Name Fields (First and Last Name) */}
               <div className="grid grid-cols-2 gap-4">
