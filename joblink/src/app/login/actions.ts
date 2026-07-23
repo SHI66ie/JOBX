@@ -32,6 +32,13 @@ export async function signup(formData: FormData) {
   const lastName = formData.get('last_name') as string
   const role = formData.get('role') as string
 
+  // Password validation: at least one uppercase, at least one special character, minimum 8 characters
+  const hasUppercase = /[A-Z]/.test(password);
+  const hasSpecial = /[!@#$%^&*(),.?":{}|<>]/.test(password);
+  if (!hasUppercase || !hasSpecial || password.length < 8) {
+    return redirect('/signup?message=Password must be at least 8 characters long and contain at least one uppercase letter and one special character.')
+  }
+
   // Note: the `options.data` is stored in `raw_user_meta_data` in auth.users
   // We can use a Postgres trigger to automatically insert into public.users.
   const { error } = await supabase.auth.signUp({
@@ -51,7 +58,5 @@ export async function signup(formData: FormData) {
   }
 
   revalidatePath('/', 'layout')
-  // Users will need to verify their email depending on Supabase settings.
-  // For now, redirect to login with a success message.
-  redirect('/login?message=Check your email to confirm your account (or just log in if email confirmation is disabled)')
+  redirect('/onboarding')
 }

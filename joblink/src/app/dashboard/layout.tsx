@@ -15,7 +15,7 @@ export default async function DashboardLayout({
   } = await supabase.auth.getUser();
 
   if (!user) {
-    redirect("/login");
+    redirect("/");
   }
 
   const firstName = user.user_metadata?.first_name || "Applicant";

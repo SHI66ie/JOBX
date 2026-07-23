@@ -8,7 +8,7 @@ export default async function SeekerDashboard() {
   const { data: { user } } = await supabase.auth.getUser();
 
   if (!user) {
-    redirect("/login");
+    redirect("/");
   }
 
   // Fetch all published jobs with company details

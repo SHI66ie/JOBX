@@ -10,7 +10,7 @@ export default async function MyApplicationsPage() {
   const { data: { user } } = await supabase.auth.getUser();
 
   if (!user) {
-    redirect("/login");
+    redirect("/");
   }
 
   // Fetch applications for this user

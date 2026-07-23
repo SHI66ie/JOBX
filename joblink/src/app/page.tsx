@@ -249,7 +249,7 @@ export default function Home() {
               {/* Setup or Reset Password */}
               <div className="flex justify-end">
                 <Link
-                  href="/login"
+                  href="/"
                   className="text-sm font-medium hover:underline"
                   style={{ color: "#00838f" }}
                 >

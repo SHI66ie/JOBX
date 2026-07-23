@@ -290,6 +290,8 @@ function SignupForm() {
                   name="password"
                   type="password"
                   required
+                  pattern="(?=.*[A-Z])(?=.*[!@#$%^&*(),.?\x22:{}|<>]).{8,}"
+                  title="Must contain at least one uppercase letter and one special character."
                   className="landing-input w-full border rounded-md px-3.5 py-2.5 text-sm transition-all duration-200"
                   style={{
                     borderColor: "#ccc",
@@ -297,6 +299,9 @@ function SignupForm() {
                     backgroundColor: "#fff",
                   }}
                 />
+                <p className="text-xs text-zinc-500 mt-1.5">
+                  Password must contain at least one uppercase letter and one special character.
+                </p>
               </div>
 
               {message && (
