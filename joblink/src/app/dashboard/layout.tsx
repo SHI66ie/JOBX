@@ -21,8 +21,14 @@ export default async function DashboardLayout({
   const firstName = user.user_metadata?.first_name || "Applicant";
 
   return (
-    <div className="min-h-screen flex flex-col bg-zinc-50 dark:bg-zinc-950">
-      <header className="sticky top-0 z-40 border-b bg-white dark:bg-black px-6 h-16 flex items-center justify-between">
+    <div className="auth-bg min-h-screen flex flex-col text-foreground transition-colors">
+      {/* Ambient Shapes (visible mostly in dark mode, or slightly in light mode) */}
+      <div className="auth-shape auth-shape-cyan hidden dark:block" />
+      <div className="auth-shape auth-shape-magenta hidden dark:block" />
+      <div className="auth-shape auth-shape-orange hidden dark:block" />
+      <div className="auth-shape auth-shape-red hidden dark:block" />
+
+      <header className="sticky top-0 z-40 glass-panel border-b px-6 h-16 flex items-center justify-between">
         <div className="flex items-center gap-6">
           <Link href="/" className="font-bold text-xl tracking-tighter text-primary">
             Joblink
@@ -45,6 +51,12 @@ export default async function DashboardLayout({
               className="text-sm font-medium text-muted-foreground hover:text-primary transition-colors"
             >
               Admin Panel
+            </Link>
+            <Link
+              href="/dashboard/settings"
+              className="text-sm font-medium text-muted-foreground hover:text-primary transition-colors"
+            >
+              Settings
             </Link>
           </nav>
         </div>

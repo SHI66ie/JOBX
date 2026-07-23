@@ -24,7 +24,7 @@ interface JobCardProps {
 
 export function JobCard({ job, hasApplied }: Omit<JobCardProps, 'onApply'>) {
   return (
-    <Card className="flex flex-col h-full hover:shadow-lg transition-shadow duration-300">
+    <Card className="flex flex-col h-full glass-panel border-0 hover:shadow-xl hover:-translate-y-1 transition-all duration-300 relative z-10">
       <CardHeader>
         <div className="flex justify-between items-start gap-4">
           <div>
