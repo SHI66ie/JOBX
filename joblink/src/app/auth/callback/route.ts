@@ -16,6 +16,12 @@ export async function GET(request: Request) {
       if (user && !user.user_metadata?.onboarded) {
         return NextResponse.redirect(new URL('/onboarding', requestUrl.origin))
       }
+      
+      // Check user role for proper redirect
+      if (user?.user_metadata?.role === 'employer') {
+        return NextResponse.redirect(new URL('/employer/dashboard', requestUrl.origin))
+      }
+      
       return NextResponse.redirect(new URL(next, requestUrl.origin))
     }
   }

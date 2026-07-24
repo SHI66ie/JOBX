@@ -36,27 +36,27 @@ export default async function EmployerLayout({
       <div className="auth-shape auth-shape-orange hidden dark:block" />
       <div className="auth-shape auth-shape-red hidden dark:block" />
 
-      <header className="sticky top-0 z-40 glass-panel border-b px-6 h-16 flex items-center justify-between">
+      <header className="sticky top-0 z-40 glass-panel border-b px-6 h-16 flex items-center justify-between bg-gradient-to-r from-blue-600 to-purple-600">
         <div className="flex items-center gap-6">
-          <Link href="/" className="font-bold text-xl tracking-tighter text-primary">
-            Joblink
+          <Link href="/" className="font-bold text-xl tracking-tighter text-white">
+            Joblink <span className="text-blue-200">Employer</span>
           </Link>
           <nav className="hidden md:flex gap-4">
             <Link
               href="/employer/dashboard"
-              className="text-sm font-medium text-muted-foreground hover:text-primary transition-colors"
+              className="text-sm font-medium text-white/90 hover:text-white transition-colors"
             >
               Dashboard
             </Link>
             <Link
               href="/employer/jobs/create"
-              className="text-sm font-medium text-muted-foreground hover:text-primary transition-colors"
+              className="text-sm font-medium text-white/90 hover:text-white transition-colors"
             >
               Post a Job
             </Link>
             <Link
               href="/employer/settings"
-              className="text-sm font-medium text-muted-foreground hover:text-primary transition-colors"
+              className="text-sm font-medium text-white/90 hover:text-white transition-colors"
             >
               Company Settings
             </Link>
@@ -64,11 +64,11 @@ export default async function EmployerLayout({
         </div>
         <div className="flex items-center gap-4">
           <NotificationsDropdown />
-          <span className="text-sm text-muted-foreground hidden sm:inline-block">
+          <span className="text-sm text-white/90 hidden sm:inline-block font-medium">
             {companyName}
           </span>
           <form action="/auth/signout" method="post">
-            <Button variant="outline" size="sm">
+            <Button variant="outline" size="sm" className="bg-white/10 text-white border-white/20 hover:bg-white/20">
               Sign Out
             </Button>
           </form>

@@ -24,11 +24,14 @@ export default async function EmployerSettings() {
   return (
     <div className="max-w-2xl mx-auto space-y-8">
       <div>
-        <h1 className="text-3xl font-bold tracking-tight">Company Profile</h1>
-        <p className="text-muted-foreground">Manage your company's public profile on Joblink.</p>
+        <div className="flex items-center gap-2 mb-2">
+          <h1 className="text-3xl font-bold tracking-tight">Company Profile</h1>
+          <span className="px-3 py-1 bg-blue-100 text-blue-800 text-xs font-semibold rounded-full">Employer Portal</span>
+        </div>
+        <p className="text-muted-foreground">Manage your company's public profile to attract top talent.</p>
       </div>
 
-      <Card>
+      <Card className="border-blue-200">
         <CardHeader>
           <CardTitle>Profile Information</CardTitle>
           <CardDescription>
@@ -45,6 +48,7 @@ export default async function EmployerSettings() {
                 defaultValue={company?.name || ""}
                 placeholder="Acme Corp"
                 required
+                className="border-blue-200"
               />
             </div>
             <div className="space-y-2">
@@ -55,6 +59,7 @@ export default async function EmployerSettings() {
                 type="url"
                 defaultValue={company?.website || ""}
                 placeholder="https://acmecorp.com"
+                className="border-blue-200"
               />
             </div>
             <div className="space-y-2">
@@ -65,9 +70,10 @@ export default async function EmployerSettings() {
                 defaultValue={company?.description || ""}
                 placeholder="Tell candidates about your mission and culture..."
                 rows={5}
+                className="border-blue-200"
               />
             </div>
-            <Button type="submit">Save Profile</Button>
+            <Button type="submit" className="bg-blue-600 hover:bg-blue-700">Save Profile</Button>
           </form>
         </CardContent>
       </Card>

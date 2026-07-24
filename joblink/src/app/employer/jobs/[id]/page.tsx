@@ -65,10 +65,13 @@ export default async function JobDetailsPage({ params }: { params: { id: string 
   return (
     <div className="space-y-8">
       <div>
-        <Link href="/employer/dashboard" className="inline-flex items-center text-sm text-muted-foreground hover:text-primary mb-4">
+        <Link href="/employer/dashboard" className="inline-flex items-center text-sm text-blue-600 hover:text-blue-700 mb-4 font-medium">
           <ArrowLeft className="mr-1 h-4 w-4" /> Back to Dashboard
         </Link>
-        <h1 className="text-3xl font-bold tracking-tight">{job.title}</h1>
+        <div className="flex items-center gap-2 mb-2">
+          <h1 className="text-3xl font-bold tracking-tight">{job.title}</h1>
+          <span className="px-3 py-1 bg-blue-100 text-blue-800 text-xs font-semibold rounded-full">Employer Portal</span>
+        </div>
         <div className="flex gap-2 mt-2 text-sm text-muted-foreground">
           <span>{job.location}</span>
           <span>•</span>
@@ -80,7 +83,7 @@ export default async function JobDetailsPage({ params }: { params: { id: string 
 
       <div className="grid gap-8 lg:grid-cols-3">
         <div className="lg:col-span-2 space-y-6">
-          <Card>
+          <Card className="border-blue-200">
             <CardHeader>
               <CardTitle>Job Description</CardTitle>
             </CardHeader>
@@ -98,11 +101,11 @@ export default async function JobDetailsPage({ params }: { params: { id: string 
         </div>
 
         <div className="space-y-6">
-          <h2 className="text-xl font-semibold tracking-tight">Applications ({applications?.length || 0})</h2>
+          <h2 className="text-xl font-semibold tracking-tight">Candidate Applications ({applications?.length || 0})</h2>
           {applications && applications.length > 0 ? (
             <div className="grid gap-4">
               {applications.map((app) => (
-                <Card key={app.id}>
+                <Card key={app.id} className="border-blue-200">
                   <CardHeader className="pb-3">
                     <CardTitle className="text-lg">
                       {(app.candidate as any)?.first_name} {(app.candidate as any)?.last_name}
@@ -121,12 +124,12 @@ export default async function JobDetailsPage({ params }: { params: { id: string 
                       <div className="flex gap-2">
                         {app.status !== "accepted" && (
                           <form action={updateApplicationStatus.bind(null, app.id, "accepted", job.id)}>
-                            <Button size="sm" variant="outline" className="h-8 text-green-600 hover:text-green-700">Accept</Button>
+                            <Button size="sm" variant="outline" className="h-8 text-green-600 hover:text-green-700 border-green-200 hover:bg-green-50">Accept</Button>
                           </form>
                         )}
                         {app.status !== "rejected" && (
                           <form action={updateApplicationStatus.bind(null, app.id, "rejected", job.id)}>
-                            <Button size="sm" variant="outline" className="h-8 text-red-600 hover:text-red-700">Reject</Button>
+                            <Button size="sm" variant="outline" className="h-8 text-red-600 hover:text-red-700 border-red-200 hover:bg-red-50">Reject</Button>
                           </form>
                         )}
                       </div>
@@ -136,8 +139,8 @@ export default async function JobDetailsPage({ params }: { params: { id: string 
               ))}
             </div>
           ) : (
-            <Card className="py-8 text-center bg-muted/50">
-              <p className="text-sm text-muted-foreground">No applications yet.</p>
+            <Card className="py-8 text-center bg-blue-50/50 border-blue-200">
+              <p className="text-sm text-blue-700">No candidate applications yet.</p>
             </Card>
           )}
         </div>
