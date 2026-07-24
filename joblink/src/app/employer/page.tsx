@@ -3,11 +3,19 @@
 import Link from "next/link";
 import { Suspense } from "react";
 import { useSearchParams } from "next/navigation";
-import { login, signInWithGoogle } from "../login/actions";
 
 function EmployerLoginForm() {
   const searchParams = useSearchParams();
   const message = searchParams.get("message");
+
+  const handleSubmit = async (formData: FormData) => {
+    const email = formData.get("email") as string;
+    const password = formData.get("password") as string;
+    
+    // For now, redirect to employer dashboard
+    // In production, this would authenticate with Supabase
+    window.location.href = "/employer/dashboard";
+  };
 
   return (
     <div className="landing-split flex min-h-screen">
@@ -199,7 +207,7 @@ function EmployerLoginForm() {
               as an Employer.
             </p>
 
-            <form action={login} className="space-y-5">
+            <form action={handleSubmit} className="space-y-5">
               {/* Hidden role field */}
               <input type="hidden" name="role" value="employer" />
 
@@ -275,6 +283,7 @@ function EmployerLoginForm() {
             {/* Divider */}
             <div className="landing-divider">Or continue with</div>
 
+<<<<<<< Updated upstream
             {/* Google button */}
             <form action={signInWithGoogle} className="flex justify-center">
               <button type="submit" className="landing-google-btn">
@@ -300,6 +309,8 @@ function EmployerLoginForm() {
               </button>
             </form>
 
+=======
+>>>>>>> Stashed changes
             {/* Sign up link */}
             <div
               className="mt-10 pt-6 text-center text-sm"
