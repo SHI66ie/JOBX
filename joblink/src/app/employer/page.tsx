@@ -3,9 +3,9 @@
 import Link from "next/link";
 import { Suspense } from "react";
 import { useSearchParams } from "next/navigation";
-import { login, signInWithGoogle } from "./login/actions";
+import { login, signInWithGoogle } from "../login/actions";
 
-function LoginForm() {
+function EmployerLoginForm() {
   const searchParams = useSearchParams();
   const message = searchParams.get("message");
 
@@ -112,14 +112,14 @@ function LoginForm() {
           >
             Joblink
             <br />
-            <span className="font-bold text-white">Career Platform</span>
+            <span className="font-bold text-white">Employer Portal</span>
           </p>
 
           <h1
             className="text-4xl lg:text-5xl font-extrabold leading-tight mb-6"
             style={{ color: "#fff" }}
           >
-            Build Your Career
+            Find Top Talent
             <br />
             With Joblink
           </h1>
@@ -128,9 +128,8 @@ function LoginForm() {
             className="text-base lg:text-lg leading-relaxed"
             style={{ color: "#90a4ae" }}
           >
-            Pursue real career paths through employer-posted positions, connect
-            with top companies, and access free tools backed by Joblink&apos;s
-            expertise.
+            Post jobs, manage applications, and connect with qualified candidates
+            through Joblink&apos;s employer platform.
           </p>
         </div>
       </div>
@@ -192,29 +191,29 @@ function LoginForm() {
               className="text-3xl font-bold mb-1"
               style={{ color: "#1a1a1a" }}
             >
-              Welcome!
+              Employer Login
             </h2>
             <p className="mb-8" style={{ color: "#666", fontSize: "0.95rem" }}>
               Please{" "}
               <span style={{ color: "#00838f", fontWeight: 500 }}>login</span>{" "}
-              as an Applicant.
+              as an Employer.
             </p>
 
             <form action={login} className="space-y-5">
-              {/* Hidden role field if needed by backend actions */}
-              <input type="hidden" name="role" value="candidate" />
+              {/* Hidden role field */}
+              <input type="hidden" name="role" value="employer" />
 
               {/* Email */}
               <div>
                 <label
-                  htmlFor="landing-email"
+                  htmlFor="employer-email"
                   className="block text-sm font-medium mb-1.5"
                   style={{ color: "#444" }}
                 >
                   Email
                 </label>
                 <input
-                  id="landing-email"
+                  id="employer-email"
                   name="email"
                   type="email"
                   required
@@ -230,14 +229,14 @@ function LoginForm() {
               {/* Password */}
               <div>
                 <label
-                  htmlFor="landing-password"
+                  htmlFor="employer-password"
                   className="block text-sm font-medium mb-1.5"
                   style={{ color: "#444" }}
                 >
                   Password
                 </label>
                 <input
-                  id="landing-password"
+                  id="employer-password"
                   name="password"
                   type="password"
                   required
@@ -269,7 +268,7 @@ function LoginForm() {
 
               {/* Login button */}
               <button type="submit" className="landing-login-btn">
-                Login
+                Login as Employer
               </button>
             </form>
 
@@ -306,25 +305,13 @@ function LoginForm() {
               className="mt-10 pt-6 text-center text-sm"
               style={{ borderTop: "1px solid #eee", color: "#555" }}
             >
-              Don&apos;t have an account?{" "}
+              Don&apos;t have an employer account?{" "}
               <Link
-                href="/signup"
+                href="/signup?role=employer"
                 className="font-semibold hover:underline"
                 style={{ color: "#1a1a1a" }}
               >
-                Sign up
-              </Link>
-            </div>
-
-            {/* Employer link */}
-            <div className="mt-4 text-center text-sm">
-              Are you an employer?{" "}
-              <Link
-                href="/employer"
-                className="font-semibold hover:underline"
-                style={{ color: "#00838f" }}
-              >
-                Login as Employer
+                Sign up as Employer
               </Link>
             </div>
           </div>
@@ -334,10 +321,10 @@ function LoginForm() {
   );
 }
 
-export default function Home() {
+export default function EmployerLogin() {
   return (
     <Suspense fallback={<div className="min-h-screen flex items-center justify-center">Loading...</div>}>
-      <LoginForm />
+      <EmployerLoginForm />
     </Suspense>
   );
 }
