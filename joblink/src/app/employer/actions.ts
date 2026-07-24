@@ -3,6 +3,7 @@
 import { createClient } from "@/utils/supabase/server";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
+import { createNotification } from "@/lib/notifications";
 
 export async function upsertCompanyProfile(formData: FormData) {
   const supabase = await createClient();
@@ -111,6 +112,13 @@ export async function updateApplicationStatus(applicationId: string, status: str
     throw new Error("Unauthorized");
   }
 
+  // Get the application details to notify the candidate
+  const { data: application } = await supabase
+    .from("applications")
+    .select("candidate_id, job:jobs(title)")
+    .eq("id", applicationId)
+    .single();
+
   // The RLS policy on applications table ensures only the employer who created the job can update it.
   const { error } = await supabase
     .from("applications")
@@ -122,5 +130,25 @@ export async function updateApplicationStatus(applicationId: string, status: str
     throw new Error(error.message);
   }
 
+  // Notify the candidate about the status change
+  if (application) {
+    const statusMessages = {
+      accepted: "Congratulations! Your application has been accepted.",
+      rejected: "Your application has been rejected.",
+      interviewing: "You have been selected for an interview.",
+      reviewed: "Your application is being reviewed.",
+      pending: "Your application status is pending."
+    };
+
+    await createNotification(
+      application.candidate_id,
+      "application_status",
+      `Application Status Update: ${status.charAt(0).toUpperCase() + status.slice(1)}`,
+      statusMessages[status as keyof typeof statusMessages] || `Your application status has been updated to ${status}.`,
+      applicationId
+    );
+  }
+
   revalidatePath(`/employer/jobs/${jobId}`);
+  revalidatePath("/dashboard/applications");
 }

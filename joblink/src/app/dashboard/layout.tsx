@@ -2,6 +2,7 @@ import { createClient } from "@/utils/supabase/server";
 import { redirect } from "next/navigation";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
+import { NotificationsDropdown } from "@/components/notifications-dropdown";
 
 export default async function DashboardLayout({
   children,
@@ -61,6 +62,7 @@ export default async function DashboardLayout({
           </nav>
         </div>
         <div className="flex items-center gap-4">
+          <NotificationsDropdown />
           <span className="text-sm text-muted-foreground hidden sm:inline-block">
             Welcome, {firstName}
           </span>
