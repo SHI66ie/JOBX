@@ -14,8 +14,15 @@ export default async function EmployerLayout({
     data: { user },
   } = await supabase.auth.getUser();
 
+  // Don't require authentication for the login page
+  // Only protect dashboard and other employer routes
   if (!user) {
-    redirect("/employer");
+    // Allow access to the login page, don't redirect
+    return (
+      <div className="min-h-screen">
+        {children}
+      </div>
+    );
   }
 
   // Check if they have a company profile
