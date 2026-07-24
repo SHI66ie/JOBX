@@ -9,6 +9,7 @@ export async function login(formData: FormData) {
 
   const email = formData.get('email') as string
   const password = formData.get('password') as string
+  const role = formData.get('role') as string
 
   const { error } = await supabase.auth.signInWithPassword({
     email,
@@ -20,6 +21,12 @@ export async function login(formData: FormData) {
   }
 
   revalidatePath('/', 'layout')
+  
+  // Redirect based on role
+  if (role === 'employer') {
+    redirect('/employer/dashboard')
+  }
+  
   redirect('/dashboard')
 }
 
