@@ -1,70 +1,90 @@
 import { createClient } from "@/utils/supabase/server";
 
 export async function createNotification(userId: string, type: string, title: string, message: string, relatedId?: string) {
-  const supabase = await createClient();
-  
-  const { error } = await supabase
-    .from("notifications")
-    .insert({
-      user_id: userId,
-      type,
-      title,
-      message,
-      related_id: relatedId,
-      read: false,
-    });
+  try {
+    const supabase = await createClient();
+    
+    const { error } = await supabase
+      .from("notifications")
+      .insert({
+        user_id: userId,
+        type,
+        title,
+        message,
+        related_id: relatedId,
+        read: false,
+      });
 
-  if (error) {
-    console.error("Error creating notification:", error);
-    throw new Error(error.message);
+    if (error) {
+      console.error("Error creating notification:", error);
+      throw new Error(error.message);
+    }
+  } catch (error) {
+    console.error("Error in createNotification:", error);
+    throw error;
   }
 }
 
 export async function getNotifications(userId: string) {
-  const supabase = await createClient();
-  
-  const { data, error } = await supabase
-    .from("notifications")
-    .select("*")
-    .eq("user_id", userId)
-    .order("created_at", { ascending: false })
-    .limit(20);
+  try {
+    const supabase = await createClient();
+    
+    const { data, error } = await supabase
+      .from("notifications")
+      .select("*")
+      .eq("user_id", userId)
+      .order("created_at", { ascending: false })
+      .limit(20);
 
-  if (error) {
-    console.error("Error fetching notifications:", error);
-    throw new Error(error.message);
+    if (error) {
+      console.error("Error fetching notifications:", error);
+      return [];
+    }
+
+    return data || [];
+  } catch (error) {
+    console.error("Error in getNotifications:", error);
+    return [];
   }
-
-  return data;
 }
 
 export async function markNotificationAsRead(notificationId: string) {
-  const supabase = await createClient();
-  
-  const { error } = await supabase
-    .from("notifications")
-    .update({ read: true })
-    .eq("id", notificationId);
+  try {
+    const supabase = await createClient();
+    
+    const { error } = await supabase
+      .from("notifications")
+      .update({ read: true })
+      .eq("id", notificationId);
 
-  if (error) {
-    console.error("Error marking notification as read:", error);
-    throw new Error(error.message);
+    if (error) {
+      console.error("Error marking notification as read:", error);
+      throw new Error(error.message);
+    }
+  } catch (error) {
+    console.error("Error in markNotificationAsRead:", error);
+    throw error;
   }
 }
 
 export async function getUnreadCount(userId: string) {
-  const supabase = await createClient();
-  
-  const { data, error } = await supabase
-    .from("notifications")
-    .select("id", { count: "exact" })
-    .eq("user_id", userId)
-    .eq("read", false);
+  try {
+    const supabase = await createClient();
+    
+    const { data, error } = await supabase
+      .from("notifications")
+      .select("id", { count: "exact" })
+      .eq("user_id", userId)
+      .eq("read", false);
 
-  if (error) {
-    console.error("Error fetching unread count:", error);
+    if (error) {
+      console.error("Error fetching unread count:", error);
+      return 0;
+    }
+
+    return data?.length || 0;
+  } catch (error) {
+    console.error("Error in getUnreadCount:", error);
     return 0;
   }
-
-  return data?.length || 0;
 }

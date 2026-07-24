@@ -132,21 +132,26 @@ export async function updateApplicationStatus(applicationId: string, status: str
 
   // Notify the candidate about the status change
   if (application) {
-    const statusMessages = {
-      accepted: "Congratulations! Your application has been accepted.",
-      rejected: "Your application has been rejected.",
-      interviewing: "You have been selected for an interview.",
-      reviewed: "Your application is being reviewed.",
-      pending: "Your application status is pending."
-    };
+    try {
+      const statusMessages = {
+        accepted: "Congratulations! Your application has been accepted.",
+        rejected: "Your application has been rejected.",
+        interviewing: "You have been selected for an interview.",
+        reviewed: "Your application is being reviewed.",
+        pending: "Your application status is pending."
+      };
 
-    await createNotification(
-      application.candidate_id,
-      "application_status",
-      `Application Status Update: ${status.charAt(0).toUpperCase() + status.slice(1)}`,
-      statusMessages[status as keyof typeof statusMessages] || `Your application status has been updated to ${status}.`,
-      applicationId
-    );
+      await createNotification(
+        application.candidate_id,
+        "application_status",
+        `Application Status Update: ${status.charAt(0).toUpperCase() + status.slice(1)}`,
+        statusMessages[status as keyof typeof statusMessages] || `Your application status has been updated to ${status}.`,
+        applicationId
+      );
+    } catch (notificationError) {
+      console.error("Error creating notification:", notificationError);
+      // Don't fail the whole operation if notification fails
+    }
   }
 
   revalidatePath(`/employer/jobs/${jobId}`);
