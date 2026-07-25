@@ -129,7 +129,7 @@ function LoginForm() {
             style={{ color: "#90a4ae" }}
           >
             Pursue real career paths through employer-posted positions, connect
-            with top companies, and access free tools backed by Joblink&apos;s
+            with top companies, and access free tools backed by Joblink's
             expertise.
           </p>
         </div>
@@ -159,30 +159,6 @@ function LoginForm() {
             </svg>
             English (English)
           </span>
-        </div>
-
-        {/* Go back */}
-        <div className="px-8 lg:px-16 pt-4">
-          <Link
-            href="/"
-            className="inline-flex items-center gap-2 text-sm hover:opacity-70 transition-opacity"
-            style={{ color: "#333" }}
-          >
-            <svg
-              width="18"
-              height="18"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="2"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-            >
-              <line x1="19" y1="12" x2="5" y2="12" />
-              <polyline points="12 19 5 12 12 5" />
-            </svg>
-            Go back
-          </Link>
         </div>
 
         {/* Form section */}
@@ -303,7 +279,7 @@ function LoginForm() {
               className="mt-10 pt-6 text-center text-sm"
               style={{ borderTop: "1px solid #eee", color: "#555" }}
             >
-              Don&apos;t have an account?{" "}
+              Don't have an account?{" "}
               <Link
                 href="/signup"
                 className="font-semibold hover:underline"
