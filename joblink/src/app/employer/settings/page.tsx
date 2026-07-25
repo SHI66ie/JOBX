@@ -6,7 +6,8 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
 import { upsertCompanyProfile } from "../actions";
-import { addRole, getUserRoles } from "@/app/login/actions";
+import { addRole } from "@/app/login/actions";
+import { getUserRoles } from "@/utils/auth";
 import Link from "next/link";
 
 export default async function EmployerSettings() {

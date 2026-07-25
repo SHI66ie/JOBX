@@ -1,7 +1,8 @@
 import { ThemeToggle } from "@/components/theme-toggle"
 import { createClient } from "@/utils/supabase/server"
 import { Button } from "@/components/ui/button"
-import { addRole, getUserRoles } from "@/app/login/actions"
+import { addRole } from "@/app/login/actions"
+import { getUserRoles } from "@/utils/auth"
 import Link from "next/link"
 
 export default async function SettingsPage() {

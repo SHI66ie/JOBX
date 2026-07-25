@@ -2,7 +2,7 @@ import { createClient } from "@/utils/supabase/server";
 import { redirect } from "next/navigation";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
-import { getUserRoles } from "@/app/login/actions";
+import { getUserRoles } from "@/utils/auth";
 
 export default async function DashboardLayout({
   children,

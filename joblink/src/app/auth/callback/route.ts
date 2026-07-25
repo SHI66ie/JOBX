@@ -1,13 +1,6 @@
 import { createClient } from '@/utils/supabase/server'
 import { NextResponse } from 'next/server'
-
-function getUserRoles(user: any): string[] {
-  const meta = user?.user_metadata || {}
-  if (Array.isArray(meta.roles) && meta.roles.length > 0) {
-    return meta.roles
-  }
-  return [meta.role || 'candidate']
-}
+import { getUserRoles } from '@/utils/auth'
 
 export async function GET(request: Request) {
   const requestUrl = new URL(request.url)

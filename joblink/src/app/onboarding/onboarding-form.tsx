@@ -101,9 +101,11 @@ export default function OnboardingForm({ initialData, userId }: OnboardingFormPr
         console.warn("Database users table update skipped/failed:", dbError);
       }
 
-      // Success -> Redirect to dashboard
-      router.push("/dashboard");
+      // Refresh server cache first so dashboard layout sees the updated session
       router.refresh();
+      // Small wait lets the refresh propagate before navigation
+      await new Promise((resolve) => setTimeout(resolve, 200));
+      router.push("/dashboard");
     } catch (err: any) {
       setErrorMsg(err.message || "Something went wrong during onboarding.");
     } finally {
