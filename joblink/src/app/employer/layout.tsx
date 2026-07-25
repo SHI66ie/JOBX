@@ -2,6 +2,7 @@ import { createClient } from "@/utils/supabase/server";
 import { redirect } from "next/navigation";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
+import { getUserRoles } from "@/app/login/actions";
 
 export default async function EmployerLayout({
   children,
@@ -26,10 +27,12 @@ export default async function EmployerLayout({
     .single();
 
   const companyName = company?.name || "Employer";
+  const roles = getUserRoles(user);
+  const hasCandidate = roles.includes("candidate");
 
   return (
     <div className="auth-bg min-h-screen flex flex-col text-foreground transition-colors">
-      {/* Ambient Shapes (visible mostly in dark mode, or slightly in light mode) */}
+      {/* Ambient Shapes */}
       <div className="auth-shape auth-shape-cyan hidden dark:block" />
       <div className="auth-shape auth-shape-magenta hidden dark:block" />
       <div className="auth-shape auth-shape-orange hidden dark:block" />
@@ -37,7 +40,10 @@ export default async function EmployerLayout({
 
       <header className="sticky top-0 z-40 glass-panel border-b px-6 h-16 flex items-center justify-between">
         <div className="flex items-center gap-6">
-          <Link href="/" className="font-bold text-xl tracking-tighter text-primary">
+          <Link
+            href="/"
+            className="font-bold text-xl tracking-tighter text-primary"
+          >
             Joblink
           </Link>
           <nav className="hidden md:flex gap-4">
@@ -59,6 +65,14 @@ export default async function EmployerLayout({
             >
               Company Settings
             </Link>
+            {hasCandidate && (
+              <Link
+                href="/dashboard"
+                className="text-sm font-medium text-[#00838f] hover:text-[#005662] transition-colors"
+              >
+                Applicant Mode
+              </Link>
+            )}
           </nav>
         </div>
         <div className="flex items-center gap-4">

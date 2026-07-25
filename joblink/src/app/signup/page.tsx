@@ -8,6 +8,8 @@ import { signup, signInWithGoogle } from "../login/actions";
 function SignupForm() {
   const searchParams = useSearchParams();
   const message = searchParams.get("message");
+  const role = searchParams.get("role") === "employer" ? "employer" : "candidate";
+  const isEmployer = role === "employer";
 
   return (
     <div className="landing-split flex min-h-screen">
@@ -44,15 +46,7 @@ function SignupForm() {
           style={{ top: "12%", right: "18%", width: 44, height: 44 }}
         >
           <svg width="44" height="44" viewBox="0 0 44 44">
-            <rect
-              x="4"
-              y="4"
-              width="36"
-              height="36"
-              rx="10"
-              fill="#ff4081"
-              opacity="0.9"
-            />
+            <rect x="4" y="4" width="36" height="36" rx="10" fill="#ff4081" opacity="0.9" />
           </svg>
         </div>
 
@@ -70,15 +64,7 @@ function SignupForm() {
           style={{ top: "48%", left: "8%", width: 24, height: 24 }}
         >
           <svg width="24" height="24" viewBox="0 0 24 24">
-            <rect
-              x="2"
-              y="2"
-              width="20"
-              height="20"
-              rx="4"
-              fill="#00e5ff"
-              opacity="0.8"
-            />
+            <rect x="2" y="2" width="20" height="20" rx="4" fill="#00e5ff" opacity="0.8" />
           </svg>
         </div>
 
@@ -119,17 +105,28 @@ function SignupForm() {
             className="text-4xl lg:text-5xl font-extrabold leading-tight mb-6"
             style={{ color: "#fff" }}
           >
-            Join the Network
-            <br />
-            Start Today
+            {isEmployer ? (
+              <>
+                Hire Top Talent
+                <br />
+                Faster
+              </>
+            ) : (
+              <>
+                Join the Network
+                <br />
+                Start Today
+              </>
+            )}
           </h1>
 
           <p
             className="text-base lg:text-lg leading-relaxed"
             style={{ color: "#90a4ae" }}
           >
-            Create your account to browse jobs, hire top candidates, and build
-            valuable connections within the dynamic Joblink ecosystem.
+            {isEmployer
+              ? "Create your employer account to post jobs, manage applications, and connect with qualified candidates."
+              : "Create your account to browse jobs, apply easily, and build valuable connections within the Joblink ecosystem."}
           </p>
         </div>
       </div>
@@ -193,18 +190,41 @@ function SignupForm() {
             >
               Sign Up
             </h2>
-            <p className="mb-8" style={{ color: "#666", fontSize: "0.95rem" }}>
+
+            <p className="mb-4" style={{ color: "#666", fontSize: "0.95rem" }}>
               Create your account as an{" "}
               <span style={{ color: "#00838f", fontWeight: 500 }}>
-                Applicant
-              </span>.
+                {isEmployer ? "Employer" : "Applicant"}
+              </span>
+              .
             </p>
+
+            {/* Switch role button */}
+            <div className="mb-6">
+              {isEmployer ? (
+                <Link
+                  href="/signup"
+                  className="inline-flex items-center justify-center w-full border border-dashed rounded-md px-4 py-2.5 text-sm font-medium transition-all hover:bg-zinc-50"
+                  style={{ borderColor: "#00bcd4", color: "#00838f" }}
+                >
+                  Looking for a job? Register as an Applicant →
+                </Link>
+              ) : (
+                <Link
+                  href="/signup?role=employer"
+                  className="inline-flex items-center justify-center w-full border border-dashed rounded-md px-4 py-2.5 text-sm font-medium transition-all hover:bg-zinc-50"
+                  style={{ borderColor: "#00bcd4", color: "#00838f" }}
+                >
+                  Looking to hire? Register as an Employer →
+                </Link>
+              )}
+            </div>
 
             <form action={signup} className="space-y-5">
               {/* Role hidden field */}
-              <input type="hidden" name="role" value="candidate" />
+              <input type="hidden" name="role" value={role} />
 
-              {/* Name Fields (First and Last Name) */}
+              {/* Name Fields */}
               <div className="grid grid-cols-2 gap-4">
                 <div>
                   <label
@@ -290,7 +310,7 @@ function SignupForm() {
                   name="password"
                   type="password"
                   required
-                  pattern="(?=.*[A-Z])(?=.*[!@#$%^&*(),.?\x22:{}|<>]).{8,}"
+                  pattern='(?=.*[A-Z])(?=.*[!@#$%^&*(),.?":{}|<>]).{8,}'
                   title="Must contain at least one uppercase letter and one special character."
                   className="landing-input w-full border rounded-md px-3.5 py-2.5 text-sm transition-all duration-200"
                   style={{
@@ -312,7 +332,7 @@ function SignupForm() {
 
               {/* Submit button */}
               <button type="submit" className="landing-login-btn">
-                Sign up
+                {isEmployer ? "Create Employer Account" : "Sign up"}
               </button>
             </form>
 
@@ -367,7 +387,13 @@ function SignupForm() {
 
 export default function SignupPage() {
   return (
-    <Suspense fallback={<div className="min-h-screen flex items-center justify-center">Loading...</div>}>
+    <Suspense
+      fallback={
+        <div className="min-h-screen flex items-center justify-center">
+          Loading...
+        </div>
+      }
+    >
       <SignupForm />
     </Suspense>
   );
