@@ -197,13 +197,10 @@ function LoginForm() {
             <p className="mb-8" style={{ color: "#666", fontSize: "0.95rem" }}>
               Please{" "}
               <span style={{ color: "#00838f", fontWeight: 500 }}>login</span>{" "}
-              as an Applicant.
+              to continue.
             </p>
 
             <form action={login} className="space-y-5">
-              {/* Hidden role field if needed by backend actions */}
-              <input type="hidden" name="role" value="candidate" />
-
               {/* Email */}
               <div>
                 <label
@@ -257,7 +254,7 @@ function LoginForm() {
                   className="text-sm font-medium hover:underline"
                   style={{ color: "#00838f" }}
                 >
-                  Setup or Reset Password
+                  Forgot password?
                 </Link>
               </div>
 
@@ -286,7 +283,7 @@ function LoginForm() {
                   />
                   <path
                     fill="#4285F4"
-                    d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z"
+                    d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6,4.51-4.18 7.09-10.36 7.09-17.65z"
                   />
                   <path
                     fill="#FBBC05"
@@ -313,18 +310,6 @@ function LoginForm() {
                 style={{ color: "#1a1a1a" }}
               >
                 Sign up
-              </Link>
-            </div>
-
-            {/* Employer link */}
-            <div className="mt-4 text-center text-sm">
-              Are you an employer?{" "}
-              <Link
-                href="/employer"
-                className="font-semibold hover:underline"
-                style={{ color: "#00838f" }}
-              >
-                Login as Employer
               </Link>
             </div>
           </div>

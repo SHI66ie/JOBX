@@ -9,9 +9,8 @@ export async function login(formData: FormData) {
 
   const email = formData.get('email') as string
   const password = formData.get('password') as string
-  const role = formData.get('role') as string
 
-  const { error } = await supabase.auth.signInWithPassword({
+  const { data, error } = await supabase.auth.signInWithPassword({
     email,
     password,
   })
@@ -20,10 +19,13 @@ export async function login(formData: FormData) {
     return redirect('/?message=Could not authenticate user')
   }
 
+  // Get user role from metadata
+  const userRole = data.user?.user_metadata?.role || 'candidate'
+
   revalidatePath('/', 'layout')
   
   // Redirect based on role
-  if (role === 'employer') {
+  if (userRole === 'employer') {
     redirect('/employer/dashboard')
   }
   
