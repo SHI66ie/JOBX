@@ -91,6 +91,14 @@ export async function signInWithGoogle() {
         : 'http://localhost:3000')
   }
 
+  // Ensure origin is a valid absolute URL to prevent Supabase relative redirects
+  if (origin) {
+    origin = origin.trim()
+    if (!origin.startsWith('http')) {
+      origin = `https://${origin}`
+    }
+  }
+
   const { data } = await supabase.auth.signInWithOAuth({
     provider: 'google',
     options: {
