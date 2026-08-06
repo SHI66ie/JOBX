@@ -4,6 +4,7 @@ import { Button, buttonVariants } from "@/components/ui/button"
 import { addRole } from "@/app/login/actions"
 import { getUserRoles } from "@/utils/auth"
 import Link from "next/link"
+import { APP_NAME } from "@/lib/config"
 
 export default async function SettingsPage() {
   const supabase = await createClient()
@@ -26,7 +27,7 @@ export default async function SettingsPage() {
           <div>
             <h3 className="font-medium">Theme</h3>
             <p className="text-sm text-muted-foreground mt-1">
-              Toggle between light mode and the premium Joblink dark mode.
+              Toggle between light mode and the premium {APP_NAME} dark mode.
             </p>
           </div>
           <ThemeToggle />

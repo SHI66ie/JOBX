@@ -4,6 +4,7 @@ import Link from "next/link";
 import { Suspense } from "react";
 import { useSearchParams } from "next/navigation";
 import { signup, signInWithGoogle } from "../login/actions";
+import { APP_NAME } from "@/lib/config";
 
 function SignupForm() {
   const searchParams = useSearchParams();
@@ -96,7 +97,7 @@ function SignupForm() {
             className="text-sm font-semibold tracking-wider uppercase mb-8"
             style={{ color: "#90a4ae" }}
           >
-            Joblink
+            {APP_NAME}
             <br />
             <span className="font-bold text-white">Career Platform</span>
           </p>
@@ -126,7 +127,7 @@ function SignupForm() {
           >
             {isEmployer
               ? "Create your employer account to post jobs, manage applications, and connect with qualified candidates."
-              : "Create your account to browse jobs, apply easily, and build valuable connections within the Joblink ecosystem."}
+              : `Create your account to browse jobs, apply easily, and build valuable connections within the ${APP_NAME} ecosystem.`}
           </p>
         </div>
       </div>

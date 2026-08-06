@@ -2,6 +2,7 @@ import { createClient } from "@/utils/supabase/server";
 import { redirect } from "next/navigation";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
+import { APP_NAME } from "@/lib/config";
 import { getUserRoles } from "@/utils/auth";
 
 export default async function DashboardLayout({
@@ -37,7 +38,7 @@ export default async function DashboardLayout({
             href="/"
             className="font-bold text-xl tracking-tighter text-primary"
           >
-            Joblink
+            {APP_NAME}
           </Link>
           <nav className="hidden md:flex gap-4">
             <Link

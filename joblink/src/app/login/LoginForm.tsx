@@ -4,6 +4,7 @@ import Link from "next/link";
 import { Suspense } from "react";
 import { useSearchParams } from "next/navigation";
 import { login, signInWithGoogle } from "./actions";
+import { APP_NAME } from "@/lib/config";
 
 function LoginFormInner() {
   const searchParams = useSearchParams();
@@ -110,7 +111,7 @@ function LoginFormInner() {
             className="text-sm font-semibold tracking-wider uppercase mb-8"
             style={{ color: "#90a4ae" }}
           >
-            Joblink
+            {APP_NAME}
             <br />
             <span className="font-bold text-white">Career Platform</span>
           </p>
@@ -121,7 +122,7 @@ function LoginFormInner() {
           >
             Build Your Career
             <br />
-            With Joblink
+            With {APP_NAME}
           </h1>
 
           <p
@@ -129,7 +130,7 @@ function LoginFormInner() {
             style={{ color: "#90a4ae" }}
           >
             Pursue real career paths through employer-posted positions, connect
-            with top companies, and access free tools backed by Joblink&apos;s
+            with top companies, and access free tools backed by {APP_NAME}&apos;s
             expertise.
           </p>
         </div>

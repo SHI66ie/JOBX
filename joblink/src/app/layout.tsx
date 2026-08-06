@@ -4,6 +4,7 @@ import "./globals.css";
 import { Analytics } from "@vercel/analytics/react";
 import { SpeedInsights } from "@vercel/speed-insights/next";
 import { ThemeProvider } from "@/components/theme-provider";
+import { APP_NAME } from "@/lib/config";
 
 const inter = Inter({
   subsets: ["latin"],
@@ -11,8 +12,8 @@ const inter = Inter({
 });
 
 export const metadata: Metadata = {
-  title: "Joblink | Find or Post a Job",
-  description: "Connect with top candidates and companies on Joblink.",
+  title: `${APP_NAME} | Find or Post a Job`,
+  description: `Connect with top candidates and companies on ${APP_NAME}.`,
 };
 
 export default function RootLayout({
