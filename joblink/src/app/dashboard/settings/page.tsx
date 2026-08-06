@@ -1,6 +1,6 @@
 import { ThemeToggle } from "@/components/theme-toggle"
 import { createClient } from "@/utils/supabase/server"
-import { Button } from "@/components/ui/button"
+import { Button, buttonVariants } from "@/components/ui/button"
 import { addRole } from "@/app/login/actions"
 import { getUserRoles } from "@/utils/auth"
 import Link from "next/link"
@@ -75,9 +75,9 @@ export default async function SettingsPage() {
           <p className="text-sm text-muted-foreground mb-4">
             You already have an Employer role on this account.
           </p>
-          <Button asChild variant="outline">
-            <Link href="/employer/dashboard">Go to Employer Dashboard</Link>
-          </Button>
+          <Link href="/employer/dashboard" className={buttonVariants({ variant: "outline" })}>
+            Go to Employer Dashboard
+          </Link>
         </div>
       )}
     </div>

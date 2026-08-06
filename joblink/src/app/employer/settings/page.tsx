@@ -4,7 +4,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import { Button } from "@/components/ui/button";
+import { Button, buttonVariants } from "@/components/ui/button";
 import { upsertCompanyProfile } from "../actions";
 import { addRole } from "@/app/login/actions";
 import { getUserRoles } from "@/utils/auth";
@@ -122,9 +122,9 @@ export default async function EmployerSettings() {
             </CardDescription>
           </CardHeader>
           <CardContent>
-            <Button asChild variant="outline">
-              <Link href="/dashboard">Go to Applicant Dashboard</Link>
-            </Button>
+            <Link href="/dashboard" className={buttonVariants({ variant: "outline" })}>
+              Go to Applicant Dashboard
+            </Link>
           </CardContent>
         </Card>
       )}
