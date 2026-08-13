@@ -1,0 +1,1006 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>JOMP — Build Your Career With JOMP</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@500;600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --navy-950:#080d1a;
+    --navy-900:#0b1424;
+    --navy-800:#101c33;
+    --navy-700:#16243f;
+    --cyan:#2fd8d0;
+    --cyan-dim:#2fd8d055;
+    --pink:#ee1a63;
+    --magenta:#c81361;
+    --orange:#f2871f;
+    --ink:#0b1424;
+    --paper:#f5f6fa;
+    --paper-2:#ffffff;
+    --text-loud:#f4f6fb;
+    --text-muted:#93a1c0;
+    --text-ink-muted:#5b6478;
+    --radius:20px;
+  }
+  *{box-sizing:border-box;}
+  html{scroll-behavior:smooth;}
+  body{
+    margin:0;
+    font-family:'Inter',sans-serif;
+    background:var(--paper);
+    color:var(--ink);
+    -webkit-font-smoothing:antialiased;
+  }
+  h1,h2,h3,.display{
+    font-family:'Poppins',sans-serif;
+    margin:0;
+    line-height:1.05;
+  }
+  p{margin:0;}
+  a{text-decoration:none;color:inherit;}
+  .wrap{
+    max-width:1120px;
+    margin:0 auto;
+    padding:0 28px;
+  }
+  .eyebrow{
+    text-transform:uppercase;
+    letter-spacing:0.22em;
+    font-weight:600;
+    font-size:13px;
+  }
+
+  /* ---------- NAV ---------- */
+  .nav{
+    position:sticky;
+    top:0;
+    z-index:50;
+    background:rgba(8,13,26,0.85);
+    backdrop-filter:blur(10px);
+    border-bottom:1px solid rgba(255,255,255,0.07);
+  }
+  .nav .wrap{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    height:68px;
+  }
+  .nav-brand{
+    display:flex;
+    align-items:center;
+    gap:10px;
+    font-family:'Poppins',sans-serif;
+    font-weight:700;
+    color:#fff;
+    font-size:19px;
+    letter-spacing:0.02em;
+  }
+  .nav-brand .dot{
+    width:11px;height:11px;border-radius:4px;
+    background:var(--pink);
+    transform:rotate(12deg);
+  }
+  .nav-links{display:flex;gap:34px;}
+  .nav-links a{
+    color:var(--text-muted);
+    font-size:14.5px;
+    font-weight:500;
+    transition:color .2s ease;
+  }
+  .nav-links a:hover{color:#fff;}
+  .nav-cta{
+    display:flex;gap:12px;
+  }
+  .btn{
+    display:inline-flex;
+    align-items:center;
+    justify-content:center;
+    gap:8px;
+    padding:11px 22px;
+    border-radius:12px;
+    font-weight:600;
+    font-size:14.5px;
+    cursor:pointer;
+    border:1px solid transparent;
+    transition:transform .18s ease, box-shadow .18s ease, background .18s ease, border-color .18s ease;
+  }
+  .btn:hover{transform:translateY(-2px);}
+  .btn-primary{
+    background:var(--cyan);
+    color:#032523;
+    box-shadow:0 8px 24px -8px var(--cyan-dim);
+  }
+  .btn-primary:hover{box-shadow:0 12px 28px -6px var(--cyan-dim);}
+  .btn-ghost-dark{
+    background:transparent;
+    color:#fff;
+    border-color:rgba(255,255,255,0.22);
+  }
+  .btn-ghost-dark:hover{border-color:#fff;}
+  .btn-pink{
+    background:var(--pink);
+    color:#fff;
+    box-shadow:0 10px 26px -10px rgba(238,26,99,0.6);
+  }
+  .btn-outline-ink{
+    background:transparent;
+    border-color:rgba(11,20,36,0.18);
+    color:var(--ink);
+  }
+  .btn-outline-ink:hover{border-color:var(--ink);}
+
+  @media (max-width:840px){
+    .nav-links{display:none;}
+  }
+
+  /* ---------- HERO (Section 1) ---------- */
+  .hero{
+    position:relative;
+    background:radial-gradient(120% 140% at 78% 8%, #14213e 0%, var(--navy-900) 45%, var(--navy-950) 100%);
+    overflow:hidden;
+    padding:104px 0 150px;
+  }
+  .hero-shape{
+    position:absolute;
+  }
+  .shape-square{
+    width:118px;height:118px;
+    background:linear-gradient(145deg, var(--pink), #ff4d8d);
+    border-radius:30px;
+    top:78px; right:8%;
+    transform:rotate(8deg);
+    box-shadow:0 30px 60px -20px rgba(238,26,99,0.45);
+  }
+  .shape-dot{
+    width:34px;height:34px;
+    border-radius:50%;
+    background:var(--magenta);
+    top:230px; right:2%;
+  }
+  .shape-square-sm{
+    width:44px;height:44px;
+    border-radius:12px;
+    background:var(--cyan);
+    top:400px; left:9%;
+    transform:rotate(-6deg);
+  }
+  .shape-hex{
+    width:96px;height:96px;
+    top:445px; left:3%;
+    background:var(--orange);
+    clip-path:polygon(25% 5%, 75% 5%, 100% 50%, 75% 95%, 25% 95%, 0% 50%);
+    opacity:0.9;
+  }
+  .hero .wrap{position:relative;z-index:2;}
+  .hero-eyebrow{color:var(--text-muted);}
+  .hero-eyebrow strong{
+    display:block;
+    color:#fff;
+    font-weight:700;
+    font-size:14px;
+    letter-spacing:0.24em;
+  }
+  .hero-eyebrow strong.tagline{
+    color:var(--text-muted);
+    font-size:12.5px;
+    font-weight:600;
+    letter-spacing:0.12em;
+  }
+  .hero h1{
+    margin-top:26px;
+    font-size:clamp(38px, 6vw, 66px);
+    font-weight:700;
+    color:#fff;
+    max-width:780px;
+  }
+  .hero-desc{
+    margin-top:28px;
+    max-width:520px;
+    font-size:17px;
+    line-height:1.7;
+    color:var(--text-muted);
+  }
+  .hero-cta{
+    margin-top:40px;
+    display:flex;
+    gap:14px;
+    flex-wrap:wrap;
+  }
+  .hero-stats{
+    margin-top:64px;
+    display:flex;
+    gap:48px;
+    flex-wrap:wrap;
+  }
+  .hero-stats div strong{
+    display:block;
+    font-family:'Poppins',sans-serif;
+    color:#fff;
+    font-size:26px;
+    font-weight:700;
+  }
+  .hero-stats div span{
+    color:var(--text-muted);
+    font-size:13.5px;
+  }
+  .wave-svg{
+    position:absolute;
+    left:-5%;
+    top:520px;
+    width:110%;
+    opacity:0.85;
+    z-index:1;
+  }
+  @media (max-width:720px){
+    .hero{padding:70px 0 110px;}
+    .shape-square{width:78px;height:78px;top:40px;right:6%;}
+    .shape-dot{top:130px;}
+    .shape-hex,.shape-square-sm{display:none;}
+    .wave-svg{top:auto;bottom:0;}
+  }
+
+  /* connecting thread between sections */
+  .thread{
+    position:relative;
+    height:64px;
+  }
+  .thread svg{position:absolute;top:-1px;left:0;width:100%;height:65px;display:block;}
+
+  /* ---------- SECTION 2 : Employers ---------- */
+  .sec{
+    padding:104px 0;
+    position:relative;
+  }
+  .sec-light{background:var(--paper-2);}
+  .sec-grid{
+    display:grid;
+    grid-template-columns:0.9fr 1.1fr;
+    gap:64px;
+    align-items:center;
+  }
+  @media (max-width:900px){
+    .sec-grid{grid-template-columns:1fr;gap:40px;}
+  }
+  .tag-pill{
+    display:inline-flex;
+    align-items:center;
+    gap:8px;
+    padding:7px 16px;
+    border-radius:999px;
+    font-size:12.5px;
+    font-weight:600;
+    letter-spacing:0.08em;
+    text-transform:uppercase;
+  }
+  .tag-pink{background:rgba(238,26,99,0.1);color:var(--pink);}
+  .tag-cyan{background:rgba(47,216,208,0.12);color:#0e9a92;}
+  .tag-orange{background:rgba(242,135,31,0.12);color:#b96410;}
+  .sec2 h2{
+    margin-top:20px;
+    font-size:clamp(30px,4vw,44px);
+    font-weight:700;
+    color:var(--ink);
+    max-width:520px;
+  }
+  .sec2 p.lead{
+    margin-top:20px;
+    font-size:16.5px;
+    line-height:1.75;
+    color:var(--text-ink-muted);
+    max-width:480px;
+  }
+  .feature-list{
+    margin-top:32px;
+    display:flex;
+    flex-direction:column;
+    gap:18px;
+  }
+  .feature-item{
+    display:flex;
+    gap:14px;
+    align-items:flex-start;
+  }
+  .feature-icon{
+    flex:none;
+    width:38px;height:38px;
+    border-radius:11px;
+    background:var(--navy-900);
+    color:var(--cyan);
+    display:flex;align-items:center;justify-content:center;
+    font-weight:700;
+    font-family:'Poppins',sans-serif;
+    font-size:14px;
+  }
+  .feature-item h4{
+    font-family:'Poppins',sans-serif;
+    font-size:15.5px;
+    font-weight:600;
+    color:var(--ink);
+  }
+  .feature-item p{
+    margin-top:4px;
+    font-size:14.5px;
+    color:var(--text-ink-muted);
+    line-height:1.6;
+  }
+  .panel{
+    background:linear-gradient(160deg,var(--navy-900),var(--navy-950));
+    border-radius:28px;
+    padding:38px;
+    position:relative;
+    overflow:hidden;
+    min-height:380px;
+  }
+  .panel .shape-square-sm{position:absolute;top:26px;right:26px;background:var(--pink);width:38px;height:38px;border-radius:10px;transform:rotate(10deg);}
+  .talent-card{
+    background:var(--navy-800);
+    border:1px solid rgba(255,255,255,0.06);
+    border-radius:16px;
+    padding:18px 20px;
+    display:flex;
+    align-items:center;
+    gap:14px;
+    margin-bottom:14px;
+  }
+  .talent-avatar{
+    width:44px;height:44px;border-radius:50%;
+    background:linear-gradient(135deg,var(--cyan),#1aa9a2);
+    flex:none;
+  }
+  .talent-card h5{color:#fff;font-family:'Poppins',sans-serif;font-size:14.5px;font-weight:600;}
+  .talent-card span{color:var(--text-muted);font-size:12.5px;}
+  .talent-card .rate{
+    margin-left:auto;
+    color:var(--cyan);
+    font-weight:700;
+    font-size:13.5px;
+    font-family:'Poppins',sans-serif;
+  }
+
+  /* ---------- SECTION 3 : Open Connection (dark) ---------- */
+  .sec3{
+    background:radial-gradient(130% 130% at 15% 0%, #14213e 0%, var(--navy-900) 45%, var(--navy-950) 100%);
+    color:#fff;
+    text-align:center;
+    padding:120px 0;
+    position:relative;
+    overflow:hidden;
+  }
+  .sec3-shape-hex{
+    position:absolute; width:130px;height:130px;
+    background:var(--orange);
+    clip-path:polygon(25% 5%, 75% 5%, 100% 50%, 75% 95%, 25% 95%, 0% 50%);
+    opacity:0.15; top:-30px; left:-30px;
+  }
+  .sec3-shape-square{
+    position:absolute; width:160px;height:160px;border-radius:40px;
+    background:var(--pink); opacity:0.12; bottom:-50px; right:-40px; transform:rotate(20deg);
+  }
+  .sec3 .wrap{position:relative;z-index:2;}
+  .sec3 h2{
+    font-size:clamp(30px,4.2vw,46px);
+    font-weight:700;
+    max-width:680px;
+    margin:22px auto 0;
+  }
+  .sec3 p.lead{
+    max-width:560px;
+    margin:22px auto 0;
+    color:var(--text-muted);
+    font-size:16.5px;
+    line-height:1.75;
+  }
+  .link-diagram{
+    margin-top:64px;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    gap:0;
+    flex-wrap:wrap;
+  }
+  .link-node{
+    width:180px;
+    padding:26px 20px;
+    border-radius:20px;
+    background:var(--navy-800);
+    border:1px solid rgba(255,255,255,0.08);
+  }
+  .link-node .badge{
+    width:40px;height:40px;
+    border-radius:12px;
+    display:flex;align-items:center;justify-content:center;
+    margin:0 auto 14px;
+    font-family:'Poppins',sans-serif;
+    font-weight:700;
+  }
+  .badge-cyan{background:rgba(47,216,208,0.15);color:var(--cyan);}
+  .badge-orange{background:rgba(242,135,31,0.15);color:var(--orange);}
+  .link-node h4{font-family:'Poppins',sans-serif;font-size:15px;font-weight:600;color:#fff;}
+  .link-node p{margin-top:8px;font-size:12.5px;color:var(--text-muted);line-height:1.5;}
+  .link-mid{
+    width:120px;
+    display:flex;align-items:center;justify-content:center;
+    position:relative;
+  }
+  .link-mid svg{width:100%;}
+  @media (max-width:680px){
+    .link-diagram{flex-direction:column;}
+    .link-mid{transform:rotate(90deg);width:60px;margin:6px 0;}
+  }
+  .open-points{
+    margin-top:60px;
+    display:grid;
+    grid-template-columns:repeat(3,1fr);
+    gap:24px;
+    text-align:left;
+  }
+  @media (max-width:780px){.open-points{grid-template-columns:1fr;}}
+  .open-point{
+    background:rgba(255,255,255,0.03);
+    border:1px solid rgba(255,255,255,0.07);
+    border-radius:18px;
+    padding:24px;
+  }
+  .open-point .n{
+    color:var(--cyan);
+    font-family:'Poppins',sans-serif;
+    font-weight:700;
+    font-size:13px;
+    letter-spacing:0.1em;
+  }
+  .open-point h4{
+    margin-top:10px;
+    font-family:'Poppins',sans-serif;
+    font-size:16px;
+    color:#fff;
+    font-weight:600;
+  }
+  .open-point p{
+    margin-top:8px;
+    font-size:13.5px;
+    color:var(--text-muted);
+    line-height:1.6;
+  }
+
+  /* ---------- SECTION 3.5 : Platform stats ---------- */
+  .stats-grid{
+    margin-top:52px;
+    display:grid;
+    grid-template-columns:0.85fr 1.15fr;
+    gap:28px;
+    align-items:stretch;
+  }
+  @media (max-width:900px){.stats-grid{grid-template-columns:1fr;}}
+  .chart-card{
+    background:linear-gradient(160deg,var(--navy-900),var(--navy-950));
+    border-radius:28px;
+    padding:36px;
+    color:#fff;
+  }
+  .chart-title{
+    font-family:'Poppins',sans-serif;
+    font-size:20px;
+    font-weight:600;
+    margin-top:10px;
+    color:#fff;
+  }
+  .donut-wrap{display:flex;justify-content:center;margin:32px 0 8px;}
+  .donut{
+    width:190px;height:190px;border-radius:50%;
+    display:flex;align-items:center;justify-content:center;
+    flex:none;
+  }
+  .donut-hole{
+    width:120px;height:120px;border-radius:50%;
+    background:var(--navy-900);
+    display:flex;flex-direction:column;align-items:center;justify-content:center;
+  }
+  .donut-hole strong{font-family:'Poppins',sans-serif;font-size:26px;font-weight:700;color:#fff;}
+  .donut-hole span{font-size:12px;color:var(--text-muted);margin-top:4px;}
+  .chart-legend{margin-top:24px;display:flex;flex-direction:column;gap:12px;}
+  .line-legend{flex-direction:row;gap:24px;margin-top:18px;flex-wrap:wrap;}
+  .legend-row{display:flex;align-items:center;gap:10px;font-size:14px;color:#dfe6f5;}
+  .legend-row .dot{width:10px;height:10px;border-radius:50%;flex:none;}
+  .legend-value{margin-left:auto;font-family:'Poppins',sans-serif;font-weight:700;color:#fff;}
+  .line-chart{width:100%;height:auto;margin-top:28px;display:block;}
+  .chart-insight{
+    margin-top:22px;font-size:13.5px;color:var(--text-muted);line-height:1.6;
+    padding-top:18px;border-top:1px solid rgba(255,255,255,0.08);
+  }
+  .chart-insight strong{color:var(--cyan);}
+
+  /* ---------- SECTION 4 : Register ---------- */
+  .sec4{
+    background:var(--paper);
+    padding:120px 0 130px;
+  }
+  .sec4-head{
+    text-align:center;
+    max-width:600px;
+    margin:0 auto;
+  }
+  .sec4-head .eyebrow{color:var(--pink);}
+  .sec4-head h2{
+    margin-top:18px;
+    font-size:clamp(30px,4vw,44px);
+    font-weight:700;
+    color:var(--ink);
+  }
+  .sec4-head p{
+    margin-top:16px;
+    color:var(--text-ink-muted);
+    font-size:16px;
+    line-height:1.7;
+  }
+  .register-grid{
+    margin-top:56px;
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    gap:28px;
+  }
+  @media (max-width:780px){.register-grid{grid-template-columns:1fr;}}
+  .register-card{
+    border-radius:26px;
+    padding:40px;
+    position:relative;
+    overflow:hidden;
+  }
+  .card-applicant{
+    background:linear-gradient(155deg,#0e2a2c,var(--navy-950));
+    border:1px solid rgba(47,216,208,0.18);
+  }
+  .card-employer{
+    background:linear-gradient(155deg,#2a1730,var(--navy-950));
+    border:1px solid rgba(238,26,99,0.18);
+  }
+  .register-card .icon{
+    width:52px;height:52px;
+    border-radius:15px;
+    display:flex;align-items:center;justify-content:center;
+    font-family:'Poppins',sans-serif;
+    font-weight:700;
+    font-size:20px;
+    margin-bottom:22px;
+  }
+  .card-applicant .icon{background:rgba(47,216,208,0.15);color:var(--cyan);}
+  .card-employer .icon{background:rgba(238,26,99,0.15);color:var(--pink);}
+  .register-card h3{
+    font-family:'Poppins',sans-serif;
+    color:#fff;
+    font-size:23px;
+    font-weight:700;
+  }
+  .register-card p{
+    margin-top:12px;
+    color:var(--text-muted);
+    font-size:14.5px;
+    line-height:1.7;
+    max-width:340px;
+  }
+  .register-card ul{
+    list-style:none;
+    padding:0;
+    margin:22px 0 0;
+    display:flex;
+    flex-direction:column;
+    gap:10px;
+  }
+  .register-card li{
+    font-size:13.5px;
+    color:#cfd7ea;
+    display:flex;
+    gap:10px;
+    align-items:center;
+  }
+  .register-card li:before{
+    content:"";
+    width:6px;height:6px;border-radius:50%;
+    background:var(--cyan);
+    flex:none;
+  }
+  .card-employer li:before{background:var(--pink);}
+  .register-card .btn{margin-top:28px;width:100%;}
+
+  /* ---------- FOOTER ---------- */
+  footer{
+    background:var(--navy-950);
+    color:var(--text-muted);
+    padding:50px 0 34px;
+  }
+  .footer-top{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    flex-wrap:wrap;
+    gap:20px;
+    padding-bottom:30px;
+    border-bottom:1px solid rgba(255,255,255,0.08);
+  }
+  .footer-brand{
+    display:flex;align-items:center;gap:10px;
+    font-family:'Poppins',sans-serif;
+    font-weight:700;color:#fff;font-size:18px;
+  }
+  .footer-brand .dot{width:10px;height:10px;border-radius:4px;background:var(--pink);transform:rotate(12deg);}
+  .footer-links{display:flex;gap:26px;flex-wrap:wrap;font-size:13.5px;}
+  .footer-links a:hover{color:#fff;}
+  .footer-bottom{
+    margin-top:24px;
+    font-size:12.5px;
+    display:flex;
+    justify-content:space-between;
+    flex-wrap:wrap;
+    gap:10px;
+  }
+
+  /* reveal on scroll */
+  .reveal{opacity:0;transform:translateY(18px);transition:opacity .7s ease, transform .7s ease;}
+  .reveal.in{opacity:1;transform:none;}
+
+  @media (prefers-reduced-motion: reduce){
+    .reveal{opacity:1;transform:none;transition:none;}
+    html{scroll-behavior:auto;}
+  }
+</style>
+</head>
+<body>
+
+<nav class="nav">
+  <div class="wrap">
+    <div class="nav-brand"><span class="dot"></span> JOMP</div>
+    <div class="nav-links">
+      <a href="#employers">For employers</a>
+      <a href="#connection">How it works</a>
+      <a href="#stats">Platform stats</a>
+      <a href="#register">Get started</a>
+    </div>
+    <div class="nav-cta">
+      <a class="btn btn-ghost-dark" href="#register">Log in</a>
+      <a class="btn btn-primary" href="#register">Register</a>
+    </div>
+  </div>
+</nav>
+
+<!-- SECTION 1 — HERO -->
+<header class="hero">
+  <span class="hero-shape shape-square"></span>
+  <span class="hero-shape shape-dot"></span>
+  <span class="hero-shape shape-square-sm"></span>
+  <span class="hero-shape shape-hex"></span>
+  <svg class="wave-svg" viewBox="0 0 1200 200" preserveAspectRatio="none">
+    <path d="M0,120 C150,180 300,40 480,90 C620,130 700,220 900,110 C1000,60 1100,90 1200,60"
+      fill="none" stroke="url(#waveGrad)" stroke-width="3"/>
+    <defs>
+      <linearGradient id="waveGrad" x1="0" y1="0" x2="1" y2="0">
+        <stop offset="0%" stop-color="#2fd8d0"/>
+        <stop offset="100%" stop-color="#2fd8d000"/>
+      </linearGradient>
+    </defs>
+  </svg>
+
+  <div class="wrap">
+    <div class="hero-eyebrow">
+      <strong>JOMP</strong>
+      <strong class="tagline" style="margin-top:4px;">JOB OPPORTUNITIES MEETS PREPARATION</strong>
+    </div>
+    <h1>Build Your Career<br>With JOMP</h1>
+    <p class="hero-desc">
+      Pursue real career paths through employer-posted positions, connect with
+      top companies, and access free tools backed by JOMP's expertise —
+      built for applicants and employers who want to work on open ground.
+    </p>
+    <div class="hero-cta">
+      <a class="btn btn-primary" href="#register">Find work</a>
+      <a class="btn btn-ghost-dark" href="#register">Hire talent</a>
+    </div>
+    <div class="hero-stats">
+      <div><strong>12k+</strong><span>Verified applicants</span></div>
+      <div><strong>3.4k+</strong><span>Employers hiring</span></div>
+      <div><strong>98%</strong><span>Jobs completed on time</span></div>
+    </div>
+  </div>
+</header>
+
+<!-- SECTION 2 — EMPLOYERS -->
+<section class="sec sec-light sec2" id="employers">
+  <div class="wrap sec-grid">
+    <div class="reveal">
+      <span class="tag-pill tag-pink">For employers</span>
+      <h2>Get the best applicants to get the job done.</h2>
+      <p class="lead">
+        Post a role once and reach a pool of applicants who've already
+        proven themselves — vetted profiles, real work history, and ratings
+        from other employers, so you can hire with confidence instead of guesswork.
+      </p>
+      <div class="feature-list">
+        <div class="feature-item">
+          <div class="feature-icon">01</div>
+          <div>
+            <h4>Vetted, ranked talent</h4>
+            <p>Every applicant profile carries a track record you can check before you hire.</p>
+          </div>
+        </div>
+        <div class="feature-item">
+          <div class="feature-icon">02</div>
+          <div>
+            <h4>Post once, reach thousands</h4>
+            <p>Your listing goes straight to applicants actively looking for that exact skill set.</p>
+          </div>
+        </div>
+        <div class="feature-item">
+          <div class="feature-icon">03</div>
+          <div>
+            <h4>Free hiring tools</h4>
+            <p>Screening, messaging, and job tracking — all built in, backed by JOMP's expertise.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="panel reveal">
+      <span class="shape-square-sm"></span>
+      <div class="talent-card">
+        <div class="talent-avatar"></div>
+        <div>
+          <h5>Product Designer</h5>
+          <span>4.9 rating · 62 jobs done</span>
+        </div>
+        <div class="rate">$45/hr</div>
+      </div>
+      <div class="talent-card">
+        <div class="talent-avatar" style="background:linear-gradient(135deg,var(--pink),#ff4d8d);"></div>
+        <div>
+          <h5>Backend Engineer</h5>
+          <span>5.0 rating · 40 jobs done</span>
+        </div>
+        <div class="rate">$60/hr</div>
+      </div>
+      <div class="talent-card">
+        <div class="talent-avatar" style="background:linear-gradient(135deg,var(--orange),#ffb35c);"></div>
+        <div>
+          <h5>Content Strategist</h5>
+          <span>4.8 rating · 88 jobs done</span>
+        </div>
+        <div class="rate">$32/hr</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- SECTION 3 — OPEN CONNECTION -->
+<section class="sec3" id="connection">
+  <span class="sec3-shape-hex"></span>
+  <span class="sec3-shape-square"></span>
+  <div class="wrap">
+    <span class="tag-pill tag-cyan reveal">How it works</span>
+    <h2 class="reveal">An open connection between applicants and employers.</h2>
+    <p class="lead reveal">
+      No hidden gatekeeping and no black-box algorithms deciding who gets seen.
+      Applicants apply directly, employers respond directly, and every job on
+      JOMP stays visible on open ground from the first message to the final payment.
+    </p>
+
+    <div class="link-diagram reveal">
+      <div class="link-node">
+        <div class="badge badge-cyan">A</div>
+        <h4>Applicants</h4>
+        <p>Build a profile, browse open roles, apply directly to employers.</p>
+      </div>
+      <div class="link-mid">
+        <svg viewBox="0 0 120 40" fill="none">
+          <path d="M0,20 C30,0 90,40 120,20" stroke="#2fd8d0" stroke-width="2.5"/>
+        </svg>
+      </div>
+      <div class="link-node">
+        <div class="badge badge-orange">E</div>
+        <h4>Employers</h4>
+        <p>Post roles, review applicants, message and hire without a middleman.</p>
+      </div>
+    </div>
+
+    <div class="open-points">
+      <div class="open-point reveal">
+        <div class="n">TRANSPARENT</div>
+        <h4>Open job listings</h4>
+        <p>Every posting shows its scope, budget, and requirements up front — no surprise terms.</p>
+      </div>
+      <div class="open-point reveal">
+        <div class="n">DIRECT</div>
+        <h4>No hidden middlemen</h4>
+        <p>Applicants and employers message and negotiate directly on the platform.</p>
+      </div>
+      <div class="open-point reveal">
+        <div class="n">FAIR</div>
+        <h4>Reputation both ways</h4>
+        <p>Ratings run in both directions, so trust is earned by everyone on JOMP.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- SECTION 3.5 — PLATFORM STATS -->
+<section class="sec sec-light" id="stats">
+  <div class="wrap">
+    <div class="reveal" style="max-width:600px;">
+      <span class="tag-pill tag-cyan">Platform stats</span>
+      <h2 style="margin-top:20px;font-size:clamp(28px,3.6vw,40px);font-weight:700;color:var(--ink);">JOMP by the numbers</h2>
+      <p style="margin-top:16px;color:var(--text-ink-muted);font-size:16px;line-height:1.7;">
+        A quick look at who's on the platform, and how many applicants go on to get hired.
+      </p>
+    </div>
+
+    <div class="stats-grid">
+
+      <!-- PIE / DONUT CHART: Applicants vs Employers -->
+      <div class="chart-card reveal">
+        <span class="eyebrow" style="color:var(--cyan);">Platform mix</span>
+        <h3 class="chart-title">Applicants vs Employers</h3>
+
+        <div class="donut-wrap">
+          <div class="donut" style="background:conic-gradient(var(--cyan) 0% 72%, var(--pink) 72% 100%);">
+            <div class="donut-hole">
+              <strong>72%</strong>
+              <span>Applicants</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="chart-legend">
+          <div class="legend-row">
+            <span class="dot" style="background:var(--cyan);"></span>
+            <span class="legend-label">Applicants</span>
+            <span class="legend-value">72%</span>
+          </div>
+          <div class="legend-row">
+            <span class="dot" style="background:var(--pink);"></span>
+            <span class="legend-label">Employers</span>
+            <span class="legend-value">28%</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- INDEX / LINE CHART: Applicants & Employed Applicants -->
+      <div class="chart-card reveal">
+        <span class="eyebrow" style="color:var(--orange);">Growth index</span>
+        <h3 class="chart-title">Applicants &amp; Employed Applicants</h3>
+
+        <svg class="line-chart" viewBox="0 0 640 280" preserveAspectRatio="xMidYMid meet">
+          <g stroke="rgba(255,255,255,0.08)" stroke-width="1">
+            <line x1="40" y1="250" x2="620" y2="250"/>
+            <line x1="40" y1="193" x2="620" y2="193"/>
+            <line x1="40" y1="135" x2="620" y2="135"/>
+            <line x1="40" y1="78" x2="620" y2="78"/>
+            <line x1="40" y1="20" x2="620" y2="20"/>
+          </g>
+          <g fill="#93a1c0" font-size="11" font-family="Inter, sans-serif">
+            <text x="10" y="254">0</text>
+            <text x="4" y="197">3k</text>
+            <text x="4" y="139">6k</text>
+            <text x="4" y="82">9k</text>
+            <text x="0" y="24">12k</text>
+          </g>
+          <g fill="#93a1c0" font-size="11" font-family="Inter, sans-serif" text-anchor="middle">
+            <text x="40" y="268">Jan</text>
+            <text x="156" y="268">Feb</text>
+            <text x="272" y="268">Mar</text>
+            <text x="388" y="268">Apr</text>
+            <text x="504" y="268">May</text>
+            <text x="620" y="268">Jun</text>
+          </g>
+
+          <defs>
+            <linearGradient id="applicantFill" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0%" stop-color="#2fd8d0" stop-opacity="0.35"/>
+              <stop offset="100%" stop-color="#2fd8d0" stop-opacity="0"/>
+            </linearGradient>
+            <linearGradient id="employedFill" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0%" stop-color="#f2871f" stop-opacity="0.35"/>
+              <stop offset="100%" stop-color="#f2871f" stop-opacity="0"/>
+            </linearGradient>
+          </defs>
+
+          <path d="M40,250 L40,210 L156,185 L272,154 L388,112 L504,62 L620,20 L620,250 Z" fill="url(#applicantFill)"/>
+          <path d="M40,210 L156,185 L272,154 L388,112 L504,62 L620,20" fill="none" stroke="#2fd8d0" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+
+          <path d="M40,250 L40,239 L156,229 L272,214 L388,196 L504,173 L620,148 L620,250 Z" fill="url(#employedFill)"/>
+          <path d="M40,239 L156,229 L272,214 L388,196 L504,173 L620,148" fill="none" stroke="#f2871f" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+
+          <g fill="#2fd8d0">
+            <circle cx="40" cy="210" r="4"><title>Jan — 2.1k applicants</title></circle>
+            <circle cx="156" cy="185" r="4"><title>Feb — 3.4k applicants</title></circle>
+            <circle cx="272" cy="154" r="4"><title>Mar — 5.0k applicants</title></circle>
+            <circle cx="388" cy="112" r="4"><title>Apr — 7.2k applicants</title></circle>
+            <circle cx="504" cy="62" r="4"><title>May — 9.8k applicants</title></circle>
+            <circle cx="620" cy="20" r="4"><title>Jun — 12.0k applicants</title></circle>
+          </g>
+          <g fill="#f2871f">
+            <circle cx="40" cy="239" r="4"><title>Jan — 0.6k employed</title></circle>
+            <circle cx="156" cy="229" r="4"><title>Feb — 1.1k employed</title></circle>
+            <circle cx="272" cy="214" r="4"><title>Mar — 1.9k employed</title></circle>
+            <circle cx="388" cy="196" r="4"><title>Apr — 2.8k employed</title></circle>
+            <circle cx="504" cy="173" r="4"><title>May — 4.0k employed</title></circle>
+            <circle cx="620" cy="148" r="4"><title>Jun — 5.3k employed</title></circle>
+          </g>
+        </svg>
+
+        <div class="chart-legend line-legend">
+          <div class="legend-row"><span class="dot" style="background:var(--cyan);"></span><span class="legend-label">Applicants</span></div>
+          <div class="legend-row"><span class="dot" style="background:var(--orange);"></span><span class="legend-label">Employed applicants</span></div>
+        </div>
+
+        <p class="chart-insight">By June, <strong>44%</strong> of applicants on JOMP had been hired for at least one role.</p>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<!-- SECTION 4 — REGISTER -->
+<section class="sec4" id="register">
+  <div class="wrap">
+    <div class="sec4-head reveal">
+      <span class="eyebrow">Get started</span>
+      <h2>Register as an applicant or an employer.</h2>
+      <p>Two paths, one open platform. Pick the one that's yours and set up your profile in minutes.</p>
+    </div>
+
+    <div class="register-grid">
+      <div class="register-card card-applicant reveal">
+        <div class="icon">F</div>
+        <h3>I'm an applicant</h3>
+        <p>Find real, employer-posted work in your field and get paid for jobs you finish.</p>
+        <ul>
+          <li>Build a profile that shows your track record</li>
+          <li>Apply directly to open roles, no bidding wars</li>
+          <li>Get rated and build your reputation over time</li>
+        </ul>
+        <a class="btn btn-primary" href="#">Register as an applicant</a>
+      </div>
+
+      <div class="register-card card-employer reveal">
+        <div class="icon">E</div>
+        <h3>I'm an employer</h3>
+        <p>Post a role and connect with applicants who are ready to get the job done.</p>
+        <ul>
+          <li>Post jobs and reach vetted applicants fast</li>
+          <li>Review real work history before you hire</li>
+          <li>Manage hires with free built-in tools</li>
+        </ul>
+        <a class="btn btn-pink" href="#">Register as an employer</a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <div class="wrap">
+    <div class="footer-top">
+      <div class="footer-brand"><span class="dot"></span> JOMP</div>
+      <div class="footer-links">
+        <a href="#employers">For employers</a>
+        <a href="#connection">How it works</a>
+        <a href="#register">Register</a>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <span>© 2026 JOMP Career Platform.</span>
+      <span>Built on open ground for applicants and employers.</span>
+    </div>
+  </div>
+</footer>
+
+<script>
+  const els = document.querySelectorAll('.reveal');
+  const io = new IntersectionObserver((entries)=>{
+    entries.forEach(e=>{
+      if(e.isIntersecting){ e.target.classList.add('in'); io.unobserve(e.target); }
+    });
+  },{threshold:0.15});
+  els.forEach(el=>io.observe(el));
+</script>
+
+</body>
+</html>
