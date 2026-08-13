@@ -18,7 +18,7 @@ export async function login(formData: FormData) {
   })
 
   if (error) {
-    return redirect('/?message=Could not authenticate user')
+    return redirect('/login?message=Could not authenticate user')
   }
 
   const roles = getUserRoles(data.user)
@@ -38,14 +38,11 @@ export async function signup(formData: FormData) {
 
   const email = formData.get('email') as string
   const password = formData.get('password') as string
-  const firstName = formData.get('first_name') as string
-  const lastName = formData.get('last_name') as string
+  const first_name = formData.get('first_name') as string
+  const last_name = formData.get('last_name') as string
   const role = (formData.get('role') as string) || 'candidate'
 
-  // Password validation
-  const hasUppercase = /[A-Z]/.test(password)
-  const hasSpecial = /[!@#$%^&*(),.?":{}|<>]/.test(password)
-  if (!hasUppercase || !hasSpecial || password.length < 8) {
+  if (password.length < 8 || !/[A-Z]/.test(password) || !/[!@#$%^&*(),.?":{}|<>]/.test(password)) {
     return redirect(
       '/signup?message=Password must be at least 8 characters long and contain at least one uppercase letter and one special character.'
     )
@@ -56,10 +53,9 @@ export async function signup(formData: FormData) {
     password,
     options: {
       data: {
-        first_name: firstName,
-        last_name: lastName,
-        role: role, // keep for backward compatibility
-        roles: [role], // dual-role support
+        first_name,
+        last_name,
+        role,
       },
     },
   })
@@ -68,8 +64,7 @@ export async function signup(formData: FormData) {
     return redirect('/signup?message=Could not create user')
   }
 
-  // If email confirmation is required there will be no session yet
-  if (!data.session) {
+  if (data.user && !data.session) {
     return redirect(
       '/signup?message=Check your email to confirm your account before signing in.'
     )
@@ -81,25 +76,10 @@ export async function signup(formData: FormData) {
 
 export async function signInWithGoogle() {
   const supabase = await createClient()
-
-  let origin = (await headers()).get('origin')
-  if (!origin) {
-    origin =
-      process.env.NEXT_PUBLIC_SITE_URL ||
-      (process.env.NEXT_PUBLIC_VERCEL_URL
-        ? `https://${process.env.NEXT_PUBLIC_VERCEL_URL}`
-        : 'http://localhost:3000')
-  }
+  const origin = (await headers()).get('origin') || 'http://localhost:3000'
 
   // Ensure origin is a valid absolute URL to prevent Supabase relative redirects
-  if (origin) {
-    origin = origin.trim()
-    if (!origin.startsWith('http')) {
-      origin = `https://${origin}`
-    }
-  }
-
-  const { data } = await supabase.auth.signInWithOAuth({
+  const { data, error } = await supabase.auth.signInWithOAuth({
     provider: 'google',
     options: {
       redirectTo: `${origin}/auth/callback`,
@@ -109,42 +89,35 @@ export async function signInWithGoogle() {
   if (data.url) {
     redirect(data.url)
   }
+
+  if (error) {
+    redirect('/login?message=Could not sign in with Google')
+  }
 }
 
-/** Add a second role to an existing user (dual-role support) */
 export async function addRole(formData: FormData) {
   const supabase = await createClient()
+  const role = formData.get('role') as string
+
   const {
     data: { user },
   } = await supabase.auth.getUser()
 
   if (!user) {
-    throw new Error('Unauthorized')
-  }
-
-  const newRole = formData.get('role') as string
-  if (!['employer', 'candidate'].includes(newRole)) {
-    throw new Error('Invalid role')
+    redirect('/login')
   }
 
   const currentRoles = getUserRoles(user)
-
-  if (currentRoles.includes(newRole)) {
-    // already has it
-    if (newRole === 'employer') {
+  if (currentRoles.includes(role)) {
+    if (role === 'employer') {
       redirect('/employer/settings')
     }
     redirect('/dashboard')
   }
 
-  const updatedRoles = [...currentRoles, newRole]
-
+  const newRoles = [...currentRoles, role]
   const { error } = await supabase.auth.updateUser({
-    data: {
-      roles: updatedRoles,
-      // keep primary role as the newly added one for login preference
-      role: newRole,
-    },
+    data: { roles: newRoles, role: newRoles[0] },
   })
 
   if (error) {
@@ -152,11 +125,8 @@ export async function addRole(formData: FormData) {
   }
 
   revalidatePath('/', 'layout')
-
-  if (newRole === 'employer') {
-    // send them to create company profile
+  if (role === 'employer') {
     redirect('/employer/settings')
   }
-
   redirect('/dashboard')
 }
