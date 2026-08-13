@@ -1,1 +1,1 @@
-export const APP_NAME = "JobX NG";
+export const APP_NAME = "JOMP";
