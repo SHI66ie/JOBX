@@ -1,6 +1,8 @@
-# JOBX
+# JOMP (formerly JOBX / Joblink)
 
 A modern job board platform built with Next.js, TypeScript, and Supabase.
+
+**JOMP** — Job Opportunities Meets Preparation
 
 ## Features
 
@@ -38,6 +40,8 @@ npm run dev
 3. Redeploy
 
 The production URL should then resolve correctly instead of showing `DEPLOYMENT_NOT_FOUND`.
+
+> Domain left unchanged as requested.
 
 ## Project Structure
 
