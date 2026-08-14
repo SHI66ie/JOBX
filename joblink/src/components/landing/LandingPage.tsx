@@ -33,6 +33,7 @@ export default function LandingPage() {
           <div className="hidden items-center gap-8 md:flex">
             <a href="#employers" className="text-[14.5px] font-medium text-[#93a1c0] hover:text-white">For employers</a>
             <a href="#connection" className="text-[14.5px] font-medium text-[#93a1c0] hover:text-white">How it works</a>
+            <a href="#stats" className="text-[14.5px] font-medium text-[#93a1c0] hover:text-white">Platform stats</a>
             <a href="#register" className="text-[14.5px] font-medium text-[#93a1c0] hover:text-white">Get started</a>
           </div>
           <div className="flex items-center gap-3">
@@ -113,6 +114,132 @@ export default function LandingPage() {
         </div>
       </section>
 
+      {/* PLATFORM STATS — restored from original design */}
+      <section id="stats" className="bg-white py-24">
+        <div className="mx-auto max-w-[1120px] px-7">
+          <div className="reveal max-w-[600px]">
+            <span className="inline-flex rounded-full bg-[rgba(47,216,208,0.12)] px-4 py-1.5 text-[12.5px] font-semibold uppercase tracking-wider text-[#0e9a92]">Platform stats</span>
+            <h2 className="mt-5 text-[clamp(28px,3.6vw,40px)] font-bold text-[#0b1424]" style={{ fontFamily: "var(--font-heading)" }}>{APP_NAME} by the numbers</h2>
+            <p className="mt-4 text-base leading-relaxed text-[#5b6478]">
+              A quick look at who's on the platform, and how many applicants go on to get hired.
+            </p>
+          </div>
+
+          <div className="mt-14 grid grid-cols-1 gap-7 lg:grid-cols-[0.85fr_1.15fr]">
+            {/* Donut: Applicants vs Employers */}
+            <div className="reveal rounded-[28px] bg-gradient-to-br from-[#0b1424] to-[#080d1a] p-9 text-white">
+              <span className="text-[13px] font-semibold uppercase tracking-[0.18em] text-[#2fd8d0]">Platform mix</span>
+              <h3 className="mt-2.5 text-[20px] font-semibold text-white" style={{ fontFamily: "var(--font-heading)" }}>Applicants vs Employers</h3>
+
+              <div className="my-8 flex justify-center">
+                <div
+                  className="flex h-[190px] w-[190px] items-center justify-center rounded-full"
+                  style={{ background: "conic-gradient(#2fd8d0 0% 72%, #ee1a63 72% 100%)" }}
+                >
+                  <div className="flex h-[120px] w-[120px] flex-col items-center justify-center rounded-full bg-[#0b1424]">
+                    <strong className="text-[26px] font-bold text-white" style={{ fontFamily: "var(--font-heading)" }}>72%</strong>
+                    <span className="mt-1 text-xs text-[#93a1c0]">Applicants</span>
+                  </div>
+                </div>
+              </div>
+
+              <div className="space-y-3">
+                <div className="flex items-center gap-2.5 text-[14px] text-[#dfe6f5]">
+                  <span className="h-2.5 w-2.5 flex-none rounded-full bg-[#2fd8d0]" />
+                  <span>Applicants</span>
+                  <span className="ml-auto font-bold text-white" style={{ fontFamily: "var(--font-heading)" }}>72%</span>
+                </div>
+                <div className="flex items-center gap-2.5 text-[14px] text-[#dfe6f5]">
+                  <span className="h-2.5 w-2.5 flex-none rounded-full bg-[#ee1a63]" />
+                  <span>Employers</span>
+                  <span className="ml-auto font-bold text-white" style={{ fontFamily: "var(--font-heading)" }}>28%</span>
+                </div>
+              </div>
+            </div>
+
+            {/* Growth Index line chart */}
+            <div className="reveal rounded-[28px] bg-gradient-to-br from-[#0b1424] to-[#080d1a] p-9 text-white">
+              <span className="text-[13px] font-semibold uppercase tracking-[0.18em] text-[#f2871f]">Growth index</span>
+              <h3 className="mt-2.5 text-[20px] font-semibold text-white" style={{ fontFamily: "var(--font-heading)" }}>Applicants & Employed Applicants</h3>
+
+              <svg className="mt-7 w-full" viewBox="0 0 640 280" preserveAspectRatio="xMidYMid meet">
+                <g stroke="rgba(255,255,255,0.08)" strokeWidth="1">
+                  <line x1="40" y1="250" x2="620" y2="250" />
+                  <line x1="40" y1="193" x2="620" y2="193" />
+                  <line x1="40" y1="135" x2="620" y2="135" />
+                  <line x1="40" y1="78" x2="620" y2="78" />
+                  <line x1="40" y1="20" x2="620" y2="20" />
+                </g>
+                <g fill="#93a1c0" fontSize="11" fontFamily="Inter, sans-serif">
+                  <text x="10" y="254">0</text>
+                  <text x="4" y="197">3k</text>
+                  <text x="4" y="139">6k</text>
+                  <text x="4" y="82">9k</text>
+                  <text x="0" y="24">12k</text>
+                </g>
+                <g fill="#93a1c0" fontSize="11" fontFamily="Inter, sans-serif" textAnchor="middle">
+                  <text x="40" y="268">Jan</text>
+                  <text x="156" y="268">Feb</text>
+                  <text x="272" y="268">Mar</text>
+                  <text x="388" y="268">Apr</text>
+                  <text x="504" y="268">May</text>
+                  <text x="620" y="268">Jun</text>
+                </g>
+
+                <defs>
+                  <linearGradient id="applicantFill" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="0%" stopColor="#2fd8d0" stopOpacity="0.35" />
+                    <stop offset="100%" stopColor="#2fd8d0" stopOpacity="0" />
+                  </linearGradient>
+                  <linearGradient id="employedFill" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="0%" stopColor="#f2871f" stopOpacity="0.35" />
+                    <stop offset="100%" stopColor="#f2871f" stopOpacity="0" />
+                  </linearGradient>
+                </defs>
+
+                <path d="M40,250 L40,210 L156,185 L272,154 L388,112 L504,62 L620,20 L620,250 Z" fill="url(#applicantFill)" />
+                <path d="M40,210 L156,185 L272,154 L388,112 L504,62 L620,20" fill="none" stroke="#2fd8d0" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" />
+
+                <path d="M40,250 L40,239 L156,229 L272,214 L388,196 L504,173 L620,148 L620,250 Z" fill="url(#employedFill)" />
+                <path d="M40,239 L156,229 L272,214 L388,196 L504,173 L620,148" fill="none" stroke="#f2871f" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" />
+
+                <g fill="#2fd8d0">
+                  <circle cx="40" cy="210" r="4"><title>Jan — 2.1k applicants</title></circle>
+                  <circle cx="156" cy="185" r="4"><title>Feb — 3.4k applicants</title></circle>
+                  <circle cx="272" cy="154" r="4"><title>Mar — 5.0k applicants</title></circle>
+                  <circle cx="388" cy="112" r="4"><title>Apr — 7.2k applicants</title></circle>
+                  <circle cx="504" cy="62" r="4"><title>May — 9.8k applicants</title></circle>
+                  <circle cx="620" cy="20" r="4"><title>Jun — 12.0k applicants</title></circle>
+                </g>
+                <g fill="#f2871f">
+                  <circle cx="40" cy="239" r="4"><title>Jan — 0.6k employed</title></circle>
+                  <circle cx="156" cy="229" r="4"><title>Feb — 1.1k employed</title></circle>
+                  <circle cx="272" cy="214" r="4"><title>Mar — 1.9k employed</title></circle>
+                  <circle cx="388" cy="196" r="4"><title>Apr — 2.8k employed</title></circle>
+                  <circle cx="504" cy="173" r="4"><title>May — 4.0k employed</title></circle>
+                  <circle cx="620" cy="148" r="4"><title>Jun — 5.3k employed</title></circle>
+                </g>
+              </svg>
+
+              <div className="mt-5 flex flex-wrap gap-6 text-[14px] text-[#dfe6f5]">
+                <div className="flex items-center gap-2.5">
+                  <span className="h-2.5 w-2.5 rounded-full bg-[#2fd8d0]" />
+                  <span>Applicants</span>
+                </div>
+                <div className="flex items-center gap-2.5">
+                  <span className="h-2.5 w-2.5 rounded-full bg-[#f2871f]" />
+                  <span>Employed applicants</span>
+                </div>
+              </div>
+
+              <p className="mt-5 border-t border-white/10 pt-4 text-[13.5px] leading-relaxed text-[#93a1c0]">
+                By June, <strong className="text-[#2fd8d0]">44%</strong> of applicants on {APP_NAME} had been hired for at least one role.
+              </p>
+            </div>
+          </div>
+        </div>
+      </section>
+
       <section id="register" className="bg-[#f5f6fa] py-28">
         <div className="mx-auto max-w-[1120px] px-7">
           <div className="reveal mx-auto max-w-[600px] text-center">
@@ -123,7 +250,7 @@ export default function LandingPage() {
           <div className="mt-14 grid grid-cols-1 gap-7 md:grid-cols-2">
             <div className="reveal rounded-[26px] border border-[rgba(47,216,208,0.18)] bg-gradient-to-br from-[#0e2a2c] to-[#080d1a] p-10">
               <div className="mb-5 flex h-[52px] w-[52px] items-center justify-center rounded-[15px] bg-[rgba(47,216,208,0.15)] text-xl font-bold text-[#2fd8d0]" style={{ fontFamily: "var(--font-heading)" }}>A</div>
-              <h3 className="text-[23px] font-bold text-white" style={{ fontFamily: "var(--font-heading)" }}>I&apos;m an applicant</h3>
+              <h3 className="text-[23px] font-bold text-white" style={{ fontFamily: "var(--font-heading)" }}>I'm an applicant</h3>
               <p className="mt-3 text-[14.5px] leading-relaxed text-[#93a1c0]">Find real employer-posted work and get paid for jobs you finish.</p>
               <ul className="mt-5 space-y-2.5 text-[13.5px] text-[#cfd7ea]">
                 {["Build a profile that shows your track record","Apply directly — no bidding wars","Build reputation over time"].map(t=><li key={t} className="flex items-center gap-2.5"><span className="h-1.5 w-1.5 rounded-full bg-[#2fd8d0]" />{t}</li>)}
@@ -132,7 +259,7 @@ export default function LandingPage() {
             </div>
             <div className="reveal rounded-[26px] border border-[rgba(238,26,99,0.18)] bg-gradient-to-br from-[#2a1730] to-[#080d1a] p-10">
               <div className="mb-5 flex h-[52px] w-[52px] items-center justify-center rounded-[15px] bg-[rgba(238,26,99,0.15)] text-xl font-bold text-[#ee1a63]" style={{ fontFamily: "var(--font-heading)" }}>E</div>
-              <h3 className="text-[23px] font-bold text-white" style={{ fontFamily: "var(--font-heading)" }}>I&apos;m an employer</h3>
+              <h3 className="text-[23px] font-bold text-white" style={{ fontFamily: "var(--font-heading)" }}>I'm an employer</h3>
               <p className="mt-3 text-[14.5px] leading-relaxed text-[#93a1c0]">Post a role and connect with applicants ready to get the job done.</p>
               <ul className="mt-5 space-y-2.5 text-[13.5px] text-[#cfd7ea]">
                 {["Post jobs and reach vetted applicants","Review real work history","Manage hires with free tools"].map(t=><li key={t} className="flex items-center gap-2.5"><span className="h-1.5 w-1.5 rounded-full bg-[#ee1a63]" />{t}</li>)}
@@ -152,6 +279,7 @@ export default function LandingPage() {
             <div className="flex flex-wrap gap-6 text-[13.5px]">
               <a href="#employers" className="hover:text-white">For employers</a>
               <a href="#connection" className="hover:text-white">How it works</a>
+              <a href="#stats" className="hover:text-white">Platform stats</a>
               <Link href="/signup" className="hover:text-white">Register</Link>
               <Link href="/login" className="hover:text-white">Log in</Link>
             </div>
