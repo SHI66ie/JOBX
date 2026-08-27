@@ -5,7 +5,23 @@ import OnboardingForm from "./onboarding-form";
 import EmployerOnboardingForm from "./employer-onboarding-form";
 import { Logo } from "@/components/brand/logo";
 
-export default async function OnboardingPage() {
+function nameFromUser(user: {
+  user_metadata?: Record<string, string | undefined>;
+}) {
+  const meta = user.user_metadata || {};
+  if (meta.first_name || meta.last_name) {
+    return { firstName: meta.first_name || "", lastName: meta.last_name || "" };
+  }
+  const full = String(meta.full_name || meta.name || "").trim();
+  const [firstName, ...rest] = full.split(" ");
+  return { firstName: firstName || "", lastName: rest.join(" ") };
+}
+
+export default async function OnboardingPage({
+  searchParams,
+}: {
+  searchParams?: Promise<{ role?: string }> | { role?: string };
+}) {
   const supabase = await createClient();
   const {
     data: { user },
@@ -15,12 +31,14 @@ export default async function OnboardingPage() {
     redirect("/");
   }
 
+  const params = await Promise.resolve(searchParams || {});
   const roles = getUserRoles(user);
-  const isEmployer = roles.includes("employer");
+  const isEmployer = params.role === "employer" || roles.includes("employer");
+  const names = nameFromUser(user);
 
   const initialData = {
-    firstName: user.user_metadata?.first_name || "",
-    lastName: user.user_metadata?.last_name || "",
+    firstName: names.firstName,
+    lastName: names.lastName,
     email: user.email || "",
   };
 

@@ -1,13 +1,12 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { useRouter, useSearchParams } from "next/navigation";
+import { useSearchParams } from "next/navigation";
 import { createClient } from "@/utils/supabase/client";
 import { startOnboardingRole } from "@/app/onboarding/actions";
 import { isGoogleUser } from "@/utils/auth";
 
 export default function WelcomeOnboarding() {
-  const router = useRouter();
   const searchParams = useSearchParams();
   const welcome = searchParams.get("welcome") === "1";
   const [open, setOpen] = useState(false);
@@ -24,7 +23,6 @@ export default function WelcomeOnboarding() {
       const user = data.user;
       if (!user) return;
 
-      // Email/password users already entered their details at registration.
       if (!isGoogleUser(user) || user.user_metadata?.onboarded) {
         setOpen(false);
         return;
@@ -44,18 +42,11 @@ export default function WelcomeOnboarding() {
     setLoading(true);
     setError(null);
     try {
-      const result = await startOnboardingRole(role);
-      if (result?.error) {
-        setError(result.error);
-        setLoading(false);
-        return;
-      }
-      router.push("/onboarding");
-      router.refresh();
-    } catch (err: unknown) {
-      setError(err instanceof Error ? err.message : "Could not start onboarding.");
-      setLoading(false);
+      await startOnboardingRole(role);
+    } catch {
+      // Server action may redirect; if not, fall through to a hard navigation.
     }
+    window.location.assign(`/onboarding?role=${role}`);
   }
 
   if (!open) return null;
