@@ -1,11 +1,18 @@
-# JOMP brand assets
+# JOMP brand
 
-Primary navy: `#01224F` (RGB 1, 34, 79)
+Canonical guidelines: [JOMP_Brand_Kit.md](./JOMP_Brand_Kit.md)
 
-Tagline: Connecting Talent. Creating Opportunities.
+## Locked palette
 
-Hardcoded UI usage lives in `joblink/src/components/brand/logo.tsx`.
-Web-ready vectors are also in `joblink/public/brand/`.
+- Navy `#01224F` — logo, primary UI, headlines on white
+- White `#FFFFFF` — fields and reversed lockups
+- Black `#111111` — body copy fallback only
 
-Use the monogram for favicons, app icons, and tight headers.
-Use the lockup (monogram + wordmark + tagline) for marketing and auth panels.
+Do not introduce secondary accent colors.
+
+## Product usage
+
+Hardcoded lockups: `joblink/src/components/brand/logo.tsx`
+Web vectors: `joblink/public/brand/`
+
+Use navy-on-white on light surfaces and white-on-navy on dark surfaces only.
