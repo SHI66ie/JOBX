@@ -2,8 +2,8 @@ import { createClient } from "@/utils/supabase/server";
 import { redirect } from "next/navigation";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
-import { APP_NAME } from "@/lib/config";
 import { getUserRoles } from "@/utils/auth";
+import { Logo } from "@/components/brand/logo";
 
 export default async function DashboardLayout({
   children,
@@ -26,7 +26,6 @@ export default async function DashboardLayout({
 
   return (
     <div className="auth-bg min-h-screen flex flex-col text-foreground transition-colors">
-      {/* Ambient Shapes */}
       <div className="auth-shape auth-shape-cyan hidden dark:block" />
       <div className="auth-shape auth-shape-magenta hidden dark:block" />
       <div className="auth-shape auth-shape-orange hidden dark:block" />
@@ -34,11 +33,8 @@ export default async function DashboardLayout({
 
       <header className="sticky top-0 z-40 glass-panel border-b px-6 h-16 flex items-center justify-between">
         <div className="flex items-center gap-6">
-          <Link
-            href="/"
-            className="font-bold text-xl tracking-tighter text-primary"
-          >
-            {APP_NAME}
+          <Link href="/" className="text-primary">
+            <Logo variant="lockup" tone="current" className="h-10" markClassName="h-8 w-8" />
           </Link>
           <nav className="hidden md:flex gap-4">
             <Link
@@ -68,7 +64,7 @@ export default async function DashboardLayout({
             {hasEmployer && (
               <Link
                 href="/employer/dashboard"
-                className="text-sm font-medium text-[#00838f] hover:text-[#005662] transition-colors"
+                className="text-sm font-medium text-[#01224F] hover:text-[#001833] dark:text-[#8fb4e8] transition-colors"
               >
                 Employer Mode
               </Link>
