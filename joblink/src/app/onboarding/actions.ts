@@ -4,6 +4,44 @@ import { createClient } from "@/utils/supabase/server";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { isEnterpriseTeam } from "@/lib/employer-options";
+import { getUserRoles } from "@/utils/auth";
+
+export async function startOnboardingRole(role: "employer" | "candidate") {
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+
+  if (!user) {
+    return { error: "You need to sign in first." };
+  }
+
+  const fullName = String(user.user_metadata?.full_name || user.user_metadata?.name || "").trim();
+  const [given, ...rest] = fullName.split(" ");
+  const first_name = user.user_metadata?.first_name || given || "";
+  const last_name = user.user_metadata?.last_name || rest.join(" ") || "";
+  const currentRoles = getUserRoles(user);
+  const roles = Array.from(new Set([role, ...currentRoles.filter(Boolean)]));
+
+  const { error } = await supabase.auth.updateUser({
+    data: {
+      first_name,
+      last_name,
+      role,
+      roles,
+      onboarded: false,
+    },
+  });
+
+  if (error) {
+    return { error: error.message };
+  }
+
+  await supabase.from("users").update({ first_name, last_name, role }).eq("id", user.id);
+  revalidatePath("/");
+  revalidatePath("/onboarding");
+  return { ok: true };
+}
 
 export async function completeEmployerOnboarding(formData: FormData) {
   const supabase = await createClient();
