@@ -25,7 +25,10 @@ export async function login(formData: FormData) {
 
   revalidatePath('/', 'layout')
 
-  // Prefer employer dashboard if they have that role, otherwise applicant
+  if (!data.user?.user_metadata?.onboarded) {
+    redirect('/onboarding')
+  }
+
   if (roles.includes('employer')) {
     redirect('/employer/dashboard')
   }
@@ -56,6 +59,7 @@ export async function signup(formData: FormData) {
         first_name,
         last_name,
         role,
+        roles: [role],
       },
     },
   })
@@ -78,7 +82,6 @@ export async function signInWithGoogle() {
   const supabase = await createClient()
   const origin = (await headers()).get('origin') || 'http://localhost:3000'
 
-  // Ensure origin is a valid absolute URL to prevent Supabase relative redirects
   const { data, error } = await supabase.auth.signInWithOAuth({
     provider: 'google',
     options: {
@@ -110,14 +113,18 @@ export async function addRole(formData: FormData) {
   const currentRoles = getUserRoles(user)
   if (currentRoles.includes(role)) {
     if (role === 'employer') {
-      redirect('/employer/settings')
+      redirect(user.user_metadata?.onboarded ? '/employer/dashboard' : '/onboarding')
     }
     redirect('/dashboard')
   }
 
   const newRoles = [...currentRoles, role]
   const { error } = await supabase.auth.updateUser({
-    data: { roles: newRoles, role: newRoles[0] },
+    data: {
+      roles: newRoles,
+      role: newRoles[0],
+      onboarded: role === 'employer' ? false : user.user_metadata?.onboarded,
+    },
   })
 
   if (error) {
@@ -126,7 +133,7 @@ export async function addRole(formData: FormData) {
 
   revalidatePath('/', 'layout')
   if (role === 'employer') {
-    redirect('/employer/settings')
+    redirect('/onboarding')
   }
   redirect('/dashboard')
 }
