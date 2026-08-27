@@ -25,20 +25,57 @@ export async function upsertCompanyProfile(formData: FormData) {
     throw new Error("Unauthorized");
   }
 
+  const first_name = String(formData.get("first_name") || "").trim();
+  const last_name = String(formData.get("last_name") || "").trim();
   const name = String(formData.get("name") || "").trim();
   const description = String(formData.get("description") || "").trim();
   const website = String(formData.get("website") || "").trim();
+  const hiring_for = String(formData.get("hiring_for") || "").trim();
+  const team_size = String(formData.get("team_size") || "").trim();
+  const account_type = String(formData.get("account_type") || "").trim();
+  const vat_number = String(formData.get("vat_number") || "").trim();
+  const business_registration = String(formData.get("business_registration") || "").trim();
+  const requestVerification = formData.get("request_verification") === "true";
 
   if (!name) {
     throw new Error("Company name is required.");
   }
+
+  if (first_name || last_name) {
+    await supabase.auth.updateUser({
+      data: {
+        first_name: first_name || user.user_metadata?.first_name,
+        last_name: last_name || user.user_metadata?.last_name,
+      },
+    });
+    await supabase
+      .from("users")
+      .update({
+        first_name: first_name || undefined,
+        last_name: last_name || undefined,
+      })
+      .eq("id", user.id);
+  }
+
+  const companyFields = {
+    name,
+    description,
+    website,
+    hiring_for: hiring_for || null,
+    industry: hiring_for || null,
+    team_size: team_size || null,
+    account_type: account_type || null,
+    vat_number: vat_number || null,
+    business_registration: business_registration || null,
+    ...(requestVerification ? { verification_status: "pending" } : {}),
+  };
 
   const existingCompany = await getOwnedCompany(supabase, user.id);
 
   if (existingCompany) {
     const { error } = await supabase
       .from("companies")
-      .update({ name, description, website })
+      .update(companyFields)
       .eq("id", existingCompany.id);
 
     if (error) {
@@ -47,9 +84,7 @@ export async function upsertCompanyProfile(formData: FormData) {
     }
   } else {
     const { error } = await supabase.from("companies").insert({
-      name,
-      description,
-      website,
+      ...companyFields,
       created_by: user.id,
     });
 
