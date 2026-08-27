@@ -15,8 +15,10 @@ export async function GET(request: Request) {
         data: { user },
       } = await supabase.auth.getUser()
 
+      // New Google / OAuth users land on the homepage first.
+      // The landing page then starts onboarding.
       if (user && !user.user_metadata?.onboarded) {
-        return NextResponse.redirect(new URL('/onboarding', requestUrl.origin))
+        return NextResponse.redirect(new URL('/?welcome=1', requestUrl.origin))
       }
 
       const roles = getUserRoles(user)
