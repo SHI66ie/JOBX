@@ -4,7 +4,7 @@ import "./globals.css";
 import { Analytics } from "@vercel/analytics/react";
 import { SpeedInsights } from "@vercel/speed-insights/next";
 import { ThemeProvider } from "@/components/theme-provider";
-import { APP_NAME } from "@/lib/config";
+import { APP_NAME, APP_TAGLINE } from "@/lib/config";
 
 const inter = Inter({
   subsets: ["latin"],
@@ -18,8 +18,11 @@ const poppins = Poppins({
 });
 
 export const metadata: Metadata = {
-  title: `${APP_NAME} | Find or Post a Job`,
-  description: `Connect with top candidates and companies on ${APP_NAME}.`,
+  title: `${APP_NAME} | ${APP_TAGLINE}`,
+  description: `${APP_TAGLINE} Connect with top candidates and companies on ${APP_NAME}.`,
+  icons: {
+    icon: "/brand/JOMP_Monogram_Navy.svg",
+  },
 };
 
 export default function RootLayout({
