@@ -53,7 +53,6 @@ export async function login(formData: FormData) {
   const user = data.user
   const roles = getUserRoles(user)
 
-  // Email users already gave their details at registration.
   if (user && !user.user_metadata?.onboarded && !isGoogleUser(user)) {
     await supabase.auth.updateUser({
       data: {
@@ -138,14 +137,18 @@ export async function signup(formData: FormData) {
   redirect(role === 'employer' ? '/employer/dashboard' : '/dashboard')
 }
 
-export async function signInWithGoogle() {
+export async function signInWithGoogle(formData?: FormData) {
   const supabase = await createClient()
   const origin = (await headers()).get('origin') || 'http://localhost:3000'
+  const role = formData?.get('role') === 'employer' ? 'employer' : ''
+  const callback = role
+    ? `${origin}/auth/callback?intent=employer`
+    : `${origin}/auth/callback`
 
   const { data, error } = await supabase.auth.signInWithOAuth({
     provider: 'google',
     options: {
-      redirectTo: `${origin}/auth/callback`,
+      redirectTo: callback,
     },
   })
 
@@ -202,7 +205,7 @@ export async function addRole(formData: FormData) {
 
   revalidatePath('/', 'layout')
   if (role === 'employer' && isGoogleUser(user)) {
-    redirect('/?welcome=1')
+    redirect('/onboarding?role=employer')
   }
   if (role === 'employer') {
     redirect('/employer/settings')
