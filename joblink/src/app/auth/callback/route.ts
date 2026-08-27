@@ -1,6 +1,6 @@
 import { createClient } from '@/utils/supabase/server'
 import { NextResponse } from 'next/server'
-import { getUserRoles } from '@/utils/auth'
+import { getUserRoles, isGoogleUser } from '@/utils/auth'
 
 export async function GET(request: Request) {
   const requestUrl = new URL(request.url)
@@ -15,9 +15,8 @@ export async function GET(request: Request) {
         data: { user },
       } = await supabase.auth.getUser()
 
-      // New Google / OAuth users land on the homepage first.
-      // The landing page then starts onboarding.
-      if (user && !user.user_metadata?.onboarded) {
+      // Google users choose a path on the landing page, then enter details.
+      if (user && !user.user_metadata?.onboarded && isGoogleUser(user)) {
         return NextResponse.redirect(new URL('/?welcome=1', requestUrl.origin))
       }
 
