@@ -273,13 +273,8 @@ export async function updateApplicationStatus(applicationId: string, status: str
 
   if (application) {
     try {
-      const jobTitle =
-        (application.job as { title?: string } | { title?: string }[] | null) &&
-        !Array.isArray(application.job)
-          ? application.job.title
-          : Array.isArray(application.job)
-            ? application.job[0]?.title
-            : undefined;
+      const job = application.job as { title?: string } | { title?: string }[] | null;
+      const jobTitle = Array.isArray(job) ? job[0]?.title : job?.title;
 
       const statusMessages: Record<string, string> = {
         accepted: `Congratulations! Your application${jobTitle ? ` for ${jobTitle}` : ""} has been accepted.`,
