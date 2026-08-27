@@ -32,59 +32,30 @@ export default async function EmployerLayout({
 
   return (
     <div className="auth-bg min-h-screen flex flex-col text-foreground transition-colors">
-      <div className="auth-shape auth-shape-cyan hidden dark:block" />
-      <div className="auth-shape auth-shape-magenta hidden dark:block" />
-      <div className="auth-shape auth-shape-orange hidden dark:block" />
-      <div className="auth-shape auth-shape-red hidden dark:block" />
-
-      <header className="sticky top-0 z-40 glass-panel border-b px-6 h-16 flex items-center justify-between">
+      <header className="sticky top-0 z-40 glass-panel border-b px-6 h-16 flex items-center justify-between bg-white dark:bg-[#01224F]">
         <div className="flex items-center gap-6">
-          <Link href="/" className="text-primary">
+          <Link href="/" className="text-[#01224F] dark:text-white">
             <Logo variant="lockup" tone="current" className="h-10" markClassName="h-8 w-8" />
           </Link>
           <nav className="hidden md:flex gap-4">
-            <Link
-              href="/employer/dashboard"
-              className="text-sm font-medium text-muted-foreground hover:text-primary transition-colors"
-            >
-              Dashboard
-            </Link>
-            <Link
-              href="/employer/jobs/create"
-              className="text-sm font-medium text-muted-foreground hover:text-primary transition-colors"
-            >
-              Post a Job
-            </Link>
-            <Link
-              href="/employer/settings"
-              className="text-sm font-medium text-muted-foreground hover:text-primary transition-colors"
-            >
-              Company Settings
-            </Link>
+            <Link href="/employer/dashboard" className="text-sm font-medium text-[#111111]/70 hover:text-[#01224F] dark:text-white/70 dark:hover:text-white">Dashboard</Link>
+            <Link href="/employer/jobs/create" className="text-sm font-medium text-[#111111]/70 hover:text-[#01224F] dark:text-white/70 dark:hover:text-white">Post a Job</Link>
+            <Link href="/employer/settings" className="text-sm font-medium text-[#111111]/70 hover:text-[#01224F] dark:text-white/70 dark:hover:text-white">Company Settings</Link>
             {hasCandidate && (
-              <Link
-                href="/dashboard"
-                className="text-sm font-medium text-[#01224F] hover:text-[#001833] dark:text-[#8fb4e8] transition-colors"
-              >
+              <Link href="/dashboard" className="text-sm font-medium text-[#01224F] dark:text-white">
                 Applicant Mode
               </Link>
             )}
           </nav>
         </div>
         <div className="flex items-center gap-4">
-          <span className="text-sm text-muted-foreground hidden sm:inline-block">
-            {companyName}
-          </span>
+          <span className="text-sm text-[#111111]/70 dark:text-white/70 hidden sm:inline-block">{companyName}</span>
           <form action="/auth/signout" method="post">
-            <Button variant="outline" size="sm">
-              Sign Out
-            </Button>
+            <Button variant="outline" size="sm">Sign Out</Button>
           </form>
         </div>
       </header>
-      <main className="flex-1 max-w-7xl w-full mx-auto p-4 sm:p-6 lg:p-8">
-        {children}
-      </main>
+      <main className="flex-1 max-w-7xl w-full mx-auto p-4 sm:p-6 lg:p-8">{children}</main>
     </div>
   );
 }
