@@ -1,9 +1,10 @@
 "use client";
 
 import Link from "next/link";
-import { useEffect } from "react";
+import { Suspense, useEffect } from "react";
 import { APP_NAME, APP_TAGLINE } from "@/lib/config";
 import { Logo } from "@/components/brand/logo";
+import WelcomeOnboarding from "./WelcomeOnboarding";
 
 export default function LandingPage() {
   useEffect(() => {
@@ -25,6 +26,9 @@ export default function LandingPage() {
 
   return (
     <div className="jomp-landing min-h-screen bg-white text-[#111111]">
+      <Suspense fallback={null}>
+        <WelcomeOnboarding />
+      </Suspense>
       <nav className="sticky top-0 z-50 border-b border-white/10 bg-[#01224F]/95 backdrop-blur-md">
         <div className="mx-auto flex h-[68px] max-w-[1120px] items-center justify-between px-7">
           <Link href="/" className="text-white">
@@ -104,12 +108,12 @@ export default function LandingPage() {
           </div>
           <div className="mt-14 grid grid-cols-1 gap-7 md:grid-cols-2">
             <div className="rounded-[26px] border border-[#01224F]/15 bg-[#01224F] p-10 text-white">
-              <h3 className="text-[23px] font-bold">I&apos;m an applicant</h3>
+              <h3 className="text-[23px] font-bold">I'm an applicant</h3>
               <p className="mt-3 text-[14.5px] leading-relaxed text-white/70">Find real employer-posted work and get paid for jobs you finish.</p>
               <Link href="/signup" className="mt-7 flex w-full items-center justify-center rounded-xl bg-white py-3.5 text-[14.5px] font-semibold text-[#01224F]">Register as an applicant</Link>
             </div>
             <div className="rounded-[26px] border border-[#01224F]/15 bg-white p-10">
-              <h3 className="text-[23px] font-bold text-[#01224F]">I&apos;m an employer</h3>
+              <h3 className="text-[23px] font-bold text-[#01224F]">I'm an employer</h3>
               <p className="mt-3 text-[14.5px] leading-relaxed text-[#111111]/70">Post a role and connect with applicants ready to get the job done.</p>
               <Link href="/signup?role=employer" className="mt-7 flex w-full items-center justify-center rounded-xl bg-[#01224F] py-3.5 text-[14.5px] font-semibold text-white">Register as an employer</Link>
             </div>
