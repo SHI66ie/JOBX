@@ -2,7 +2,11 @@
 
 A modern job board platform built with Next.js, TypeScript, and Supabase.
 
-**JOMP** — Job Opportunities Meets Preparation
+**JOMP** — Connecting Talent. Creating Opportunities.
+
+Primary brand color: `#01224F`
+
+Official logos are hardcoded in `joblink/src/components/brand/logo.tsx` and served from `joblink/public/brand/`.
 
 ## Features
 
@@ -39,18 +43,16 @@ npm run dev
 2. Set it to `joblink`
 3. Redeploy
 
-The production URL should then resolve correctly instead of showing `DEPLOYMENT_NOT_FOUND`.
-
-> Domain left unchanged as requested.
-
 ## Project Structure
 
 ```
 JOBX/
-├── joblink/          ← main Next.js app (use this)
-│   ├── src/app/      ← routes (landing, login, signup, dashboards…)
+├── brand/             ← brand notes
+├── joblink/           ← main Next.js app (use this)
+│   ├── public/brand/   ← official SVG logos
+│   ├── src/components/brand/logo.tsx
 │   └── ...
-└── next-app/         ← legacy / unused scaffold (safe to ignore)
+└── next-app/          ← legacy / unused scaffold (safe to ignore)
 ```
 
 ## License
