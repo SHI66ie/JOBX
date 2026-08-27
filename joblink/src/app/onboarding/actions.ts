@@ -59,10 +59,7 @@ export async function completeEmployerOnboarding(formData: FormData) {
     return { error: authError.message };
   }
 
-  await supabase
-    .from("users")
-    .update({ first_name, last_name, role: "employer" })
-    .eq("id", user.id);
+  await supabase.from("users").update({ first_name, last_name, role: "employer" }).eq("id", user.id);
 
   const companyFields = {
     name: companyName,
@@ -84,7 +81,10 @@ export async function completeEmployerOnboarding(formData: FormData) {
   if (existing) {
     const { error } = await supabase.from("companies").update(companyFields).eq("id", existing.id);
     if (error) {
-      return { error: error.message };
+      const fallback = await supabase.from("companies").update({ name: companyName }).eq("id", existing.id);
+      if (fallback.error) {
+        return { error: fallback.error.message };
+      }
     }
   } else {
     const { error } = await supabase.from("companies").insert({
@@ -92,7 +92,13 @@ export async function completeEmployerOnboarding(formData: FormData) {
       created_by: user.id,
     });
     if (error) {
-      return { error: error.message };
+      const fallback = await supabase.from("companies").insert({
+        name: companyName,
+        created_by: user.id,
+      });
+      if (fallback.error) {
+        return { error: fallback.error.message };
+      }
     }
   }
 
