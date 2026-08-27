@@ -13,6 +13,7 @@ export default function WelcomeOnboarding() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [name, setName] = useState("");
+  const [knownRole, setKnownRole] = useState<"employer" | "candidate" | null>(null);
 
   useEffect(() => {
     const supabase = createClient();
@@ -26,6 +27,13 @@ export default function WelcomeOnboarding() {
       const first = user.user_metadata?.first_name || user.user_metadata?.full_name || user.email || "";
       setName(String(first).split(" ")[0]);
 
+      const roles = Array.isArray(user.user_metadata?.roles)
+        ? user.user_metadata.roles
+        : [user.user_metadata?.role].filter(Boolean);
+
+      if (roles.includes("employer")) setKnownRole("employer");
+      else if (roles.includes("candidate")) setKnownRole("candidate");
+
       if (!user.user_metadata?.onboarded) {
         setOpen(true);
       }
@@ -36,15 +44,18 @@ export default function WelcomeOnboarding() {
     };
   }, []);
 
-  async function choose(role: "employer" | "candidate") {
+  async function continueSetup(role?: "employer" | "candidate") {
     setLoading(true);
     setError(null);
     try {
-      const result = await startOnboardingRole(role);
-      if (result?.error) {
-        setError(result.error);
-        setLoading(false);
-        return;
+      const chosen = role || knownRole;
+      if (chosen) {
+        const result = await startOnboardingRole(chosen);
+        if (result?.error) {
+          setError(result.error);
+          setLoading(false);
+          return;
+        }
       }
       router.push("/onboarding");
       router.refresh();
@@ -64,33 +75,46 @@ export default function WelcomeOnboarding() {
         </p>
         <h2 className="mt-2 text-2xl font-bold text-[#01224F]">Finish setting up your account</h2>
         <p className="mt-2 text-sm leading-relaxed text-[#111111]/70">
-          You signed in with Google. Choose how you want to use JOMP and we will start onboarding.
+          {knownRole
+            ? `Continue as ${knownRole === "employer" ? "an employer" : "an applicant"} to complete your profile.`
+            : "Choose how you want to use JOMP and we will start onboarding."}
         </p>
         {error && (
           <p className="mt-4 rounded-md bg-red-50 p-3 text-sm text-red-600">{error}</p>
         )}
-        <div className="mt-6 grid grid-cols-1 gap-3 sm:grid-cols-2">
+        {knownRole ? (
           <button
             type="button"
             disabled={loading}
-            onClick={() => choose("candidate")}
-            className="rounded-xl border border-[#01224F]/15 bg-white px-4 py-4 text-left hover:border-[#01224F] disabled:opacity-60"
+            onClick={() => continueSetup()}
+            className="mt-6 w-full rounded-xl bg-[#01224F] px-4 py-3.5 text-sm font-semibold text-white disabled:opacity-60"
           >
-            <span className="block font-semibold text-[#01224F]">I am an applicant</span>
-            <span className="mt-1 block text-sm text-[#111111]/70">Find work and apply to jobs.</span>
+            {loading ? "Starting onboarding…" : "Start onboarding"}
           </button>
-          <button
-            type="button"
-            disabled={loading}
-            onClick={() => choose("employer")}
-            className="rounded-xl bg-[#01224F] px-4 py-4 text-left text-white hover:opacity-95 disabled:opacity-60"
-          >
-            <span className="block font-semibold">I am an employer</span>
-            <span className="mt-1 block text-sm text-white/70">Post jobs and hire talent.</span>
-          </button>
-        </div>
+        ) : (
+          <div className="mt-6 grid grid-cols-1 gap-3 sm:grid-cols-2">
+            <button
+              type="button"
+              disabled={loading}
+              onClick={() => continueSetup("candidate")}
+              className="rounded-xl border border-[#01224F]/15 bg-white px-4 py-4 text-left hover:border-[#01224F] disabled:opacity-60"
+            >
+              <span className="block font-semibold text-[#01224F]">I am an applicant</span>
+              <span className="mt-1 block text-sm text-[#111111]/70">Find work and apply to jobs.</span>
+            </button>
+            <button
+              type="button"
+              disabled={loading}
+              onClick={() => continueSetup("employer")}
+              className="rounded-xl bg-[#01224F] px-4 py-4 text-left text-white hover:opacity-95 disabled:opacity-60"
+            >
+              <span className="block font-semibold">I am an employer</span>
+              <span className="mt-1 block text-sm text-white/70">Post jobs and hire talent.</span>
+            </button>
+          </div>
+        )}
         <p className="mt-4 text-xs text-[#111111]/50">
-          {loading ? "Starting onboarding…" : "You can add the other role later from settings."}
+          Email and Google accounts use the same setup step.
         </p>
       </div>
     </div>

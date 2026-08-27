@@ -34,7 +34,7 @@ export async function login(formData: FormData) {
   revalidatePath('/', 'layout')
 
   if (!data.user?.user_metadata?.onboarded) {
-    redirect('/onboarding')
+    redirect('/?welcome=1')
   }
 
   if (roles.includes('employer')) {
@@ -81,12 +81,15 @@ export async function signup(formData: FormData) {
 
   if (data.user && !data.session) {
     return redirect(
-      signupUrl(role, 'Check your email to confirm your account, then sign in to finish employer setup.')
+      signupUrl(
+        role,
+        'Check your email to confirm your account, then sign in to finish setup.'
+      )
     )
   }
 
   revalidatePath('/', 'layout')
-  redirect('/onboarding')
+  redirect('/?welcome=1')
 }
 
 export async function signInWithGoogle() {
@@ -124,7 +127,7 @@ export async function addRole(formData: FormData) {
   const currentRoles = getUserRoles(user)
   if (currentRoles.includes(role)) {
     if (role === 'employer') {
-      redirect(user.user_metadata?.onboarded ? '/employer/dashboard' : '/onboarding')
+      redirect(user.user_metadata?.onboarded ? '/employer/dashboard' : '/?welcome=1')
     }
     redirect('/dashboard')
   }
@@ -144,7 +147,7 @@ export async function addRole(formData: FormData) {
 
   revalidatePath('/', 'layout')
   if (role === 'employer') {
-    redirect('/onboarding')
+    redirect('/?welcome=1')
   }
   redirect('/dashboard')
 }
