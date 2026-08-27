@@ -94,6 +94,7 @@ function SignupForm() {
             </form>
             <div className="landing-divider">Or continue with</div>
             <form action={signInWithGoogle} className="flex justify-center">
+              <input type="hidden" name="role" value={role} />
               <button type="submit" className="landing-google-btn">Google</button>
             </form>
             <div className="mt-10 pt-6 text-center text-sm border-t border-[#eee] text-[#111111]/70">
