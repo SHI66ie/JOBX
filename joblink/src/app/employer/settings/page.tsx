@@ -1,5 +1,3 @@
-import { createClient } from "@/utils/supabase/server";
-import { redirect } from "next/navigation";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
@@ -8,24 +6,17 @@ import { Button, buttonVariants } from "@/components/ui/button";
 import { upsertCompanyProfile } from "../actions";
 import { addRole } from "@/app/login/actions";
 import { getUserRoles } from "@/utils/auth";
+import { requireEmployerUser } from "@/lib/employer";
 import Link from "next/link";
 
 export default async function EmployerSettings() {
-  const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
+  const { supabase, user } = await requireEmployerUser();
 
-  if (!user) {
-    redirect("/");
-  }
-
-  // Get existing company profile
   const { data: company } = await supabase
     .from("companies")
     .select("*")
     .eq("created_by", user.id)
-    .single();
+    .maybeSingle();
 
   const roles = getUserRoles(user);
   const hasCandidate = roles.includes("candidate");
@@ -33,41 +24,39 @@ export default async function EmployerSettings() {
   return (
     <div className="space-y-8 max-w-2xl">
       <div>
-        <h1 className="text-3xl font-bold tracking-tight">Company Settings</h1>
+        <h1 className="text-3xl font-bold tracking-tight">Company settings</h1>
         <p className="text-muted-foreground">
-          Manage your company profile information.
+          {company ? "Keep your public company profile up to date." : "Create a company profile before you can post jobs."}
         </p>
       </div>
 
       <Card>
         <CardHeader>
-          <CardTitle>Company Profile</CardTitle>
+          <CardTitle>Company profile</CardTitle>
           <CardDescription>
-            {company
-              ? "Update your company information"
-              : "Create your company profile to start posting jobs"}
+            {company ? "Update your company information" : "This is required before you can publish listings."}
           </CardDescription>
         </CardHeader>
         <CardContent>
           <form action={upsertCompanyProfile} className="space-y-6">
             <div className="space-y-2">
-              <Label htmlFor="name">Company Name</Label>
+              <Label htmlFor="name">Company name</Label>
               <Input
                 id="name"
                 name="name"
                 defaultValue={company?.name || ""}
-                placeholder="Your Company Name"
+                placeholder="Your company name"
                 required
               />
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="description">Description</Label>
+              <Label htmlFor="description">About the company</Label>
               <Textarea
                 id="description"
                 name="description"
                 defaultValue={company?.description || ""}
-                placeholder="Tell us about your company"
+                placeholder="What you do, who you hire, and why people should join."
                 rows={4}
                 required
               />
@@ -84,21 +73,17 @@ export default async function EmployerSettings() {
               />
             </div>
 
-            <Button type="submit">
-              {company ? "Update Profile" : "Create Profile"}
-            </Button>
+            <Button type="submit">{company ? "Save profile" : "Create profile"}</Button>
           </form>
         </CardContent>
       </Card>
 
-      {/* Dual-role: Add Applicant */}
       {!hasCandidate && (
-        <Card className="border-dashed border-[#00bcd4]/40">
+        <Card className="border-dashed border-[#01224F]/30">
           <CardHeader>
             <CardTitle>Also looking for a job?</CardTitle>
             <CardDescription>
-              Add the Applicant role to this account so you can browse and apply
-              for jobs. You will keep your Employer profile.
+              Add the Applicant role to this account so you can browse and apply without creating a second login.
             </CardDescription>
           </CardHeader>
           <CardContent>
@@ -112,18 +97,15 @@ export default async function EmployerSettings() {
         </Card>
       )}
 
-      {/* Dual-role: already has candidate → link to it */}
       {hasCandidate && (
         <Card>
           <CardHeader>
-            <CardTitle>Applicant Dashboard</CardTitle>
-            <CardDescription>
-              You already have an Applicant role on this account.
-            </CardDescription>
+            <CardTitle>Applicant dashboard</CardTitle>
+            <CardDescription>This account already has an Applicant role.</CardDescription>
           </CardHeader>
           <CardContent>
             <Link href="/dashboard" className={buttonVariants({ variant: "outline" })}>
-              Go to Applicant Dashboard
+              Go to Applicant dashboard
             </Link>
           </CardContent>
         </Card>
