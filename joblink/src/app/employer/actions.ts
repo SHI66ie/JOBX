@@ -273,12 +273,12 @@ export async function updateApplicationStatus(applicationId: string, status: str
 
   if (application) {
     try {
+      const job = application.job as { title?: string } | { title?: string }[] | null;
       const jobTitle =
-        (application.job as { title?: string } | { title?: string }[] | null) &&
-        !Array.isArray(application.job)
-          ? application.job.title
-          : Array.isArray(application.job)
-            ? application.job[0]?.title
+        job && !Array.isArray(job)
+          ? job.title
+          : Array.isArray(job)
+            ? job[0]?.title
             : undefined;
 
       const statusMessages: Record<string, string> = {

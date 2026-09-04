@@ -1,8 +1,6 @@
 import type { Metadata } from "next";
 import { Inter, Poppins } from "next/font/google";
 import "./globals.css";
-import { Analytics } from "@vercel/analytics/react";
-import { SpeedInsights } from "@vercel/speed-insights/next";
 import { ThemeProvider } from "@/components/theme-provider";
 import { APP_NAME, APP_TAGLINE } from "@/lib/config";
 
@@ -44,8 +42,6 @@ export default function RootLayout({
           disableTransitionOnChange
         >
           {children}
-          <Analytics />
-          <SpeedInsights />
         </ThemeProvider>
       </body>
     </html>
