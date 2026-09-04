@@ -1,6 +1,2 @@
-[build]
-  base = "joblink"
-  command = "npm run build"
-
-[[plugins]]
-  package = "@netlify/plugin-nextjs"
+# UI must set Base directory = joblink
+# Do not set base here or paths double up.
