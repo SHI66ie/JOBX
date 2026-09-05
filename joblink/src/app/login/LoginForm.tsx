@@ -6,6 +6,7 @@ import { useSearchParams } from "next/navigation";
 import { login, signInWithGoogle } from "./actions";
 import { APP_NAME } from "@/lib/config";
 import { Logo } from "@/components/brand/logo";
+import { SocialLinks } from "@/components/brand/social-links";
 
 function LoginFormInner() {
   const searchParams = useSearchParams();
@@ -30,6 +31,10 @@ function LoginFormInner() {
             with top companies, and access free tools backed by {APP_NAME}'s
             expertise.
           </p>
+          <div className="mt-10">
+            <p className="mb-3 text-xs font-medium uppercase tracking-[0.16em] text-white/55">Follow @jomponline</p>
+            <SocialLinks />
+          </div>
         </div>
       </div>
 
