@@ -4,6 +4,7 @@ import Link from "next/link";
 import { Suspense, useEffect } from "react";
 import { APP_NAME, APP_TAGLINE } from "@/lib/config";
 import { Logo } from "@/components/brand/logo";
+import { SocialLinks } from "@/components/brand/social-links";
 import WelcomeOnboarding from "./WelcomeOnboarding";
 
 export default function LandingPage() {
@@ -69,9 +70,13 @@ export default function LandingPage() {
           <p className="mt-7 max-w-[520px] text-[17px] leading-relaxed text-white/70">
             Pursue real career paths through employer-posted positions, connect with top companies, and access free tools backed by {APP_NAME}'s expertise — built for applicants and employers who want to work on open ground.
           </p>
-          <div className="mt-10 flex flex-wrap gap-3.5">
+          <div className="mt-10 flex flex-wrap items-center gap-3.5">
             <Link href="/signup" className="rounded-xl bg-white px-6 py-3 text-[14.5px] font-semibold text-[#01224F]">Find work</Link>
             <Link href="/signup?role=employer" className="rounded-xl border border-white/20 px-6 py-3 text-[14.5px] font-semibold text-white hover:border-white">Hire talent</Link>
+          </div>
+          <div className="mt-8">
+            <p className="mb-3 text-[12.5px] font-medium uppercase tracking-[0.16em] text-white/60">Follow JOMP</p>
+            <SocialLinks />
           </div>
           <div className="mt-16 flex flex-wrap gap-12">
             <div><strong className="block text-[26px] font-bold text-white">12k+</strong><span className="text-[13.5px] text-white/70">Verified applicants</span></div>
@@ -278,9 +283,14 @@ export default function LandingPage() {
               <Link href="/login" className="hover:text-white">Log in</Link>
             </div>
           </div>
-          <div className="mt-6 flex flex-wrap justify-between gap-2 text-[12.5px]">
-            <span>© {new Date().getFullYear()} {APP_NAME}. {APP_TAGLINE}</span>
-            <span>Built on open ground for applicants and employers.</span>
+          <div className="mt-6 flex flex-wrap items-center justify-between gap-4">
+            <div>
+              <p className="mb-3 text-[12px] font-medium uppercase tracking-[0.16em] text-white/55">Follow @jomponline</p>
+              <SocialLinks compact />
+            </div>
+            <div className="text-[12.5px]">
+              <span>© {new Date().getFullYear()} {APP_NAME}. {APP_TAGLINE}</span>
+            </div>
           </div>
         </div>
       </footer>
