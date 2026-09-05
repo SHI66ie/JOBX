@@ -380,3 +380,21 @@
     min-height: 280px;
   }
 }
+
+/* Landing page scroll-reveal — content must stay visible if JS is late */
+.jomp-landing .reveal {
+  opacity: 0;
+  transform: translateY(18px);
+  transition: opacity 0.7s ease, transform 0.7s ease;
+}
+.jomp-landing .reveal.in {
+  opacity: 1;
+  transform: none;
+}
+@media (prefers-reduced-motion: reduce) {
+  .jomp-landing .reveal {
+    opacity: 1;
+    transform: none;
+    transition: none;
+  }
+}
