@@ -6,6 +6,7 @@ import { useSearchParams } from "next/navigation";
 import { signup, signInWithGoogle } from "../login/actions";
 import { APP_NAME } from "@/lib/config";
 import { Logo } from "@/components/brand/logo";
+import { SocialLinks } from "@/components/brand/social-links";
 
 function SignupForm() {
   const searchParams = useSearchParams();
@@ -40,6 +41,10 @@ function SignupForm() {
               ? "Create your employer account to post jobs, manage applications, and connect with qualified candidates."
               : `Create your account to browse jobs, apply easily, and build valuable connections within the ${APP_NAME} ecosystem.`}
           </p>
+          <div className="mt-10">
+            <p className="mb-3 text-xs font-medium uppercase tracking-[0.16em] text-white/55">Follow @jomponline</p>
+            <SocialLinks />
+          </div>
         </div>
       </div>
 
