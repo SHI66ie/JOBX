@@ -1,2 +1,9 @@
-# UI must set Base directory = joblink
-# Do not set base here or paths double up.
+# Root config wins over the Netlify UI base setting.
+# Do not use joblink/.next as the base — that folder is created during the build.
+[build]
+  base = "joblink"
+  command = "npm run build"
+  publish = ".next"
+
+[[plugins]]
+  package = "@netlify/plugin-nextjs"
