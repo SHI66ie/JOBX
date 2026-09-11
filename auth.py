@@ -1,87 +1,56 @@
-"""Password hashing (stdlib PBKDF2, no extra deps) and server-side session cookies.
-
-Sessions are opaque random tokens stored in the `sessions` table (not signed
-client-side blobs), so revoking a session server-side is just deleting a row.
-"""
-import hashlib
-import hmac
-import os
-import secrets
-import datetime
-
-from fastapi import Depends, HTTPException, Request, Response
+from fastapi import APIRouter, Depends, HTTPException, Response, Request
 from sqlalchemy.orm import Session as DBSession
 
 from database import get_db
 import models
+import schemas
+import auth as auth_utils
 
-SESSION_COOKIE_NAME = "jomp_session"
-SESSION_TTL_DAYS = 7
-PBKDF2_ITERATIONS = 260_000
-
-
-def hash_password(password: str) -> str:
-    salt = os.urandom(16)
-    dk = hashlib.pbkdf2_hmac("sha256", password.encode("utf-8"), salt, PBKDF2_ITERATIONS)
-    return f"pbkdf2_sha256${PBKDF2_ITERATIONS}${salt.hex()}${dk.hex()}"
+router = APIRouter(prefix="/api/auth", tags=["auth"])
 
 
-def verify_password(password: str, stored: str) -> bool:
-    try:
-        algo, iterations_str, salt_hex, hash_hex = stored.split("$")
-        iterations = int(iterations_str)
-        salt = bytes.fromhex(salt_hex)
-        expected = bytes.fromhex(hash_hex)
-    except (ValueError, AttributeError):
-        return False
-    dk = hashlib.pbkdf2_hmac("sha256", password.encode("utf-8"), salt, iterations)
-    return hmac.compare_digest(dk, expected)
+@router.post("/register", response_model=schemas.UserOut)
+def register(payload: schemas.RegisterIn, response: Response, db: DBSession = Depends(get_db)):
+    existing = db.query(models.User).filter(models.User.email == payload.email).first()
+    if existing:
+        raise HTTPException(status_code=409, detail="An account with this email already exists")
 
-
-def create_session(db: DBSession, user_id: int, response: Response) -> str:
-    token = secrets.token_urlsafe(32)
-    expires_at = datetime.datetime.utcnow() + datetime.timedelta(days=SESSION_TTL_DAYS)
-    db.add(models.Session(token=token, user_id=user_id, expires_at=expires_at))
-    db.commit()
-    response.set_cookie(
-        key=SESSION_COOKIE_NAME,
-        value=token,
-        httponly=True,
-        samesite="lax",
-        max_age=SESSION_TTL_DAYS * 24 * 3600,
-        path="/",
+    user = models.User(
+        role=payload.role,
+        name=payload.name,
+        email=payload.email,
+        country=payload.country,
+        password_hash=auth_utils.hash_password(payload.password),
     )
-    return token
+    db.add(user)
+    db.commit()
+    db.refresh(user)
 
-
-def destroy_session(db: DBSession, token: str | None, response: Response) -> None:
-    if token:
-        db.query(models.Session).filter(models.Session.token == token).delete()
-        db.commit()
-    response.delete_cookie(SESSION_COOKIE_NAME, path="/")
-
-
-def get_current_user(request: Request, db: DBSession = Depends(get_db)) -> models.User:
-    token = request.cookies.get(SESSION_COOKIE_NAME)
-    if not token:
-        raise HTTPException(status_code=401, detail="Not logged in")
-
-    db_session = db.query(models.Session).filter(models.Session.token == token).first()
-    if not db_session or db_session.expires_at < datetime.datetime.utcnow():
-        raise HTTPException(status_code=401, detail="Session expired")
-
-    user = db.query(models.User).filter(models.User.id == db_session.user_id).first()
-    if not user:
-        raise HTTPException(status_code=401, detail="User not found")
+    auth_utils.create_session(db, user.id, response)
     return user
 
 
-def require_role(role: str):
-    """Dependency factory: only lets through users with the given role."""
+@router.post("/login", response_model=schemas.UserOut)
+def login(payload: schemas.LoginIn, response: Response, db: DBSession = Depends(get_db)):
+    user = (
+        db.query(models.User)
+        .filter(models.User.email == payload.email, models.User.role == payload.role)
+        .first()
+    )
+    if not user or not auth_utils.verify_password(payload.password, user.password_hash):
+        raise HTTPException(status_code=401, detail="Invalid email or password")
 
-    def dependency(user: models.User = Depends(get_current_user)) -> models.User:
-        if user.role != role:
-            raise HTTPException(status_code=403, detail=f"This action requires a {role} account")
-        return user
+    auth_utils.create_session(db, user.id, response)
+    return user
 
-    return dependency
+
+@router.post("/logout")
+def logout(request: Request, response: Response, db: DBSession = Depends(get_db)):
+    token = request.cookies.get(auth_utils.SESSION_COOKIE_NAME)
+    auth_utils.destroy_session(db, token, response)
+    return {"ok": True}
+
+
+@router.get("/me", response_model=schemas.UserOut)
+def me(user: models.User = Depends(auth_utils.get_current_user)):
+    return user
