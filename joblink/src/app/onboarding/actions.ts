@@ -30,6 +30,7 @@ export async function startOnboardingRole(role: "employer" | "candidate") {
       role,
       roles,
       onboarded: false,
+      ...(role === "employer" ? { employer_onboarded: false } : { candidate_onboarded: false }),
     },
   });
 
@@ -41,6 +42,60 @@ export async function startOnboardingRole(role: "employer" | "candidate") {
   revalidatePath("/");
   revalidatePath("/onboarding");
   return { ok: true };
+}
+
+export async function completeCandidateOnboarding(formData: FormData) {
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+
+  if (!user) {
+    return { error: "You need to be signed in." };
+  }
+
+  const first_name = String(formData.get("first_name") || "").trim();
+  const last_name = String(formData.get("last_name") || "").trim();
+  const title = String(formData.get("title") || "").trim();
+  const bio = String(formData.get("bio") || "").trim();
+  const skills = String(formData.get("skills") || "")
+    .split(",")
+    .map((item) => item.trim())
+    .filter(Boolean);
+  const resume_url = String(formData.get("resume_url") || "").trim();
+
+  if (!first_name || !last_name) {
+    return { error: "Full name is required." };
+  }
+  if (!title || !bio || skills.length === 0) {
+    return { error: "Add your title, bio, and at least one skill." };
+  }
+
+  const roles = Array.from(new Set(["candidate", ...getUserRoles(user)]));
+  const { error: authError } = await supabase.auth.updateUser({
+    data: {
+      first_name,
+      last_name,
+      title,
+      bio,
+      skills,
+      resume_url: resume_url || user.user_metadata?.resume_url || "",
+      role: "candidate",
+      roles,
+      onboarded: true,
+      candidate_onboarded: true,
+    },
+  });
+
+  if (authError) {
+    return { error: authError.message };
+  }
+
+  await supabase.from("users").update({ first_name, last_name, role: "candidate" }).eq("id", user.id);
+
+  revalidatePath("/", "layout");
+  revalidatePath("/dashboard");
+  redirect("/dashboard");
 }
 
 export async function completeEmployerOnboarding(formData: FormData) {
@@ -80,14 +135,16 @@ export async function completeEmployerOnboarding(formData: FormData) {
 
   const companyName = name || `${first_name} ${last_name}`;
   const verification_status = requestVerification ? "pending" : "unverified";
+  const roles = Array.from(new Set(["employer", ...getUserRoles(user)]));
 
   const { error: authError } = await supabase.auth.updateUser({
     data: {
       first_name,
       last_name,
       onboarded: true,
+      employer_onboarded: true,
       role: "employer",
-      roles: Array.from(new Set(["employer", ...((user.user_metadata?.roles as string[]) || [])])),
+      roles,
       account_type,
       team_size,
     },
