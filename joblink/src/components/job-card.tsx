@@ -7,13 +7,14 @@ import { Building2, MapPin, DollarSign, Clock } from "lucide-react";
 interface Job {
   id: string;
   title: string;
-  description: string;
-  location: string;
-  type: string;
-  salary_range: string;
+  description?: string | null;
+  location?: string | null;
+  type?: string | null;
+  job_type?: string | null;
+  salary_range?: string | null;
   company?: {
     name: string;
-  };
+  } | null;
 }
 
 interface JobCardProps {
@@ -46,7 +47,7 @@ export function JobCard({ job, hasApplied }: Omit<JobCardProps, 'onApply'>) {
           )}
           <div className="flex items-center gap-1">
             <Clock className="w-4 h-4" />
-            <span className="capitalize">{job.type.replace("-", " ")}</span>
+            <span className="capitalize">{(job.type || job.job_type || "job").replace("-", " ")}</span>
           </div>
           {job.salary_range && (
             <div className="flex items-center gap-1 text-green-600 dark:text-green-500 font-medium">
