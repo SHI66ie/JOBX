@@ -23,6 +23,7 @@ export default async function DashboardLayout({
   const firstName = user.user_metadata?.first_name || "Applicant";
   const roles = getUserRoles(user);
   const hasEmployer = roles.includes("employer");
+  const isAdmin = roles.includes("admin") || user.user_metadata?.role === "admin";
 
   return (
     <div className="auth-bg min-h-screen flex flex-col text-foreground transition-colors">
@@ -34,7 +35,9 @@ export default async function DashboardLayout({
           <nav className="hidden md:flex gap-4">
             <Link href="/dashboard" className="text-sm font-medium text-[#111111]/70 hover:text-[#01224F] dark:text-white/70 dark:hover:text-white">Dashboard</Link>
             <Link href="/dashboard/applications" className="text-sm font-medium text-[#111111]/70 hover:text-[#01224F] dark:text-white/70 dark:hover:text-white">My Applications</Link>
-            <Link href="/admin" className="text-sm font-medium text-[#111111]/70 hover:text-[#01224F] dark:text-white/70 dark:hover:text-white">Admin Panel</Link>
+            {isAdmin && (
+              <Link href="/admin" className="text-sm font-medium text-[#111111]/70 hover:text-[#01224F] dark:text-white/70 dark:hover:text-white">Admin Panel</Link>
+            )}
             <Link href="/dashboard/settings" className="text-sm font-medium text-[#111111]/70 hover:text-[#01224F] dark:text-white/70 dark:hover:text-white">Settings</Link>
             {hasEmployer && (
               <Link href="/employer/dashboard" className="text-sm font-medium text-[#01224F] dark:text-white">

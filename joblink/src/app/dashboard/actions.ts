@@ -30,8 +30,8 @@ export async function createCompanyProfile(formData: FormData) {
     throw new Error(error.message);
   }
 
-  revalidatePath("/dashboard/company");
-  redirect("/dashboard/company");
+  revalidatePath("/employer/settings");
+  redirect("/employer/settings");
 }
 
 export async function postJob(formData: FormData) {
@@ -63,12 +63,14 @@ export async function postJob(formData: FormData) {
     .from("jobs")
     .insert({
       company_id: company.id,
+      employer_id: user.id,
       title,
       description,
       location,
       type,
+      job_type: type,
       salary_range,
-      status: "published", // Default to published for MVP
+      status: "published",
     });
 
   if (error) {
@@ -76,8 +78,9 @@ export async function postJob(formData: FormData) {
     throw new Error(error.message);
   }
 
-  revalidatePath("/dashboard/company");
-  redirect("/dashboard/company");
+  revalidatePath("/employer/jobs");
+  revalidatePath("/employer/dashboard");
+  redirect("/employer/jobs");
 }
 
 export async function applyForJob(jobId: string) {
@@ -97,11 +100,15 @@ export async function applyForJob(jobId: string) {
     });
 
   if (error) {
-    console.error("Error applying for job:", error);
-    throw new Error(error.message);
+    // Unique violation = already applied; treat as success so the UI can refresh.
+    if (error.code !== "23505") {
+      console.error("Error applying for job:", error);
+      throw new Error(error.message);
+    }
   }
 
-  revalidatePath("/dashboard/seeker");
+  revalidatePath("/dashboard");
+  revalidatePath("/dashboard/applications");
 }
 
 export async function updateApplicationStatus(applicationId: string, status: string, jobId: string) {
@@ -123,5 +130,6 @@ export async function updateApplicationStatus(applicationId: string, status: str
     throw new Error(error.message);
   }
 
-  revalidatePath(`/dashboard/company/jobs/${jobId}`);
+  revalidatePath(`/employer/jobs/${jobId}`);
+  revalidatePath("/dashboard/applications");
 }

@@ -56,26 +56,32 @@ export default async function MyApplicationsPage() {
 
       {applications && applications.length > 0 ? (
         <div className="grid gap-4">
-          {applications.map((app: any) => (
+          {applications.map((app: any) => {
+            const job = Array.isArray(app.job) ? app.job[0] : app.job;
+            const company = Array.isArray(job?.company) ? job.company[0] : job?.company;
+            const jobType = job?.type || job?.job_type || "";
+            return (
             <Card key={app.id}>
               <CardContent className="p-6 flex flex-col md:flex-row md:items-center justify-between gap-6">
                 <div>
-                  <h3 className="font-semibold text-lg">{app.job.title}</h3>
+                  <h3 className="font-semibold text-lg">{job?.title || "Job unavailable"}</h3>
                   <div className="flex items-center gap-4 text-sm text-muted-foreground mt-2">
                     <div className="flex items-center gap-1">
                       <Building2 className="w-4 h-4" />
-                      {app.job.company?.name || "Company"}
+                      {company?.name || "Company"}
                     </div>
-                    {app.job.location && (
+                    {job?.location && (
                       <div className="flex items-center gap-1">
                         <MapPin className="w-4 h-4" />
-                        {app.job.location}
+                        {job.location}
                       </div>
                     )}
+                    {jobType && (
                     <div className="flex items-center gap-1">
                       <Clock className="w-4 h-4" />
-                      <span className="capitalize">{app.job.type.replace("-", " ")}</span>
+                      <span className="capitalize">{String(jobType).replace("-", " ")}</span>
                     </div>
+                    )}
                   </div>
                 </div>
                 <div className="flex flex-col md:items-end gap-2">
@@ -88,7 +94,7 @@ export default async function MyApplicationsPage() {
                 </div>
               </CardContent>
             </Card>
-          ))}
+          );})}
         </div>
       ) : (
         <Card className="flex flex-col items-center justify-center py-12 text-center">
