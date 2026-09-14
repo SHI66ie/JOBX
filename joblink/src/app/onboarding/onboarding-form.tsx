@@ -1,33 +1,30 @@
 "use client";
 
 import { useState } from "react";
-import { useRouter } from "next/navigation";
 import { createClient } from "@/utils/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
+import { completeCandidateOnboarding } from "./actions";
 
 interface OnboardingFormProps {
   initialData: {
     firstName: string;
     lastName: string;
     email: string;
+    title?: string;
+    bio?: string;
+    skills?: string;
   };
-  userId: string;
 }
 
-export default function OnboardingForm({ initialData, userId }: OnboardingFormProps) {
-  const router = useRouter();
+export default function OnboardingForm({ initialData }: OnboardingFormProps) {
   const supabase = createClient();
   const [loading, setLoading] = useState(false);
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
-
-  // Form states
-  const [title, setTitle] = useState("");
-  const [bio, setBio] = useState("");
-  const [skills, setSkills] = useState("");
   const [resumeFile, setResumeFile] = useState<File | null>(null);
+  const [resumeUrl, setResumeUrl] = useState("");
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files[0]) {
@@ -41,77 +38,45 @@ export default function OnboardingForm({ initialData, userId }: OnboardingFormPr
     }
   };
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
     setLoading(true);
     setErrorMsg(null);
 
     try {
-      let resumeUrl = "";
+      const form = e.currentTarget;
+      const formData = new FormData(form);
+      let uploadedUrl = resumeUrl;
 
-      // 1. Upload Resume if exists
       if (resumeFile) {
-        const fileExt = resumeFile.name.split(".").pop();
-        const filePath = `${userId}/resume-${Date.now()}.${fileExt}`;
-
-        // Attempt upload to 'resumes' bucket
-        const { data: uploadData, error: uploadError } = await supabase.storage
-          .from("resumes")
-          .upload(filePath, resumeFile, {
-            cacheControl: "3600",
-            upsert: true,
-          });
-
-        if (uploadError) {
-          console.warn("Storage upload failed (bucket 'resumes' might not exist):", uploadError);
-          // Don't crash, we'll continue onboarding and mock a URL or alert user
-        } else if (uploadData) {
-          const { data: publicUrlData } = supabase.storage
+        const {
+          data: { user },
+        } = await supabase.auth.getUser();
+        if (user) {
+          const fileExt = resumeFile.name.split(".").pop();
+          const filePath = `${user.id}/resume-${Date.now()}.${fileExt}`;
+          const { data: uploadData, error: uploadError } = await supabase.storage
             .from("resumes")
-            .getPublicUrl(filePath);
-          resumeUrl = publicUrlData.publicUrl;
+            .upload(filePath, resumeFile, { cacheControl: "3600", upsert: true });
+
+          if (!uploadError && uploadData) {
+            uploadedUrl = supabase.storage.from("resumes").getPublicUrl(filePath).data.publicUrl;
+            setResumeUrl(uploadedUrl);
+          }
         }
       }
 
-      // 2. Save candidate details to Supabase Auth User Metadata (Safest fallback)
-      const { error: authError } = await supabase.auth.updateUser({
-        data: {
-          onboarded: true,
-          title,
-          bio,
-          skills: skills.split(",").map((s) => s.trim()),
-          resume_url: resumeUrl,
-        },
-      });
-
-      if (authError) {
-        throw new Error(authError.message);
+      formData.set("resume_url", uploadedUrl);
+      const result = await completeCandidateOnboarding(formData);
+      if (result?.error) {
+        setErrorMsg(result.error);
       }
-
-      // 3. Attempt to update public.users table if it is configured
-      try {
-        await supabase
-          .from("users")
-          .update({
-            bio,
-            // check if columns exist or fail gracefully
-          })
-          .eq("id", userId);
-      } catch (dbError) {
-        console.warn("Database users table update skipped/failed:", dbError);
-      }
-
-      // Refresh server cache first so dashboard layout sees the updated session
-      router.refresh();
-      // Small wait lets the refresh propagate before navigation
-      await new Promise((resolve) => setTimeout(resolve, 200));
-      router.push("/dashboard");
-    } catch (err: any) {
-      setErrorMsg(err.message || "Something went wrong during onboarding.");
+    } catch (err: unknown) {
+      setErrorMsg(err instanceof Error ? err.message : "Something went wrong during onboarding.");
     } finally {
       setLoading(false);
     }
-  };
+  }
 
   return (
     <form onSubmit={handleSubmit} className="space-y-6">
@@ -122,81 +87,62 @@ export default function OnboardingForm({ initialData, userId }: OnboardingFormPr
       )}
 
       <div className="grid grid-cols-2 gap-4">
-        <div>
-          <Label htmlFor="firstName">First Name</Label>
-          <Input id="firstName" value={initialData.firstName} disabled className="mt-1" />
+        <div className="space-y-2">
+          <Label htmlFor="first_name">First name</Label>
+          <Input id="first_name" name="first_name" defaultValue={initialData.firstName} required />
         </div>
-        <div>
-          <Label htmlFor="lastName">Last Name</Label>
-          <Input id="lastName" value={initialData.lastName} disabled className="mt-1" />
+        <div className="space-y-2">
+          <Label htmlFor="last_name">Last name</Label>
+          <Input id="last_name" name="last_name" defaultValue={initialData.lastName} required />
         </div>
       </div>
 
-      <div>
-        <Label htmlFor="title">Professional Title</Label>
+      <div className="space-y-2">
+        <Label htmlFor="email">Email</Label>
+        <Input id="email" value={initialData.email} disabled />
+      </div>
+
+      <div className="space-y-2">
+        <Label htmlFor="title">Professional title</Label>
         <Input
           id="title"
+          name="title"
           placeholder="e.g. Frontend Developer"
-          value={title}
-          onChange={(e) => setTitle(e.target.value)}
+          defaultValue={initialData.title}
           required
-          className="mt-1"
         />
       </div>
 
-      <div>
-        <Label htmlFor="bio">Professional Bio</Label>
+      <div className="space-y-2">
+        <Label htmlFor="bio">Professional bio</Label>
         <Textarea
           id="bio"
+          name="bio"
           placeholder="Tell employers about your experience, achievements, and goals..."
-          value={bio}
-          onChange={(e) => setBio(e.target.value)}
+          defaultValue={initialData.bio}
           required
-          className="mt-1 min-h-[100px]"
+          className="min-h-[100px]"
         />
       </div>
 
-      <div>
+      <div className="space-y-2">
         <Label htmlFor="skills">Skills (comma separated)</Label>
         <Input
           id="skills"
+          name="skills"
           placeholder="React, TypeScript, Next.js, Node"
-          value={skills}
-          onChange={(e) => setSkills(e.target.value)}
+          defaultValue={initialData.skills}
           required
-          className="mt-1"
         />
       </div>
 
-      <div>
-        <Label htmlFor="resume">Upload Resume (PDF, DOCX)</Label>
-        <div className="mt-1 flex justify-center px-6 pt-5 pb-6 border-2 border-zinc-300 dark:border-zinc-700 border-dashed rounded-md hover:border-primary transition-colors cursor-pointer relative">
+      <div className="space-y-2">
+        <Label htmlFor="resume">Resume (optional)</Label>
+        <div className="mt-1 flex justify-center px-6 pt-5 pb-6 border-2 border-zinc-300 dark:border-zinc-700 border-dashed rounded-md relative">
           <div className="space-y-1 text-center">
-            <svg
-              className="mx-auto h-12 w-12 text-zinc-400"
-              stroke="currentColor"
-              fill="none"
-              viewBox="0 0 48 48"
-              aria-hidden="true"
-            >
-              <path
-                d="M28 8H12a4 4 0 00-4 4v20m32-12v8m0 0v8a4 4 0 01-4 4H12a4 4 0 01-4-4v-4m32-4l-3.172-3.172a4 4 0 00-5.656 0L28 28M8 32l9.172-9.172a4 4 0 015.656 0L28 28m0 0l4 4m4-24h8m-4-4v8m-12 4h.02"
-                strokeWidth={2}
-                strokeLinecap="round"
-                strokeLinejoin="round"
-              />
-            </svg>
-            <div className="flex text-sm text-zinc-600 dark:text-zinc-400">
-              <span className="relative rounded-md font-medium text-[#00838f] hover:text-[#005662] focus-within:outline-none">
-                Upload a file
-              </span>
-              <p className="pl-1">or drag and drop</p>
-            </div>
-            <p className="text-xs text-zinc-500">PDF, DOCX up to 5MB</p>
+            <p className="text-sm text-zinc-600 dark:text-zinc-400">PDF or DOCX up to 5MB</p>
             {resumeFile && (
-              <p className="text-sm font-semibold text-zinc-900 dark:text-white mt-2">
-                Selected: {resumeFile.name}
-              </p>
+              <p className="text-sm font-semibold text-zinc-900 dark:text-white">{resumeFile.name}</p>
             )}
           </div>
           <input
@@ -205,14 +151,13 @@ export default function OnboardingForm({ initialData, userId }: OnboardingFormPr
             type="file"
             accept=".pdf,.docx"
             onChange={handleFileChange}
-            required
             className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
           />
         </div>
       </div>
 
-      <Button type="submit" disabled={loading} className="w-full bg-[#00838f] hover:bg-[#005662] text-white">
-        {loading ? "Saving Profile..." : "Complete Onboarding"}
+      <Button type="submit" disabled={loading} className="w-full">
+        {loading ? "Saving profile..." : "Continue to job board"}
       </Button>
     </form>
   );
