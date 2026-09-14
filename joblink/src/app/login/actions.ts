@@ -4,7 +4,7 @@ import { revalidatePath } from 'next/cache'
 import { redirect } from 'next/navigation'
 import { createClient } from '@/utils/supabase/server'
 import { headers } from 'next/headers'
-import { getUserRoles, isGoogleUser } from '@/utils/auth'
+import { getUserRoles, hasCompletedOnboarding, isGoogleUser, onboardingPath } from '@/utils/auth'
 
 function signupUrl(role: string, message?: string) {
   const params = new URLSearchParams()
@@ -14,25 +14,27 @@ function signupUrl(role: string, message?: string) {
   return query ? `/signup?${query}` : '/signup'
 }
 
-async function ensureEmployerCompany(
-  supabase: Awaited<ReturnType<typeof createClient>>,
-  userId: string,
-  firstName: string,
-  lastName: string
-) {
-  const { data: existing } = await supabase
-    .from('companies')
-    .select('id')
-    .eq('created_by', userId)
-    .maybeSingle()
+function afterAuthPath(user: { user_metadata?: Record<string, unknown> } | null) {
+  if (!user) return '/login'
+  const roles = getUserRoles(user)
 
-  if (existing) return
+  if (isGoogleUser(user) && !hasCompletedOnboarding(user, 'candidate') && !hasCompletedOnboarding(user, 'employer') && !user.user_metadata?.role) {
+    return '/?welcome=1'
+  }
 
-  const name = [firstName, lastName].filter(Boolean).join(' ') || 'My company'
-  await supabase.from('companies').insert({
-    name,
-    created_by: userId,
-  })
+  if (roles.includes('employer') && !hasCompletedOnboarding(user, 'employer')) {
+    return onboardingPath('employer')
+  }
+  if (roles.includes('candidate') && !hasCompletedOnboarding(user, 'candidate')) {
+    return onboardingPath('candidate')
+  }
+  if (!hasCompletedOnboarding(user, 'employer') && !hasCompletedOnboarding(user, 'candidate')) {
+    return onboardingPath(roles.includes('employer') ? 'employer' : 'candidate')
+  }
+  if (roles.includes('employer') && hasCompletedOnboarding(user, 'employer')) {
+    return '/employer/dashboard'
+  }
+  return '/dashboard'
 }
 
 export async function login(formData: FormData) {
@@ -50,40 +52,8 @@ export async function login(formData: FormData) {
     return redirect(`/login?message=${encodeURIComponent(error.message)}`)
   }
 
-  const user = data.user
-  const roles = getUserRoles(user)
-
-  if (user && !user.user_metadata?.onboarded && !isGoogleUser(user)) {
-    await supabase.auth.updateUser({
-      data: {
-        onboarded: true,
-        first_name: user.user_metadata?.first_name || '',
-        last_name: user.user_metadata?.last_name || '',
-        role: roles[0],
-        roles,
-      },
-    })
-    if (roles.includes('employer')) {
-      await ensureEmployerCompany(
-        supabase,
-        user.id,
-        user.user_metadata?.first_name || '',
-        user.user_metadata?.last_name || ''
-      )
-    }
-  }
-
   revalidatePath('/', 'layout')
-
-  if (user && !user.user_metadata?.onboarded && isGoogleUser(user)) {
-    redirect('/?welcome=1')
-  }
-
-  if (roles.includes('employer')) {
-    redirect('/employer/dashboard')
-  }
-
-  redirect('/dashboard')
+  redirect(afterAuthPath(data.user))
 }
 
 export async function signup(formData: FormData) {
@@ -113,7 +83,9 @@ export async function signup(formData: FormData) {
         last_name,
         role,
         roles: [role],
-        onboarded: true,
+        onboarded: false,
+        candidate_onboarded: role === 'candidate' ? false : undefined,
+        employer_onboarded: role === 'employer' ? false : undefined,
         signup_method: 'email',
       },
     },
@@ -125,24 +97,20 @@ export async function signup(formData: FormData) {
 
   if (data.user && !data.session) {
     return redirect(
-      signupUrl(role, 'Check your email to confirm your account, then sign in. Your details are already saved.')
+      signupUrl(role, 'Check your email to confirm your account, then sign in to finish setup.')
     )
   }
 
-  if (data.user && role === 'employer') {
-    await ensureEmployerCompany(supabase, data.user.id, first_name, last_name)
-  }
-
   revalidatePath('/', 'layout')
-  redirect(role === 'employer' ? '/employer/dashboard' : '/dashboard')
+  redirect(onboardingPath(role))
 }
 
 export async function signInWithGoogle(formData?: FormData) {
   const supabase = await createClient()
   const origin = (await headers()).get('origin') || 'http://localhost:3000'
-  const role = formData?.get('role') === 'employer' ? 'employer' : ''
+  const role = formData?.get('role') === 'employer' ? 'employer' : formData?.get('role') === 'candidate' ? 'candidate' : ''
   const callback = role
-    ? `${origin}/auth/callback?intent=employer`
+    ? `${origin}/auth/callback?intent=${role}`
     : `${origin}/auth/callback`
 
   const { data, error } = await supabase.auth.signInWithOAuth({
@@ -163,7 +131,7 @@ export async function signInWithGoogle(formData?: FormData) {
 
 export async function addRole(formData: FormData) {
   const supabase = await createClient()
-  const role = formData.get('role') as string
+  const role = formData.get('role') === 'employer' ? 'employer' : 'candidate'
 
   const {
     data: { user },
@@ -174,19 +142,16 @@ export async function addRole(formData: FormData) {
   }
 
   const currentRoles = getUserRoles(user)
-  if (currentRoles.includes(role)) {
-    if (role === 'employer') {
-      redirect('/employer/dashboard')
-    }
-    redirect('/dashboard')
+  if (currentRoles.includes(role) && hasCompletedOnboarding(user, role)) {
+    redirect(role === 'employer' ? '/employer/dashboard' : '/dashboard')
   }
 
-  const newRoles = [...currentRoles, role]
+  const newRoles = currentRoles.includes(role) ? currentRoles : [...currentRoles, role]
   const { error } = await supabase.auth.updateUser({
     data: {
       roles: newRoles,
-      role: newRoles.includes('employer') ? 'employer' : newRoles[0],
-      onboarded: isGoogleUser(user) && role === 'employer' ? false : true,
+      role,
+      ...(role === 'employer' ? { employer_onboarded: false } : { candidate_onboarded: false }),
     },
   })
 
@@ -194,21 +159,6 @@ export async function addRole(formData: FormData) {
     throw new Error(error.message)
   }
 
-  if (role === 'employer' && !isGoogleUser(user)) {
-    await ensureEmployerCompany(
-      supabase,
-      user.id,
-      user.user_metadata?.first_name || '',
-      user.user_metadata?.last_name || ''
-    )
-  }
-
   revalidatePath('/', 'layout')
-  if (role === 'employer' && isGoogleUser(user)) {
-    redirect('/onboarding?role=employer')
-  }
-  if (role === 'employer') {
-    redirect('/employer/settings')
-  }
-  redirect('/dashboard')
+  redirect(onboardingPath(role))
 }
