@@ -2,7 +2,7 @@ import { createClient } from "@/utils/supabase/server";
 import { redirect } from "next/navigation";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
-import { getUserRoles } from "@/utils/auth";
+import { getUserRoles, hasCompletedOnboarding, onboardingPath } from "@/utils/auth";
 import { Logo } from "@/components/brand/logo";
 
 export default async function DashboardLayout({
@@ -18,6 +18,10 @@ export default async function DashboardLayout({
 
   if (!user) {
     redirect("/");
+  }
+
+  if (!hasCompletedOnboarding(user, "candidate")) {
+    redirect(onboardingPath("candidate"));
   }
 
   const firstName = user.user_metadata?.first_name || "Applicant";
