@@ -1,0 +1,385 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Applicant Dashboard — JOMP</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@500;600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --navy-950:#080d1a;
+    --navy-900:#0b1424;
+    --navy-800:#101c33;
+    --navy-700:#16243f;
+    --cyan:#2fd8d0;
+    --cyan-dim:rgba(47,216,208,0.3);
+    --pink:#ee1a63;
+    --magenta:#c81361;
+    --orange:#f2871f;
+    --ink:#0b1424;
+    --paper:#f5f6fa;
+    --text-loud:#f4f6fb;
+    --text-muted:#93a1c0;
+    --text-ink-muted:#5b6478;
+    --line:rgba(11,20,36,0.08);
+    --ok:#0e9a72;
+    --pending:#b96410;
+    --bad:#e0355b;
+  }
+  *{box-sizing:border-box;}
+  body{
+    margin:0;
+    font-family:'Inter',sans-serif;
+    background:var(--paper);
+    color:var(--ink);
+    -webkit-font-smoothing:antialiased;
+  }
+  h1,h2,h3,h4{font-family:'Poppins',sans-serif;margin:0;line-height:1.15;}
+  p{margin:0;}
+  a{text-decoration:none;color:inherit;}
+  button{font-family:inherit;}
+
+  body.dashboard{display:flex;min-height:100vh;align-items:stretch;}
+
+  /* ---------- SIDEBAR ---------- */
+  .sidebar{
+    width:260px;flex:none;
+    background:linear-gradient(180deg,var(--navy-900),var(--navy-950));
+    color:#fff;
+    padding:28px 22px;
+    display:flex;flex-direction:column;
+    position:sticky;top:0;height:100vh;
+  }
+  .sidebar-brand{display:flex;align-items:center;gap:10px;font-family:'Poppins',sans-serif;font-weight:700;font-size:19px;margin-bottom:8px;}
+  .sidebar-brand .dot{width:11px;height:11px;border-radius:4px;background:var(--pink);transform:rotate(12deg);}
+  .sidebar-role{font-size:11.5px;letter-spacing:0.14em;text-transform:uppercase;color:var(--cyan);font-weight:600;margin-bottom:32px;}
+  .sidebar-nav{display:flex;flex-direction:column;gap:4px;flex:1;}
+  .sidebar-nav a{
+    display:flex;align-items:center;gap:12px;padding:11px 14px;border-radius:12px;
+    color:var(--text-muted);font-size:14px;font-weight:500;transition:background .15s ease,color .15s ease;
+  }
+  .sidebar-nav a .icon{
+    width:22px;height:22px;border-radius:7px;background:rgba(255,255,255,0.07);
+    display:flex;align-items:center;justify-content:center;
+    font-family:'Poppins',sans-serif;font-weight:700;font-size:11px;flex:none;
+  }
+  .sidebar-nav a.active{background:rgba(47,216,208,0.12);color:#fff;}
+  .sidebar-nav a.active .icon{background:var(--cyan);color:#032523;}
+  .sidebar-nav a:hover{color:#fff;}
+  .sidebar-foot{
+    border-top:1px solid rgba(255,255,255,0.08);
+    padding-top:18px;display:flex;align-items:center;gap:12px;
+  }
+  .sidebar-foot .avatar{
+    width:38px;height:38px;border-radius:50%;flex:none;
+    background:linear-gradient(135deg,var(--cyan),#1aa9a2);
+    display:flex;align-items:center;justify-content:center;color:#032523;font-weight:700;
+  }
+  .sidebar-foot .who strong{display:block;color:#fff;font-size:13.5px;}
+  .sidebar-foot .who span{color:var(--text-muted);font-size:12px;}
+  .sidebar-logout{margin-top:16px;font-size:12.5px;color:var(--text-muted);display:block;cursor:pointer;}
+  .sidebar-logout:hover{color:var(--cyan);}
+
+  @media (max-width:960px){
+    body.dashboard{flex-direction:column;}
+    .sidebar{
+      position:relative;width:100%;height:auto;
+      flex-direction:row;align-items:center;gap:20px;padding:16px 20px;
+    }
+    .sidebar-role{display:none;}
+    .sidebar-brand{margin-bottom:0;}
+    .sidebar-nav{flex-direction:row;overflow-x:auto;flex:1;}
+    .sidebar-nav a span.text{display:none;}
+    .sidebar-foot{display:none;}
+  }
+
+  /* ---------- MAIN ---------- */
+  .main{flex:1;padding:40px 44px;max-width:1440px;width:100%;}
+  @media (max-width:640px){.main{padding:26px 18px;}}
+
+  .dash-header{
+    display:flex;justify-content:space-between;align-items:flex-start;
+    flex-wrap:wrap;gap:20px;margin-bottom:34px;
+  }
+  .dash-header .eyebrow{
+    text-transform:uppercase;letter-spacing:0.18em;font-weight:600;font-size:12px;color:var(--cyan);
+  }
+  .dash-header h1{font-size:clamp(24px,3vw,30px);font-weight:700;margin-top:8px;}
+  .dash-header .sub{margin-top:6px;color:var(--text-ink-muted);font-size:14.5px;}
+
+  .btn{
+    display:inline-flex;align-items:center;justify-content:center;gap:8px;
+    padding:12px 22px;border-radius:12px;font-weight:600;font-size:14px;
+    cursor:pointer;border:1px solid transparent;transition:transform .18s ease,box-shadow .18s ease;
+  }
+  .btn:hover{transform:translateY(-2px);}
+  .btn-primary{background:var(--cyan);color:#032523;box-shadow:0 10px 24px -10px var(--cyan-dim);}
+  .btn-outline{background:#fff;border:1px solid var(--line);color:var(--ink);}
+  .btn-outline:hover{border-color:var(--ink);}
+  .btn-sm{padding:7px 14px;font-size:12px;border-radius:8px;}
+
+  /* ---------- STAT CARDS ---------- */
+  .stats-row{display:grid;grid-template-columns:repeat(4,1fr);gap:20px;margin-bottom:32px;}
+  @media (max-width:980px){.stats-row{grid-template-columns:repeat(2,1fr);}}
+  @media (max-width:560px){.stats-row{grid-template-columns:1fr;}}
+  .stat-card{
+    background:#fff;border:1px solid var(--line);border-radius:20px;padding:24px;
+    box-shadow:0 14px 34px -26px rgba(11,20,36,0.35);
+  }
+  .stat-card .icon{
+    width:42px;height:42px;border-radius:12px;display:flex;align-items:center;justify-content:center;
+    font-family:'Poppins',sans-serif;font-weight:700;margin-bottom:18px;font-size:15px;
+  }
+  .icon-cyan{background:rgba(47,216,208,0.14);color:#0e9a92;}
+  .icon-orange{background:rgba(242,135,31,0.14);color:#b96410;}
+  .icon-pink{background:rgba(238,26,99,0.12);color:var(--pink);}
+  .icon-magenta{background:rgba(200,19,97,0.12);color:var(--magenta);}
+  .stat-card .value{font-size:27px;font-weight:700;}
+  .stat-card .label{margin-top:4px;font-size:13.5px;color:var(--text-ink-muted);}
+
+  /* ---------- CONTENT GRID ---------- */
+  .content-grid{display:grid;grid-template-columns:1.3fr 1fr;gap:24px;}
+  @media (max-width:980px){.content-grid{grid-template-columns:1fr;}}
+
+  .chart-card{
+    background:linear-gradient(160deg,var(--navy-900),var(--navy-950));
+    border-radius:24px;padding:32px;color:#fff;
+  }
+  .chart-card .chart-title{font-size:18px;font-weight:600;margin-top:8px;}
+  .chart-body{display:flex;align-items:center;gap:32px;margin-top:26px;flex-wrap:wrap;}
+  .donut-wrap{flex:none;}
+  .donut{width:150px;height:150px;border-radius:50%;display:flex;align-items:center;justify-content:center;}
+  .donut-hole{width:96px;height:96px;border-radius:50%;background:var(--navy-900);display:flex;flex-direction:column;align-items:center;justify-content:center;}
+  .donut-hole strong{font-family:'Poppins',sans-serif;font-size:21px;font-weight:700;}
+  .donut-hole span{font-size:10.5px;color:var(--text-muted);margin-top:3px;text-align:center;}
+  .chart-legend{display:flex;flex-direction:column;gap:14px;flex:1;min-width:180px;}
+  .legend-row{display:flex;align-items:center;gap:10px;font-size:13.5px;color:#dfe6f5;}
+  .legend-row .dot{width:10px;height:10px;border-radius:50%;flex:none;}
+  .legend-value{margin-left:auto;font-family:'Poppins',sans-serif;font-weight:700;color:#fff;}
+  .chart-insight{
+    margin-top:24px;font-size:13px;color:var(--text-muted);line-height:1.6;
+    padding-top:18px;border-top:1px solid rgba(255,255,255,0.08);
+  }
+  .chart-insight strong{color:var(--cyan);}
+
+  .panel-card{background:#fff;border:1px solid var(--line);border-radius:24px;padding:28px;}
+  .panel-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:20px;}
+  .panel-head h3{font-size:16.5px;font-weight:600;}
+  .panel-head a{font-size:13px;color:var(--cyan);font-weight:600;}
+
+  /* applications table */
+  .app-row{display:flex;align-items:center;gap:14px;padding:16px 0;border-bottom:1px solid var(--line);}
+  .app-row:last-child{border-bottom:none;padding-bottom:0;}
+  .app-row .logo{width:40px;height:40px;border-radius:11px;flex:none;background:linear-gradient(135deg,var(--cyan),#1aa9a2);display:flex;align-items:center;justify-content:center;color:#032523;font-weight:700;}
+  .app-row .info h4{font-size:14px;font-weight:600;}
+  .app-row .info span{font-size:12.5px;color:var(--text-ink-muted);}
+  .app-row .meta{margin-left:auto;text-align:right;}
+  .badge{display:inline-block;padding:4px 10px;border-radius:999px;font-size:11.5px;font-weight:600;}
+  .badge-pending{background:rgba(242,135,31,0.12);color:var(--pending);}
+  .badge-accepted{background:rgba(14,154,114,0.12);color:var(--ok);}
+  .badge-rejected{background:rgba(224,53,91,0.1);color:var(--bad);}
+  .app-row .date{display:block;margin-top:4px;font-size:11.5px;color:var(--text-muted);}
+
+  /* job offer cards */
+  .offer-card{padding:16px 0;border-bottom:1px solid var(--line);}
+  .offer-card:last-child{border-bottom:none;padding-bottom:0;}
+  .offer-card h4{font-size:14.5px;font-weight:600;}
+  .offer-card .company{font-size:12.5px;color:var(--text-ink-muted);margin-top:2px;}
+  .offer-tags{display:flex;gap:8px;margin-top:10px;flex-wrap:wrap;}
+  .offer-tag{font-size:11px;font-weight:600;padding:4px 10px;border-radius:999px;background:rgba(47,216,208,0.1);color:#0e9a92;}
+  .offer-card .row{display:flex;justify-content:space-between;align-items:center;margin-top:12px;}
+  .offer-card .pay{font-family:'Poppins',sans-serif;font-weight:700;font-size:14px;}
+</style>
+</head>
+<body class="dashboard">
+
+<aside class="sidebar">
+  <a href="index.html" class="sidebar-brand"><span class="dot"></span> JOMP</a>
+  <span class="sidebar-role">Job Seeker Portal</span>
+  <nav class="sidebar-nav">
+    <a href="#" class="active"><span class="icon">D</span><span class="text">Dashboard</span></a>
+    <a href="#offers"><span class="icon">J</span><span class="text">Job offers</span></a>
+    <a href="#applications"><span class="icon">A</span><span class="text">My applications</span></a>
+    <a href="employer-dashboard.html"><span class="icon">⇄</span><span class="text">Switch to Employer</span></a>
+  </nav>
+  <div class="sidebar-foot">
+    <div class="avatar">J</div>
+    <div class="who">
+      <strong id="sidebar-name">John Doe</strong>
+      <span>Candidate</span>
+    </div>
+  </div>
+  <a href="login.html" class="sidebar-logout" id="logout-link">Log out</a>
+</aside>
+
+<div class="main">
+
+  <div class="dash-header">
+    <div>
+      <span class="eyebrow">Seeker Dashboard</span>
+      <h1>Welcome back, <span id="header-name">John Doe</span> 👋</h1>
+      <p class="sub">Discover vetted opportunities and track your application progress.</p>
+    </div>
+    <div>
+      <a class="btn btn-primary" href="#offers">Browse Open Roles</a>
+    </div>
+  </div>
+
+  <div class="stats-row">
+    <div class="stat-card">
+      <div class="icon icon-cyan">A</div>
+      <div class="value" id="stat-applications">3</div>
+      <div class="label">Submitted Applications</div>
+    </div>
+    <div class="stat-card">
+      <div class="icon icon-orange">J</div>
+      <div class="value" id="stat-offers">18</div>
+      <div class="label">Matching Roles</div>
+    </div>
+    <div class="stat-card">
+      <div class="icon icon-pink">★</div>
+      <div class="value" id="stat-interviews">1</div>
+      <div class="label">Interviews / Accepted</div>
+    </div>
+    <div class="stat-card">
+      <div class="icon icon-magenta">✓</div>
+      <div class="value" id="stat-profile">95%</div>
+      <div class="label">Profile Strength</div>
+    </div>
+  </div>
+
+  <div class="content-grid">
+
+    <div class="col-left">
+      <div class="panel-card" id="applications">
+        <div class="panel-head">
+          <h3>Your Submitted Applications</h3>
+          <span style="font-size:12px;color:var(--text-ink-muted);">3 active</span>
+        </div>
+        <div id="applications-list"></div>
+      </div>
+
+      <div class="chart-card" style="margin-top:24px;">
+        <span class="eyebrow" style="color:var(--cyan);text-transform:uppercase;letter-spacing:0.18em;font-size:12px;font-weight:600;">Platform Success</span>
+        <h3 class="chart-title">Placement & Hiring Ratio</h3>
+        <div class="chart-body">
+          <div class="donut-wrap">
+            <div class="donut" style="background:conic-gradient(var(--cyan) 0% 72%, var(--orange) 72% 100%);">
+              <div class="donut-hole">
+                <strong>72%</strong>
+                <span>Placed in 30d</span>
+              </div>
+            </div>
+          </div>
+          <div class="chart-legend">
+            <div class="legend-row">
+              <span class="dot" style="background:var(--cyan);"></span>
+              <span>Placed candidates</span>
+              <span class="legend-value">72%</span>
+            </div>
+            <div class="legend-row">
+              <span class="dot" style="background:var(--orange);"></span>
+              <span>In review pipeline</span>
+              <span class="legend-value">28%</span>
+            </div>
+          </div>
+        </div>
+        <p class="chart-insight">Applicants with completed portfolio profiles receive <strong>2.4x more interview invitations</strong>.</p>
+      </div>
+    </div>
+
+    <div class="col-right">
+      <div class="panel-card" id="offers">
+        <div class="panel-head">
+          <h3>Recommended Opportunities</h3>
+        </div>
+        <div id="offers-list"></div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<script>
+  let myApplications = [
+    { id: 101, title: "Senior Frontend Engineer", company: "Acme Technologies", location: "Remote", status: "accepted", statusText: "Interview Scheduled", date: "Yesterday" },
+    { id: 102, title: "Lead Product Designer", company: "Starlight Labs", location: "Hybrid", status: "pending", statusText: "Under Review", date: "3 days ago" },
+    { id: 103, title: "Full Stack Developer", company: "Nexus Health", location: "Remote", status: "pending", statusText: "Application Received", date: "5 days ago" }
+  ];
+
+  let recommendedJobs = [
+    { id: 1, title: "Cloud Systems Architect", company: "Apex Digital", location: "Remote", type: "Full-time", pay: "$140k - $170k", tags: ["AWS", "Kubernetes", "DevOps"] },
+    { id: 2, title: "Senior React / Next.js Developer", company: "Vanguard Media", location: "Remote", type: "Contract", pay: "$75 - $95/hr", tags: ["React", "TypeScript", "Tailwind"] },
+    { id: 3, title: "Product Marketing Manager", company: "Horizon AI", location: "New York, NY", type: "Full-time", pay: "$115k - $135k", tags: ["B2B", "Growth", "SaaS"] }
+  ];
+
+  function renderApplications(){
+    const list = document.getElementById('applications-list');
+    list.innerHTML = myApplications.map(app => `
+      <div class="app-row">
+        <div class="logo">${app.company[0]}</div>
+        <div class="info">
+          <h4>${app.title}</h4>
+          <span>${app.company} • ${app.location}</span>
+        </div>
+        <div class="meta">
+          <span class="badge badge-${app.status}">${app.statusText}</span>
+          <span class="date">${app.date}</span>
+        </div>
+      </div>
+    `).join('');
+  }
+
+  function renderOffers(){
+    const list = document.getElementById('offers-list');
+    list.innerHTML = recommendedJobs.map(job => `
+      <div class="offer-card" id="offer-card-${job.id}">
+        <h4>${job.title}</h4>
+        <p class="company">${job.company} • ${job.location} (${job.type})</p>
+        <div class="offer-tags">
+          ${job.tags.map(t => `<span class="offer-tag">${t}</span>`).join('')}
+        </div>
+        <div class="row">
+          <span class="pay">${job.pay}</span>
+          <button class="btn btn-primary btn-sm" onclick="applyJob(${job.id})">Quick Apply</button>
+        </div>
+      </div>
+    `).join('');
+  }
+
+  function applyJob(id){
+    const job = recommendedJobs.find(j => j.id === id);
+    if(!job) return;
+
+    myApplications.unshift({
+      id: Date.now(),
+      title: job.title,
+      company: job.company,
+      location: job.location,
+      status: "pending",
+      statusText: "Application Received",
+      date: "Just now"
+    });
+
+    renderApplications();
+
+    const btn = document.querySelector(`#offer-card-${id} button`);
+    if(btn){
+      btn.textContent = "Applied ✓";
+      btn.disabled = true;
+      btn.classList.remove('btn-primary');
+      btn.classList.add('btn-outline');
+    }
+
+    const appCount = document.getElementById('stat-applications');
+    appCount.textContent = (parseInt(appCount.textContent) || 0) + 1;
+    alert(`Your application for "${job.title}" at ${job.company} was submitted successfully!`);
+  }
+
+  renderApplications();
+  renderOffers();
+</script>
+
+</body>
+</html>
