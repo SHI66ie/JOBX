@@ -23,17 +23,15 @@ Required env vars:
 
 ## Deploy
 
-**Primary:** Netlify. Root `netlify.toml` already builds `joblink`.
-
-**Vercel (hibernating):** production deploys are skipped on purpose so you are not billed for a second live site. Preview deployments for branches still build, so you can open a PR or push a branch and use the Vercel preview URL to check it. Set the Vercel project Root Directory to `joblink` if it is not already.
+**Production:** Netlify. Root `netlify.toml` builds `joblink` with the Netlify Next.js plugin. Keep Netlify as the only connected deployment provider for this repository.
 
 ### Public URL
 
-The `vercel.app` address is a deployment hostname and can change between preview deployments. It is not the public product URL. In the production hosting project, add the custom domain `jomponline.com` (or the approved JOMP domain), configure its DNS records as Vercel requests, and set `NEXT_PUBLIC_SITE_URL` to that same `https://` URL. The settings page will then be available at:
+The public product URL is `https://jomponline.com`. Configure that custom domain in Netlify and set `NEXT_PUBLIC_SITE_URL` to the same `https://` URL. The settings page is available at:
 
 `https://jomponline.com/employer/settings`
 
-Keep the Vercel preview URL only for testing. The custom domain must be attached in the Vercel or Netlify project dashboard; application code cannot rename a hosting domain by itself.
+Do not use a deployment-provider hostname as the public URL. The custom domain must be attached in the Netlify project dashboard; application code cannot rename or remove an existing hosting project by itself.
 
 ## What was removed
 
