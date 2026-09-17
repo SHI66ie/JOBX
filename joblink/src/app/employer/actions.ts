@@ -5,6 +5,8 @@ import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { createNotification } from "@/lib/notifications";
 
+import { getUserRoles } from "@/utils/auth";
+
 async function getOwnedCompany(supabase: Awaited<ReturnType<typeof createClient>>, userId: string) {
   const { data: company } = await supabase
     .from("companies")
@@ -41,26 +43,40 @@ export async function upsertCompanyProfile(formData: FormData) {
     throw new Error("Company name is required.");
   }
 
-  if (first_name || last_name) {
-    await supabase.auth.updateUser({
-      data: {
-        first_name: first_name || user.user_metadata?.first_name,
-        last_name: last_name || user.user_metadata?.last_name,
-      },
-    });
+  const currentRoles = getUserRoles(user);
+  const roles = Array.from(new Set(["employer", ...currentRoles.filter(Boolean)]));
+
+  // Ensure metadata reflects employer onboarding completion
+  await supabase.auth.updateUser({
+    data: {
+      first_name: first_name || user.user_metadata?.first_name,
+      last_name: last_name || user.user_metadata?.last_name,
+      role: "employer",
+      roles,
+      onboarded: true,
+      employer_onboarded: true,
+      ...(account_type ? { account_type } : {}),
+      ...(team_size ? { team_size } : {}),
+    },
+  });
+
+  try {
     await supabase
       .from("users")
       .update({
         first_name: first_name || undefined,
         last_name: last_name || undefined,
+        role: "employer",
       })
       .eq("id", user.id);
+  } catch (err) {
+    console.warn("Could not update public.users table:", err);
   }
 
   const companyFields = {
     name,
-    description,
-    website,
+    description: description || null,
+    website: website || null,
     hiring_for: hiring_for || null,
     industry: hiring_for || null,
     team_size: team_size || null,
@@ -79,8 +95,20 @@ export async function upsertCompanyProfile(formData: FormData) {
       .eq("id", existingCompany.id);
 
     if (error) {
-      console.error("Error updating company:", error);
-      throw new Error(error.message);
+      console.warn("Retrying company update with standard fields due to error:", error);
+      const fallback = await supabase
+        .from("companies")
+        .update({
+          name,
+          description: description || null,
+          website: website || null,
+        })
+        .eq("id", existingCompany.id);
+
+      if (fallback.error) {
+        console.error("Fallback company update failed:", fallback.error);
+        throw new Error(fallback.error.message);
+      }
     }
   } else {
     const { error } = await supabase.from("companies").insert({
@@ -89,11 +117,23 @@ export async function upsertCompanyProfile(formData: FormData) {
     });
 
     if (error) {
-      console.error("Error creating company:", error);
-      throw new Error(error.message);
+      console.warn("Retrying company insert with standard fields due to error:", error);
+      const fallback = await supabase.from("companies").insert({
+        name,
+        description: description || null,
+        website: website || null,
+        created_by: user.id,
+      });
+
+      if (fallback.error) {
+        console.error("Fallback company insert failed:", fallback.error);
+        throw new Error(fallback.error.message);
+      }
     }
   }
 
+  revalidatePath("/", "layout");
+  revalidatePath("/employer", "layout");
   revalidatePath("/employer/settings");
   revalidatePath("/employer/dashboard");
   redirect("/employer/dashboard");

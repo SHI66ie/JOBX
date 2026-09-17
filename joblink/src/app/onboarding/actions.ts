@@ -91,11 +91,16 @@ export async function completeCandidateOnboarding(formData: FormData) {
     return { error: authError.message };
   }
 
-  await supabase.from("users").update({ first_name, last_name, role: "candidate" }).eq("id", user.id);
+  try {
+    await supabase.from("users").update({ first_name, last_name, role: "candidate", bio }).eq("id", user.id);
+  } catch (err) {
+    console.warn("Could not update public.users:", err);
+  }
 
   revalidatePath("/", "layout");
+  revalidatePath("/dashboard", "layout");
   revalidatePath("/dashboard");
-  redirect("/dashboard");
+  return { success: true, redirectTo: "/dashboard" };
 }
 
 export async function completeEmployerOnboarding(formData: FormData) {
@@ -154,7 +159,11 @@ export async function completeEmployerOnboarding(formData: FormData) {
     return { error: authError.message };
   }
 
-  await supabase.from("users").update({ first_name, last_name, role: "employer" }).eq("id", user.id);
+  try {
+    await supabase.from("users").update({ first_name, last_name, role: "employer" }).eq("id", user.id);
+  } catch (err) {
+    console.warn("Could not update public.users:", err);
+  }
 
   const companyFields = {
     name: companyName,
@@ -198,6 +207,7 @@ export async function completeEmployerOnboarding(formData: FormData) {
   }
 
   revalidatePath("/", "layout");
+  revalidatePath("/employer", "layout");
   revalidatePath("/employer/dashboard");
-  redirect("/employer/dashboard");
+  return { success: true, redirectTo: "/employer/dashboard" };
 }

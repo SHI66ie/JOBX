@@ -70,10 +70,15 @@ export default function OnboardingForm({ initialData }: OnboardingFormProps) {
       const result = await completeCandidateOnboarding(formData);
       if (result?.error) {
         setErrorMsg(result.error);
+        setLoading(false);
+      } else if (result?.redirectTo) {
+        window.location.href = result.redirectTo;
       }
     } catch (err: unknown) {
+      if (err instanceof Error && err.message?.includes("NEXT_REDIRECT")) {
+        return;
+      }
       setErrorMsg(err instanceof Error ? err.message : "Something went wrong during onboarding.");
-    } finally {
       setLoading(false);
     }
   }

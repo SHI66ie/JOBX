@@ -37,10 +37,15 @@ export default function EmployerOnboardingForm({ initialData }: EmployerOnboardi
       const result = await completeEmployerOnboarding(formData);
       if (result?.error) {
         setErrorMsg(result.error);
+        setLoading(false);
+      } else if (result?.redirectTo) {
+        window.location.href = result.redirectTo;
       }
     } catch (err: unknown) {
+      if (err instanceof Error && err.message?.includes("NEXT_REDIRECT")) {
+        return;
+      }
       setErrorMsg(err instanceof Error ? err.message : "Could not finish setup.");
-    } finally {
       setLoading(false);
     }
   }
