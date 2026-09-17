@@ -107,7 +107,11 @@ export async function signup(formData: FormData) {
 
 export async function signInWithGoogle(formData?: FormData) {
   const supabase = await createClient()
-  const origin = (await headers()).get('origin') || 'http://localhost:3000'
+  const h = await headers()
+  const forwardedHost = h.get('x-forwarded-host') || h.get('host')
+  const proto = h.get('x-forwarded-proto') || 'https'
+  const origin = h.get('origin') || (forwardedHost ? `${proto}://${forwardedHost}` : '') || process.env.NEXT_PUBLIC_SITE_URL || 'https://jomponline.com'
+
   const role = formData?.get('role') === 'employer' ? 'employer' : formData?.get('role') === 'candidate' ? 'candidate' : ''
   const callback = role
     ? `${origin}/auth/callback?intent=${role}`
