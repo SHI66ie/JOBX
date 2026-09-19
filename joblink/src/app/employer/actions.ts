@@ -6,25 +6,80 @@ import { redirect } from "next/navigation";
 import { createNotification } from "@/lib/notifications";
 
 import { getUserRoles } from "@/utils/auth";
+import type { User } from "@supabase/supabase-js";
+
+type ActionResult = { error?: string };
+
+function publicErrorMessage(error: { message?: string; code?: string } | null | undefined, fallback: string) {
+  const message = String(error?.message || "");
+  const code = String(error?.code || "");
+
+  if (code === "23503" || /foreign key/i.test(message)) {
+    return "Your account profile is not in the database yet. Refresh and try again.";
+  }
+  if (code === "42501" || /row-level security/i.test(message) || /permission denied/i.test(message)) {
+    return "You do not have permission to save this company profile. Check Supabase RLS policies on companies.";
+  }
+  if (code === "23505" || /duplicate key/i.test(message)) {
+    return "A company profile already exists for this account.";
+  }
+  if (/column .* does not exist/i.test(message)) {
+    return "The companies table is missing a column. Run joblink/supabase/schema.sql in Supabase.";
+  }
+  if (/Server Components render/i.test(message)) {
+    return fallback;
+  }
+  return message || fallback;
+}
+
+async function ensurePublicUser(
+  supabase: Awaited<ReturnType<typeof createClient>>,
+  user: User,
+  fields: { first_name?: string; last_name?: string; role?: string }
+) {
+  const payload = {
+    id: user.id,
+    email: user.email || null,
+    first_name: fields.first_name || user.user_metadata?.first_name || "",
+    last_name: fields.last_name || user.user_metadata?.last_name || "",
+    role: fields.role || "employer",
+  };
+
+  const { error } = await supabase.from("users").upsert(payload, { onConflict: "id" });
+  if (!error) return;
+
+  const insertAttempt = await supabase.from("users").insert(payload);
+  if (!insertAttempt.error) return;
+
+  await supabase
+    .from("users")
+    .update({
+      first_name: payload.first_name,
+      last_name: payload.last_name,
+      role: payload.role,
+    })
+    .eq("id", user.id);
+}
 
 async function getOwnedCompany(supabase: Awaited<ReturnType<typeof createClient>>, userId: string) {
   const { data: company } = await supabase
     .from("companies")
     .select("id")
     .eq("created_by", userId)
+    .limit(1)
     .maybeSingle();
 
   return company;
 }
 
-export async function upsertCompanyProfile(formData: FormData) {
+export async function upsertCompanyProfile(formData: FormData): Promise<ActionResult> {
   const supabase = await createClient();
   const {
     data: { user },
   } = await supabase.auth.getUser();
 
   if (!user) {
-    throw new Error("Unauthorized");
+    return { error: "Please sign in again." };
   }
 
   const first_name = String(formData.get("first_name") || "").trim();
@@ -40,13 +95,12 @@ export async function upsertCompanyProfile(formData: FormData) {
   const requestVerification = formData.get("request_verification") === "true";
 
   if (!name) {
-    throw new Error("Company name is required.");
+    return { error: "Company name is required." };
   }
 
   const currentRoles = getUserRoles(user);
   const roles = Array.from(new Set(["employer", ...currentRoles.filter(Boolean)]));
 
-  // Ensure metadata reflects employer onboarding completion
   await supabase.auth.updateUser({
     data: {
       first_name: first_name || user.user_metadata?.first_name,
@@ -60,18 +114,11 @@ export async function upsertCompanyProfile(formData: FormData) {
     },
   });
 
-  try {
-    await supabase
-      .from("users")
-      .update({
-        first_name: first_name || undefined,
-        last_name: last_name || undefined,
-        role: "employer",
-      })
-      .eq("id", user.id);
-  } catch (err) {
-    console.warn("Could not update public.users table:", err);
-  }
+  await ensurePublicUser(supabase, user, {
+    first_name,
+    last_name,
+    role: "employer",
+  });
 
   const companyFields = {
     name,
@@ -86,50 +133,54 @@ export async function upsertCompanyProfile(formData: FormData) {
     ...(requestVerification ? { verification_status: "pending" } : {}),
   };
 
-  const existingCompany = await getOwnedCompany(supabase, user.id);
+  const fallbackFields = {
+    name,
+    description: description || null,
+    website: website || null,
+  };
 
-  if (existingCompany) {
-    const { error } = await supabase
-      .from("companies")
-      .update(companyFields)
-      .eq("id", existingCompany.id);
+  let existingCompany = await getOwnedCompany(supabase, user.id);
 
-    if (error) {
-      console.warn("Retrying company update with standard fields due to error:", error);
-      const fallback = await supabase
-        .from("companies")
-        .update({
-          name,
-          description: description || null,
-          website: website || null,
-        })
-        .eq("id", existingCompany.id);
-
-      if (fallback.error) {
-        console.error("Fallback company update failed:", fallback.error);
-        throw new Error(fallback.error.message);
-      }
+  const saveCompany = async () => {
+    if (existingCompany) {
+      const { error } = await supabase.from("companies").update(companyFields).eq("id", existingCompany.id);
+      if (!error) return null;
+      const fallback = await supabase.from("companies").update(fallbackFields).eq("id", existingCompany.id);
+      return fallback.error;
     }
-  } else {
+
     const { error } = await supabase.from("companies").insert({
       ...companyFields,
       created_by: user.id,
     });
+    if (!error) return null;
 
-    if (error) {
-      console.warn("Retrying company insert with standard fields due to error:", error);
-      const fallback = await supabase.from("companies").insert({
-        name,
-        description: description || null,
-        website: website || null,
-        created_by: user.id,
-      });
-
-      if (fallback.error) {
-        console.error("Fallback company insert failed:", fallback.error);
-        throw new Error(fallback.error.message);
+    if (error.code === "23505" || /duplicate key/i.test(error.message)) {
+      existingCompany = await getOwnedCompany(supabase, user.id);
+      if (existingCompany) {
+        const retry = await supabase.from("companies").update(fallbackFields).eq("id", existingCompany.id);
+        return retry.error;
       }
     }
+
+    const fallback = await supabase.from("companies").insert({
+      ...fallbackFields,
+      created_by: user.id,
+    });
+    return fallback.error;
+  };
+
+  let saveError = await saveCompany();
+  if (saveError && (saveError.code === "23503" || /foreign key/i.test(saveError.message))) {
+    await ensurePublicUser(supabase, user, { first_name, last_name, role: "employer" });
+    saveError = await saveCompany();
+  }
+
+  if (saveError) {
+    console.error("Company profile save failed:", saveError);
+    return {
+      error: publicErrorMessage(saveError, "Could not create the company profile. Check the companies table and RLS policies."),
+    };
   }
 
   revalidatePath("/", "layout");
