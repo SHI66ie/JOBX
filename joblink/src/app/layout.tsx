@@ -17,7 +17,7 @@ const poppins = Poppins({
 
 export const metadata: Metadata = {
   metadataBase: new URL(
-    process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000",
+    process.env.NEXT_PUBLIC_SITE_URL || "https://jomponline.com",
   ),
   title: `${APP_NAME} | ${APP_TAGLINE}`,
   description: `${APP_TAGLINE} Connect with top candidates and companies on ${APP_NAME}.`,
