@@ -32,6 +32,14 @@ interface SettingsFormProps {
   } | null;
 }
 
+function displayError(message: string | undefined) {
+  if (!message) return "Failed to create profile. Please check your information and try again.";
+  if (message.includes("Server Components render") || message.includes("digest")) {
+    return "Could not save the company profile. Your account row may be missing in public.users, or company insert is blocked by RLS.";
+  }
+  return message;
+}
+
 export function EmployerSettingsForm({ user, company }: SettingsFormProps) {
   const [loading, setLoading] = useState(false);
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
@@ -47,15 +55,18 @@ export function EmployerSettingsForm({ user, company }: SettingsFormProps) {
     const formData = new FormData(form);
 
     try {
-      await upsertCompanyProfile(formData);
+      const result = await upsertCompanyProfile(formData);
+      if (result?.error) {
+        setErrorMsg(displayError(result.error));
+        setLoading(false);
+      }
     } catch (err: unknown) {
-      const errorMessage = err instanceof Error ? err.message : String(err);
-      // If Next.js redirect threw (NEXT_REDIRECT), allow it to proceed
-      if (errorMessage.includes("NEXT_REDIRECT")) {
+      const message = err instanceof Error ? err.message : "";
+      if (message.includes("NEXT_REDIRECT")) {
         return;
       }
       console.error("Failed to save profile:", err);
-      setErrorMsg(errorMessage || "Failed to create profile. Please check your information and try again.");
+      setErrorMsg(displayError(message));
       setLoading(false);
     }
   }
