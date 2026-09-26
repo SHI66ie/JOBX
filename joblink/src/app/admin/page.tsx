@@ -74,9 +74,9 @@ export default async function AdminDashboard() {
         .order("created_at", { ascending: false })
     ]);
     
-    companyCount = companyCountRes;
-    jobCount = jobCountRes;
-    userCount = userCountRes;
+    companyCount = { count: companyCountRes.count ?? 0 };
+    jobCount = { count: jobCountRes.count ?? 0 };
+    userCount = { count: userCountRes.count ?? 0 };
     latestCompanies = latestCompaniesRes.data ?? [];
     latestJobs = latestJobsRes.data ?? [];
     latestUsers = latestUsersRes.data ?? [];
