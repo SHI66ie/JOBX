@@ -1,6 +1,9 @@
 import Link from "next/link";
 import { Card, CardContent } from "@/components/ui/card";
 import { formatDate, requireCompany, statusBadgeClass } from "@/lib/employer";
+import { MOCK_APPLICATIONS } from "@/lib/mock-data";
+
+const USE_MOCK = process.env.NEXT_PUBLIC_USE_MOCK_DATA === "true";
 
 type Candidate = {
   first_name: string | null;
@@ -8,29 +11,58 @@ type Candidate = {
   email: string | null;
 };
 
+type ApplicationRow = {
+  id: string;
+  status: string;
+  created_at: string;
+  job_id: string;
+  job: { id?: string; title?: string } | { id?: string; title?: string }[] | null;
+  candidate: Candidate | Candidate[] | null;
+};
+
 export default async function EmployerApplicantsPage() {
   const { supabase, company } = await requireCompany();
 
-  const { data: jobs } = await supabase.from("jobs").select("id").eq("company_id", company.id);
-  const jobIds = (jobs || []).map((job) => job.id);
+  let applications: ApplicationRow[] = [];
 
-  const { data: applications } =
-    jobIds.length > 0
-      ? await supabase
-          .from("applications")
-          .select(
-            `
-            id,
-            status,
-            created_at,
-            job_id,
-            job:jobs (id, title),
-            candidate:users (first_name, last_name, email)
-          `
-          )
-          .in("job_id", jobIds)
-          .order("created_at", { ascending: false })
-      : { data: [] };
+  if (USE_MOCK) {
+    applications = MOCK_APPLICATIONS.map((app) => ({
+      id: app.id,
+      status: app.status,
+      created_at: app.created_at,
+      job_id: app.job_id,
+      job: { id: app.jobId, title: app.jobTitle },
+      candidate: {
+        first_name: app.users.full_name.split(" ")[0] ?? null,
+        last_name: app.users.full_name.split(" ")[1] ?? null,
+        email: app.users.email,
+      },
+    }));
+  } else {
+    const { data: jobs } = await supabase.from("jobs").select("id").eq("company_id", company.id);
+    const jobIds = (jobs || []).map((job) => job.id);
+
+    if (jobIds.length > 0) {
+      const { data, error } = await supabase
+        .from("applications")
+        .select(`
+          id,
+          status,
+          created_at,
+          job_id,
+          job:jobs (id, title),
+          candidate:users (first_name, last_name, email)
+        `)
+        .in("job_id", jobIds)
+        .order("created_at", { ascending: false });
+
+      if (error) {
+        console.error("[EmployerApplicantsPage] Supabase error:", error.message);
+      } else {
+        applications = (data ?? []) as ApplicationRow[];
+      }
+    }
+  }
 
   return (
     <div className="space-y-6">
@@ -39,7 +71,7 @@ export default async function EmployerApplicantsPage() {
         <p className="text-muted-foreground">Every candidate who applied to {company.name}.</p>
       </div>
 
-      {applications && applications.length > 0 ? (
+      {applications.length > 0 ? (
         <Card>
           <CardContent className="p-0">
             <div className="overflow-x-auto">

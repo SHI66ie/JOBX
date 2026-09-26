@@ -4,60 +4,83 @@ import { redirect } from "next/navigation";
 import Link from "next/link";
 import { buttonVariants } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { MOCK_ADMIN_STATS, MOCK_COMPANY, MOCK_JOBS, MOCK_USER } from "@/lib/mock-data";
+
+const USE_MOCK = process.env.NEXT_PUBLIC_USE_MOCK_DATA === "true";
 
 export default async function AdminDashboard() {
-  const supabase = await createClient();
+  let userProfile = { role: "admin", first_name: "Admin" };
+  
+  if (!USE_MOCK) {
+    const supabase = await createClient();
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
 
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
+    if (!user) {
+      redirect("/");
+    }
 
-  if (!user) {
-    redirect("/");
-  }
-
-  const { data: userProfile } = await supabase
-    .from("users")
-    .select("role, first_name")
-    .eq("id", user.id)
-    .single();
-
-  if (userProfile?.role !== "admin") {
-    redirect("/dashboard");
-  }
-
-  const adminClient = await createAdminClient();
-
-  const [
-    companyCount,
-    jobCount,
-    userCount,
-    latestCompaniesResponse,
-    latestJobsResponse,
-    latestUsersResponse,
-  ] = await Promise.all([
-    adminClient.from("companies").select("id", { count: "exact", head: true }),
-    adminClient.from("jobs").select("id", { count: "exact", head: true }),
-    adminClient.from("users").select("id", { count: "exact", head: true }),
-    adminClient
-      .from("companies")
-      .select("id, name, website")
-      .order("created_at", { ascending: false })
-      .limit(3),
-    adminClient
-      .from("jobs")
-      .select("id, title, location, type, status, company_id")
-      .order("created_at", { ascending: false })
-      .limit(3),
-    adminClient
+    const { data } = await supabase
       .from("users")
-      .select("id, first_name, last_name, role, email")
-      .order("created_at", { ascending: false })
-  ]);
+      .select("role, first_name")
+      .eq("id", user.id)
+      .single();
+      
+    if (data) {
+      userProfile = data as any;
+    }
 
-  const latestCompanies = latestCompaniesResponse.data ?? [];
-  const latestJobs = latestJobsResponse.data ?? [];
-  const latestUsers = latestUsersResponse.data ?? [];
+    if (userProfile?.role !== "admin") {
+      redirect("/dashboard");
+    }
+  }
+
+  let companyCount = { count: USE_MOCK ? MOCK_ADMIN_STATS.totalCompanies : 0 };
+  let jobCount = { count: USE_MOCK ? MOCK_ADMIN_STATS.totalJobs : 0 };
+  let userCount = { count: USE_MOCK ? MOCK_ADMIN_STATS.totalUsers : 0 };
+  
+  let latestCompanies: any[] = USE_MOCK ? [MOCK_COMPANY] : [];
+  let latestJobs: any[] = USE_MOCK ? MOCK_JOBS.slice(0, 3) : [];
+  let latestUsers: any[] = USE_MOCK ? [{ ...MOCK_USER, first_name: MOCK_USER.user_metadata.full_name, role: "employer" }] : [];
+
+  if (!USE_MOCK) {
+    const adminClient = await createAdminClient();
+
+    const [
+      companyCountRes,
+      jobCountRes,
+      userCountRes,
+      latestCompaniesRes,
+      latestJobsRes,
+      latestUsersRes,
+    ] = await Promise.all([
+      adminClient.from("companies").select("id", { count: "exact", head: true }),
+      adminClient.from("jobs").select("id", { count: "exact", head: true }),
+      adminClient.from("users").select("id", { count: "exact", head: true }),
+      adminClient
+        .from("companies")
+        .select("id, name, website")
+        .order("created_at", { ascending: false })
+        .limit(3),
+      adminClient
+        .from("jobs")
+        .select("id, title, location, type, status, company_id")
+        .order("created_at", { ascending: false })
+        .limit(3),
+      adminClient
+        .from("users")
+        .select("id, first_name, last_name, role, email")
+        .order("created_at", { ascending: false })
+    ]);
+    
+    companyCount = companyCountRes;
+    jobCount = jobCountRes;
+    userCount = userCountRes;
+    latestCompanies = latestCompaniesRes.data ?? [];
+    latestJobs = latestJobsRes.data ?? [];
+    latestUsers = latestUsersRes.data ?? [];
+  }
 
   return (
     <div className="space-y-8">
