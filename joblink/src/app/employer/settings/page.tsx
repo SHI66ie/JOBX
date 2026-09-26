@@ -5,18 +5,32 @@ import { getUserRoles } from "@/utils/auth";
 import { requireEmployerUser } from "@/lib/employer";
 import { EmployerSettingsForm } from "./settings-form";
 import Link from "next/link";
+import { MOCK_COMPANY } from "@/lib/mock-data";
+
+const USE_MOCK = process.env.NEXT_PUBLIC_USE_MOCK_DATA === "true";
 
 export default async function EmployerSettings() {
   const { supabase, user } = await requireEmployerUser();
 
-  const { data: company } = await supabase
-    .from("companies")
-    .select("*")
-    .eq("created_by", user.id)
-    .maybeSingle();
+  let company = USE_MOCK ? MOCK_COMPANY : null;
+
+  if (!USE_MOCK) {
+    const { data, error } = await supabase
+      .from("companies")
+      .select("*")
+      .eq("created_by", user.id)
+      .maybeSingle();
+
+    if (error) {
+      console.error("[EmployerSettings] Supabase error:", error.message);
+    } else {
+      company = data;
+    }
+  }
 
   const roles = getUserRoles(user);
   const hasCandidate = roles.includes("candidate");
+
 
   return (
     <div className="space-y-8 max-w-2xl">

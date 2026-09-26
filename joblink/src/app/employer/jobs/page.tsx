@@ -2,16 +2,16 @@ import Link from "next/link";
 import { buttonVariants } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Plus } from "lucide-react";
-import { formatDate, requireCompany, statusBadgeClass } from "@/lib/employer";
+import { formatDate, getJobsForCompany, requireCompany, statusBadgeClass } from "@/lib/employer";
 
 export default async function EmployerJobsPage() {
   const { supabase, company } = await requireCompany();
 
-  const { data: jobs } = await supabase
-    .from("jobs")
-    .select("id, title, location, type, status, salary_range, created_at, applications(id)")
-    .eq("company_id", company.id)
-    .order("created_at", { ascending: false });
+  const jobs = await getJobsForCompany(
+    supabase,
+    company.id,
+    "id, title, location, type, status, salary_range, created_at, applications(id)"
+  );
 
   return (
     <div className="space-y-6">
@@ -25,7 +25,7 @@ export default async function EmployerJobsPage() {
         </Link>
       </div>
 
-      {jobs && jobs.length > 0 ? (
+      {jobs.length > 0 ? (
         <Card>
           <CardContent className="p-0">
             <div className="overflow-x-auto">

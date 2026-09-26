@@ -2,18 +2,16 @@ import Link from "next/link";
 import { buttonVariants } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Briefcase, Plus, Users, Clock3, CheckCircle2 } from "lucide-react";
-import { formatDate, requireCompany, statusBadgeClass } from "@/lib/employer";
+import { formatDate, getJobsForCompany, requireCompany, statusBadgeClass } from "@/lib/employer";
 
 export default async function EmployerDashboard() {
   const { supabase, company } = await requireCompany();
 
-  const { data: jobs } = await supabase
-    .from("jobs")
-    .select("id, title, location, type, status, created_at, applications(id, status, created_at)")
-    .eq("company_id", company.id)
-    .order("created_at", { ascending: false });
-
-  const jobList = jobs || [];
+  const jobList = await getJobsForCompany(
+    supabase,
+    company.id,
+    "id, title, location, type, status, created_at, applications(id, status, created_at)"
+  );
   const allApps = jobList.flatMap((job) =>
     (job.applications || []).map((app) => ({ ...app, jobTitle: job.title, jobId: job.id }))
   );
