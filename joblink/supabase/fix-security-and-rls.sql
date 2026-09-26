@@ -35,10 +35,6 @@ CREATE TRIGGER trg_protect_user_role
   EXECUTE FUNCTION public.protect_user_role();
 
 -- 2. FIX USERS SELECT POLICY (EMPLOYER APPLICANT VIEW & ADMIN ACCESS)
--- Allows:
--- a) Users to view their own profile
--- b) Employers to view candidate profiles for applicants to their jobs
--- c) Platform admins to view all user profiles
 DROP POLICY IF EXISTS "Users can view own profile" ON public.users;
 DROP POLICY IF EXISTS "Users and employers can view profiles" ON public.users;
 CREATE POLICY "Users and employers can view profiles"
@@ -48,9 +44,8 @@ CREATE POLICY "Users and employers can view profiles"
     OR EXISTS (
       SELECT 1 FROM public.applications a
       JOIN public.jobs j ON j.id = a.job_id
-      LEFT JOIN public.companies c ON c.id = j.company_id
       WHERE a.candidate_id = public.users.id
-        AND (j.employer_id = auth.uid() OR c.created_by = auth.uid())
+        AND j.employer_id = auth.uid()
     )
     OR EXISTS (
       SELECT 1 FROM public.users u
@@ -65,12 +60,10 @@ CREATE POLICY "Anyone can view published/active jobs"
   USING (
     status IN ('published', 'active')
     OR auth.uid() = employer_id
-    OR EXISTS (SELECT 1 FROM public.companies c WHERE c.id = jobs.company_id AND c.created_by = auth.uid())
     OR EXISTS (SELECT 1 FROM public.users u WHERE u.id = auth.uid() AND u.role = 'admin')
   );
 
--- 4. FIX NOTIFICATIONS INSERT POLICY (PREVENT NOTIFICATION SPOOFING / SPAM)
--- Only allow notification inserts from employers to their actual applicants, self, or admins
+-- 4. FIX NOTIFICATIONS INSERT POLICY (PREVENT NOTIFICATION SPOOFING)
 DROP POLICY IF EXISTS "Service can insert notifications" ON public.notifications;
 DROP POLICY IF EXISTS "Authenticated users can insert valid notifications" ON public.notifications;
 CREATE POLICY "Authenticated users can insert valid notifications"
@@ -80,9 +73,8 @@ CREATE POLICY "Authenticated users can insert valid notifications"
     OR EXISTS (
       SELECT 1 FROM public.applications a
       JOIN public.jobs j ON j.id = a.job_id
-      LEFT JOIN public.companies c ON c.id = j.company_id
       WHERE a.candidate_id = notifications.user_id
-        AND (j.employer_id = auth.uid() OR c.created_by = auth.uid())
+        AND j.employer_id = auth.uid()
     )
     OR EXISTS (
       SELECT 1 FROM public.users u
