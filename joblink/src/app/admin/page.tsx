@@ -1,4 +1,5 @@
 import { createClient } from "@/utils/supabase/server";
+import { createAdminClient } from "@/utils/supabase/admin";
 import { redirect } from "next/navigation";
 import Link from "next/link";
 import { buttonVariants } from "@/components/ui/button";
@@ -25,6 +26,8 @@ export default async function AdminDashboard() {
     redirect("/dashboard");
   }
 
+  const adminClient = await createAdminClient();
+
   const [
     companyCount,
     jobCount,
@@ -33,24 +36,23 @@ export default async function AdminDashboard() {
     latestJobsResponse,
     latestUsersResponse,
   ] = await Promise.all([
-    supabase.from("companies").select("id", { count: "exact", head: true }),
-    supabase.from("jobs").select("id", { count: "exact", head: true }),
-    supabase.from("users").select("id", { count: "exact", head: true }),
-    supabase
+    adminClient.from("companies").select("id", { count: "exact", head: true }),
+    adminClient.from("jobs").select("id", { count: "exact", head: true }),
+    adminClient.from("users").select("id", { count: "exact", head: true }),
+    adminClient
       .from("companies")
       .select("id, name, website")
       .order("created_at", { ascending: false })
       .limit(3),
-    supabase
+    adminClient
       .from("jobs")
       .select("id, title, location, type, status, company_id")
       .order("created_at", { ascending: false })
       .limit(3),
-    supabase
+    adminClient
       .from("users")
       .select("id, first_name, last_name, role, email")
       .order("created_at", { ascending: false })
-      .limit(3),
   ]);
 
   const latestCompanies = latestCompaniesResponse.data ?? [];

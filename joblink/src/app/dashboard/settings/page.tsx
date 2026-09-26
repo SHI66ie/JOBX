@@ -14,7 +14,6 @@ export default async function SettingsPage() {
 
   const roles = getUserRoles(user)
   const hasEmployer = roles.includes("employer")
-  const hasCandidate = roles.includes("candidate")
 
   return (
     <div className="max-w-3xl mx-auto py-8">

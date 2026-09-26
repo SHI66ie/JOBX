@@ -289,6 +289,11 @@ export async function deleteJob(jobId: string) {
 }
 
 export async function updateApplicationStatus(applicationId: string, status: string, jobId: string) {
+  const allowedStatuses = ["pending", "reviewed", "interviewing", "accepted", "rejected"];
+  if (!allowedStatuses.includes(status)) {
+    throw new Error(`Invalid status: ${status}`);
+  }
+
   const supabase = await createClient();
   const {
     data: { user },

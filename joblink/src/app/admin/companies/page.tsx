@@ -1,4 +1,5 @@
 import { createClient } from "@/utils/supabase/server";
+import { createAdminClient } from "@/utils/supabase/admin";
 import { redirect } from "next/navigation";
 import Link from "next/link";
 import { buttonVariants } from "@/components/ui/button";
@@ -25,7 +26,9 @@ export default async function AdminCompaniesPage() {
     redirect("/dashboard");
   }
 
-  const { data: companies } = await supabase
+  const adminClient = await createAdminClient();
+
+  const { data: companies } = await adminClient
     .from("companies")
     .select("id, name, website, description")
     .order("created_at", { ascending: false });

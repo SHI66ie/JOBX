@@ -68,7 +68,7 @@ export default function LandingPage() {
             Build Your Career<br />With {APP_NAME}
           </h1>
           <p className="mt-7 max-w-[520px] text-[17px] leading-relaxed text-white/70">
-            Pursue real career paths through employer-posted positions, connect with top companies, and access free tools backed by {APP_NAME}'s expertise — built for applicants and employers who want to work on open ground.
+            Pursue real career paths through employer-posted positions, connect with top companies, and access free tools backed by {APP_NAME}&apos;s expertise — built for applicants and employers who want to work on open ground.
           </p>
           <div className="mt-10 flex flex-wrap items-center gap-3.5">
             <Link href="/signup" className="rounded-xl bg-white px-6 py-3 text-[14.5px] font-semibold text-[#01224F]">Find work</Link>
@@ -151,7 +151,7 @@ export default function LandingPage() {
           <div className="reveal max-w-[600px]">
             <span className="inline-flex rounded-full bg-[#01224F]/10 px-4 py-1.5 text-[12.5px] font-semibold uppercase tracking-wider text-[#01224F]">Platform stats</span>
             <h2 className="mt-5 text-[clamp(28px,3.6vw,40px)] font-bold text-[#01224F]" style={{ fontFamily: "var(--font-heading)" }}>{APP_NAME} by the numbers</h2>
-            <p className="mt-4 text-[16px] leading-relaxed text-[#111111]/70">A quick look at who's on the platform, and how many applicants go on to get hired.</p>
+            <p className="mt-4 text-[16px] leading-relaxed text-[#111111]/70">A quick look at who&apos;s on the platform, and how many applicants go on to get hired.</p>
           </div>
           <div className="mt-10 grid grid-cols-1 items-stretch gap-7 lg:grid-cols-[0.85fr_1.15fr]">
             <div className="reveal rounded-[28px] bg-[#01224F] p-9 text-white">
@@ -241,12 +241,12 @@ export default function LandingPage() {
           <div className="reveal mx-auto max-w-[600px] text-center">
             <span className="text-[13px] font-semibold uppercase tracking-[0.2em] text-[#01224F]">Get started</span>
             <h2 className="mt-4 text-[clamp(28px,4vw,42px)] font-bold text-[#01224F]" style={{ fontFamily: "var(--font-heading)" }}>Register as an applicant or an employer.</h2>
-            <p className="mt-4 text-[16px] leading-relaxed text-[#111111]/70">Two paths, one open platform. Pick the one that's yours and set up your profile in minutes.</p>
+            <p className="mt-4 text-[16px] leading-relaxed text-[#111111]/70">Two paths, one open platform. Pick the one that&apos;s yours and set up your profile in minutes.</p>
           </div>
           <div className="mt-14 grid grid-cols-1 gap-7 md:grid-cols-2">
             <div className="reveal rounded-[26px] border border-white/15 bg-[#01224F] p-10 text-white">
               <div className="mb-5 flex h-[52px] w-[52px] items-center justify-center rounded-[15px] bg-white/10 text-[20px] font-bold text-white">A</div>
-              <h3 className="text-[23px] font-bold">I'm an applicant</h3>
+              <h3 className="text-[23px] font-bold">I&apos;m an applicant</h3>
               <p className="mt-3 max-w-[340px] text-[14.5px] leading-relaxed text-white/70">Find real, employer-posted work in your field and get paid for jobs you finish.</p>
               <ul className="mt-6 space-y-2.5 text-[13.5px] text-[#cfd7ea]">
                 <li className="flex items-center gap-2.5"><span className="h-1.5 w-1.5 shrink-0 rounded-full bg-white" />Build a profile that shows your track record</li>
@@ -257,7 +257,7 @@ export default function LandingPage() {
             </div>
             <div className="reveal rounded-[26px] border border-[#01224F]/15 bg-white p-10 text-[#111111]">
               <div className="mb-5 flex h-[52px] w-[52px] items-center justify-center rounded-[15px] bg-[#01224F] text-[20px] font-bold text-white">E</div>
-              <h3 className="text-[23px] font-bold text-[#01224F]">I'm an employer</h3>
+              <h3 className="text-[23px] font-bold text-[#01224F]">I&apos;m an employer</h3>
               <p className="mt-3 max-w-[340px] text-[14.5px] leading-relaxed text-[#111111]/70">Post a role and connect with applicants who are ready to get the job done.</p>
               <ul className="mt-6 space-y-2.5 text-[13.5px] text-[#111111]/80">
                 <li className="flex items-center gap-2.5"><span className="h-1.5 w-1.5 shrink-0 rounded-full bg-[#01224F]" />Post jobs and reach vetted applicants fast</li>

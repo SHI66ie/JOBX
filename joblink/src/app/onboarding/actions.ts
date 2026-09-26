@@ -2,7 +2,6 @@
 
 import { createClient } from "@/utils/supabase/server";
 import { revalidatePath } from "next/cache";
-import { redirect } from "next/navigation";
 import { isEnterpriseTeam } from "@/lib/employer-options";
 import { getUserRoles } from "@/utils/auth";
 

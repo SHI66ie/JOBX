@@ -68,12 +68,55 @@ CREATE TRIGGER update_users_updated_at
   BEFORE UPDATE ON public.users
   FOR EACH ROW EXECUTE FUNCTION public.update_updated_at_column();
 
+-- Prevent non-admins from changing role on users
+CREATE OR REPLACE FUNCTION public.protect_user_role()
+RETURNS TRIGGER
+LANGUAGE plpgsql
+SECURITY DEFINER
+SET search_path = public
+AS $$
+BEGIN
+  IF OLD.role IS NOT NULL AND NEW.role IS DISTINCT FROM OLD.role THEN
+    IF current_setting('request.jwt.claim.role', true) != 'service_role' THEN
+      IF NOT EXISTS (
+        SELECT 1 FROM public.users
+        WHERE id = auth.uid() AND role = 'admin'
+      ) THEN
+        RAISE EXCEPTION 'Unauthorized: Only platform administrators can change user roles.';
+      END IF;
+    END IF;
+  END IF;
+  RETURN NEW;
+END;
+$$;
+
+DROP TRIGGER IF EXISTS trg_protect_user_role ON public.users;
+CREATE TRIGGER trg_protect_user_role
+  BEFORE UPDATE ON public.users
+  FOR EACH ROW
+  EXECUTE FUNCTION public.protect_user_role();
+
 -- RLS
 ALTER TABLE public.users ENABLE ROW LEVEL SECURITY;
 
 DROP POLICY IF EXISTS "Users can view own profile" ON public.users;
-CREATE POLICY "Users can view own profile"
-  ON public.users FOR SELECT USING (auth.uid() = id);
+DROP POLICY IF EXISTS "Users and employers can view profiles" ON public.users;
+CREATE POLICY "Users and employers can view profiles"
+  ON public.users FOR SELECT
+  USING (
+    auth.uid() = id
+    OR EXISTS (
+      SELECT 1 FROM public.applications a
+      JOIN public.jobs j ON j.id = a.job_id
+      LEFT JOIN public.companies c ON c.id = j.company_id
+      WHERE a.candidate_id = public.users.id
+        AND (j.employer_id = auth.uid() OR c.created_by = auth.uid())
+    )
+    OR EXISTS (
+      SELECT 1 FROM public.users u
+      WHERE u.id = auth.uid() AND u.role = 'admin'
+    )
+  );
 
 DROP POLICY IF EXISTS "Users can update own profile" ON public.users;
 CREATE POLICY "Users can update own profile"
@@ -174,6 +217,7 @@ CREATE POLICY "Anyone can view published/active jobs"
     status IN ('published', 'active')
     OR auth.uid() = employer_id
     OR EXISTS (SELECT 1 FROM public.companies c WHERE c.id = jobs.company_id AND c.created_by = auth.uid())
+    OR EXISTS (SELECT 1 FROM public.users u WHERE u.id = auth.uid() AND u.role = 'admin')
   );
 
 DROP POLICY IF EXISTS "Employers can create jobs" ON public.jobs;
@@ -282,8 +326,23 @@ CREATE POLICY "Users can update own notifications"
   ON public.notifications FOR UPDATE USING (auth.uid() = user_id);
 
 DROP POLICY IF EXISTS "Service can insert notifications" ON public.notifications;
-CREATE POLICY "Service can insert notifications"
-  ON public.notifications FOR INSERT WITH CHECK (true);
+DROP POLICY IF EXISTS "Authenticated users can insert valid notifications" ON public.notifications;
+CREATE POLICY "Authenticated users can insert valid notifications"
+  ON public.notifications FOR INSERT
+  WITH CHECK (
+    auth.uid() = user_id
+    OR EXISTS (
+      SELECT 1 FROM public.applications a
+      JOIN public.jobs j ON j.id = a.job_id
+      LEFT JOIN public.companies c ON c.id = j.company_id
+      WHERE a.candidate_id = notifications.user_id
+        AND (j.employer_id = auth.uid() OR c.created_by = auth.uid())
+    )
+    OR EXISTS (
+      SELECT 1 FROM public.users u
+      WHERE u.id = auth.uid() AND u.role = 'admin'
+    )
+  );
 
 -- ============================================================
 -- Done

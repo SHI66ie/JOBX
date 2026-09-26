@@ -48,13 +48,14 @@ export function EmployerSettingsForm({ user, company }: SettingsFormProps) {
 
     try {
       await upsertCompanyProfile(formData);
-    } catch (err: any) {
+    } catch (err: unknown) {
+      const errorMessage = err instanceof Error ? err.message : String(err);
       // If Next.js redirect threw (NEXT_REDIRECT), allow it to proceed
-      if (err?.message?.includes("NEXT_REDIRECT")) {
+      if (errorMessage.includes("NEXT_REDIRECT")) {
         return;
       }
       console.error("Failed to save profile:", err);
-      setErrorMsg(err?.message || "Failed to create profile. Please check your information and try again.");
+      setErrorMsg(errorMessage || "Failed to create profile. Please check your information and try again.");
       setLoading(false);
     }
   }

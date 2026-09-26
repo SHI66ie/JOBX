@@ -31,12 +31,38 @@ export default async function MyApplicationsPage() {
     .eq("candidate_id", user.id)
     .order("created_at", { ascending: false });
 
+interface ApplicationItem {
+  id: string;
+  status: string;
+  created_at: string;
+  job?: {
+    id?: string;
+    title?: string;
+    location?: string | null;
+    type?: string | null;
+    job_type?: string | null;
+    company?: {
+      name?: string | null;
+    } | Array<{ name?: string | null }> | null;
+  } | Array<{
+    id?: string;
+    title?: string;
+    location?: string | null;
+    type?: string | null;
+    job_type?: string | null;
+    company?: {
+      name?: string | null;
+    } | Array<{ name?: string | null }> | null;
+  }> | null;
+}
+
   const getStatusColor = (status: string) => {
     switch (status) {
       case 'pending': return 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-500';
       case 'reviewed': return 'bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-500';
       case 'interviewing': return 'bg-purple-100 text-purple-800 dark:bg-purple-900/30 dark:text-purple-500';
       case 'rejected': return 'bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-500';
+      case 'accepted':
       case 'hired': return 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-500';
       default: return 'bg-zinc-100 text-zinc-800 dark:bg-zinc-800 dark:text-zinc-300';
     }
@@ -56,7 +82,7 @@ export default async function MyApplicationsPage() {
 
       {applications && applications.length > 0 ? (
         <div className="grid gap-4">
-          {applications.map((app: any) => {
+          {(applications as unknown as ApplicationItem[]).map((app) => {
             const job = Array.isArray(app.job) ? app.job[0] : app.job;
             const company = Array.isArray(job?.company) ? job.company[0] : job?.company;
             const jobType = job?.type || job?.job_type || "";
@@ -100,7 +126,7 @@ export default async function MyApplicationsPage() {
         <Card className="flex flex-col items-center justify-center py-12 text-center">
           <CardHeader>
             <CardTitle>No applications yet</CardTitle>
-            <CardDescription>You haven't applied to any jobs yet. Head over to the job board to find your next opportunity!</CardDescription>
+            <CardDescription>You haven&apos;t applied to any jobs yet. Head over to the job board to find your next opportunity!</CardDescription>
           </CardHeader>
           <CardContent>
             <Link href="/dashboard" className={buttonVariants({ variant: "default" })}>

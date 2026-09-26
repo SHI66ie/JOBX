@@ -28,7 +28,7 @@ function LoginFormInner() {
 
           <p className="text-base lg:text-lg leading-relaxed text-white/70">
             Pursue real career paths through employer-posted positions, connect
-            with top companies, and access free tools backed by {APP_NAME}'s
+            with top companies, and access free tools backed by {APP_NAME}&apos;s
             expertise.
           </p>
           <div className="mt-10">
@@ -99,7 +99,7 @@ function LoginFormInner() {
             </form>
 
             <div className="mt-10 pt-6 text-center text-sm border-t border-[#eee] text-[#111111]/70">
-              Don't have an account?{" "}
+              Don&apos;t have an account?{" "}
               <Link href="/signup" className="font-semibold hover:underline text-[#01224F]">
                 Sign up
               </Link>
