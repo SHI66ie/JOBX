@@ -7,11 +7,7 @@ import { formatDate, getJobsForCompany, requireCompany, statusBadgeClass } from 
 export default async function EmployerJobsPage() {
   const { supabase, company } = await requireCompany();
 
-  const jobs = await getJobsForCompany(
-    supabase,
-    company.id,
-    "id, title, location, type, status, salary_range, created_at, applications(id)"
-  );
+  const jobs = await getJobsForCompany(supabase, company.id);
 
   return (
     <div className="space-y-6">

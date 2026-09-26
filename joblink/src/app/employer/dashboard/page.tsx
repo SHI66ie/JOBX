@@ -7,11 +7,7 @@ import { formatDate, getJobsForCompany, requireCompany, statusBadgeClass } from 
 export default async function EmployerDashboard() {
   const { supabase, company } = await requireCompany();
 
-  const jobList = await getJobsForCompany(
-    supabase,
-    company.id,
-    "id, title, location, type, status, created_at, applications(id, status, created_at)"
-  );
+  const jobList = await getJobsForCompany(supabase, company.id);
   const allApps = jobList.flatMap((job) =>
     (job.applications || []).map((app) => ({ ...app, jobTitle: job.title, jobId: job.id }))
   );
@@ -21,7 +17,7 @@ export default async function EmployerDashboard() {
   const hired = allApps.filter((app) => app.status === "accepted").length;
 
   const recentApps = [...allApps]
-    .sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime())
+    .sort((a, b) => new Date(b.created_at ?? "").getTime() - new Date(a.created_at ?? "").getTime())
     .slice(0, 6);
 
   const stats = [
@@ -117,7 +113,7 @@ export default async function EmployerDashboard() {
                   <CardContent className="pt-4">
                     <p className="text-sm font-medium truncate">{app.jobTitle}</p>
                     <div className="mt-2 flex items-center justify-between gap-2">
-                      <span className={`text-xs px-2 py-1 rounded-full capitalize ${statusBadgeClass(app.status)}`}>
+                      <span className={`text-xs px-2 py-1 rounded-full capitalize ${statusBadgeClass(app.status ?? "")}`}>
                         {app.status}
                       </span>
                       <span className="text-xs text-muted-foreground">{formatDate(app.created_at)}</span>
