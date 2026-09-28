@@ -2,16 +2,42 @@ import { createClient } from '@/utils/supabase/server'
 import { NextResponse } from 'next/server'
 import { getUserRoles, hasCompletedOnboarding, isGoogleUser, onboardingPath } from '@/utils/auth'
 
+/** Send failures to the login page with a readable reason instead of failing silently. */
+function loginWithError(origin: string, message: string) {
+  const url = new URL('/login', origin)
+  url.searchParams.set('message', message)
+  return NextResponse.redirect(url)
+}
+
 export async function GET(request: Request) {
   const requestUrl = new URL(request.url)
   const code = requestUrl.searchParams.get('code')
   const intent = requestUrl.searchParams.get('intent')
 
-  if (code) {
+  // Supabase/Google report problems (denied consent, bad redirect, etc.) as query params.
+  const providerError = requestUrl.searchParams.get('error_description') || requestUrl.searchParams.get('error')
+  if (providerError) {
+    console.error('OAuth callback error:', providerError)
+    return loginWithError(requestUrl.origin, `Google sign-in failed: ${providerError}`)
+  }
+
+  if (!code) {
+    return loginWithError(requestUrl.origin, 'Google sign-in did not complete. Please try again.')
+  }
+
+  {
     const supabase = await createClient()
     const { error } = await supabase.auth.exchangeCodeForSession(code)
 
-    if (!error) {
+    if (error) {
+      console.error('OAuth code exchange failed:', error.message)
+      const hint = /code verifier|code_verifier|pkce/i.test(error.message)
+        ? ' Start the sign-in from this same site and browser, then try again.'
+        : ''
+      return loginWithError(requestUrl.origin, `Couldn't finish Google sign-in: ${error.message}.${hint}`)
+    }
+
+    {
       const {
         data: { user },
       } = await supabase.auth.getUser()
@@ -63,8 +89,4 @@ export async function GET(request: Request) {
       return NextResponse.redirect(new URL(redirectUrl, requestUrl.origin))
     }
   }
-
-  return NextResponse.redirect(
-    new URL('/?message=Could not authenticate user', requestUrl.origin)
-  )
 }

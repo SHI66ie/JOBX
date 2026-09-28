@@ -4,116 +4,79 @@ import Link from "next/link";
 import { Suspense } from "react";
 import { useSearchParams } from "next/navigation";
 import { login, signInWithGoogle } from "./actions";
-import { APP_NAME } from "@/lib/config";
-import { Logo } from "@/components/brand/logo";
-import { SocialLinks } from "@/components/brand/social-links";
+import { AuthHeading, AuthShell } from "@/components/auth/auth-shell";
+import {
+  FormMessage,
+  GoogleButton,
+  OrDivider,
+  PasswordField,
+  SubmitButton,
+  TextField,
+} from "@/components/auth/auth-fields";
 
 function LoginFormInner() {
   const searchParams = useSearchParams();
   const message = searchParams.get("message");
 
   return (
-    <div className="landing-split flex min-h-screen">
-      <div className="landing-left-panel flex-1 flex flex-col justify-center px-10 lg:px-16 py-12 relative">
-        <div className="relative z-10 max-w-md">
-          <div className="mb-8">
-            <Logo variant="lockup" tone="white" tagline markClassName="h-10 w-10" />
-          </div>
+    <AuthShell
+      alternate={{ prompt: "New to JOMP?", label: "Create an account", href: "/signup" }}
+      showcase={{
+        title: "Where careers find their next move.",
+        body: "Real roles from real employers, a profile that works for you, and free tools to help you land the job.",
+      }}
+    >
+      <AuthHeading title="Welcome back" description="Sign in to pick up where you left off." />
 
-          <h1 className="text-4xl lg:text-5xl font-extrabold leading-tight mb-6 text-white">
-            Build Your Career
-            <br />
-            With {APP_NAME}
-          </h1>
-
-          <p className="text-base lg:text-lg leading-relaxed text-white/70">
-            Pursue real career paths through employer-posted positions, connect
-            with top companies, and access free tools backed by {APP_NAME}&apos;s
-            expertise.
-          </p>
-          <div className="mt-10">
-            <p className="mb-3 text-xs font-medium uppercase tracking-[0.16em] text-white/55">Follow @jomponline</p>
-            <SocialLinks />
-          </div>
-        </div>
+      <div className="auth-rise mt-9 [animation-delay:80ms]">
+        <form action={signInWithGoogle}>
+          <GoogleButton />
+        </form>
       </div>
 
-      <div className="flex-1 flex flex-col bg-white min-h-screen">
-        <div className="flex-1 flex items-start justify-center px-8 lg:px-16 pt-16">
-          <div className="w-full max-w-sm">
-            <h2 className="text-3xl font-bold mb-1 text-[#111111]">Welcome!</h2>
-            <p className="mb-8 text-[#111111]/70 text-[0.95rem]">
-              Please <span className="font-medium text-[#01224F]">login</span> to continue.
-            </p>
+      <OrDivider />
 
-            <form action={login} className="space-y-5">
-              <div>
-                <label htmlFor="landing-email" className="block text-sm font-medium mb-1.5 text-[#111111]">
-                  Email
-                </label>
-                <input
-                  id="landing-email"
-                  name="email"
-                  type="email"
-                  required
-                  className="landing-input w-full border rounded-md px-3.5 py-2.5 text-sm text-[#111111] bg-white border-[#ccc]"
-                />
-              </div>
+      <form action={login} className="auth-rise space-y-5 [animation-delay:160ms]">
+        <TextField
+          id="email"
+          name="email"
+          type="email"
+          label="Email"
+          placeholder="you@example.com"
+          autoComplete="email"
+          spellCheck={false}
+          required
+        />
+        <PasswordField
+          id="password"
+          name="password"
+          label="Password"
+          placeholder="Your password"
+          autoComplete="current-password"
+          required
+          labelAction={
+            <Link
+              href="/"
+              className="rounded-sm text-[13px] font-medium text-neutral-500 transition-colors hover:text-neutral-900 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#01224F]"
+            >
+              Forgot password?
+            </Link>
+          }
+        />
 
-              <div>
-                <label htmlFor="landing-password" className="block text-sm font-medium mb-1.5 text-[#111111]">
-                  Password
-                </label>
-                <input
-                  id="landing-password"
-                  name="password"
-                  type="password"
-                  required
-                  className="landing-input w-full border rounded-md px-3.5 py-2.5 text-sm text-[#111111] bg-white border-[#ccc]"
-                />
-              </div>
+        <FormMessage message={message} />
 
-              <div className="flex justify-end">
-                <Link href="/" className="text-sm font-medium hover:underline text-[#01224F]">
-                  Forgot password?
-                </Link>
-              </div>
-
-              {message && (
-                <p className="text-sm font-medium text-destructive bg-destructive/10 p-3 rounded-md">
-                  {message}
-                </p>
-              )}
-
-              <button type="submit" className="landing-login-btn">
-                Login
-              </button>
-            </form>
-
-            <div className="landing-divider">Or continue with</div>
-
-            <form action={signInWithGoogle} className="flex justify-center">
-              <button type="submit" className="landing-google-btn">
-                Google
-              </button>
-            </form>
-
-            <div className="mt-10 pt-6 text-center text-sm border-t border-[#eee] text-[#111111]/70">
-              Don&apos;t have an account?{" "}
-              <Link href="/signup" className="font-semibold hover:underline text-[#01224F]">
-                Sign up
-              </Link>
-            </div>
-          </div>
+        <div className="pt-2">
+          <SubmitButton label="Sign in" pendingLabel="Signing in…" />
         </div>
-      </div>
-    </div>
+      </form>
+    </AuthShell>
   );
 }
 
 export default function LoginForm() {
   return (
-    <Suspense fallback={<div className="min-h-screen flex items-center justify-center">Loading...</div>}>
+    <Suspense fallback={<div className="min-h-screen bg-white" />}>
       <LoginFormInner />
     </Suspense>
   );

@@ -102,7 +102,7 @@ export function Logo({
         {tagline && (
           <p
             className="text-[10px] font-medium uppercase tracking-[0.18em]"
-            style={{ color, fontFamily: "var(--font-heading), Poppins, sans-serif" }}
+            style={{ color, fontFamily: "var(--font-sans), sans-serif" }}
           >
             {APP_TAGLINE}
           </p>
@@ -124,7 +124,7 @@ export function Logo({
         {tagline && (
           <p
             className="mt-0.5 hidden text-[9px] font-medium uppercase tracking-[0.16em] sm:block"
-            style={{ color, fontFamily: "var(--font-heading), Poppins, sans-serif" }}
+            style={{ color, fontFamily: "var(--font-sans), sans-serif" }}
           >
             {APP_TAGLINE}
           </p>

@@ -1,85 +1,106 @@
-import { ThemeToggle } from "@/components/theme-toggle"
-import { createClient } from "@/utils/supabase/server"
-import { Button, buttonVariants } from "@/components/ui/button"
-import { addRole } from "@/app/login/actions"
-import { getUserRoles } from "@/utils/auth"
-import Link from "next/link"
-import { APP_NAME } from "@/lib/config"
+import Link from "next/link";
+import { redirect } from "next/navigation";
+import { createClient } from "@/utils/supabase/server";
+import { addRole } from "@/app/login/actions";
+import { getUserRoles } from "@/utils/auth";
+import { candidateProfileFromMeta } from "@/lib/profile";
+import { ProfileForm, SettingsRow } from "@/components/dashboard/profile-form";
+import { UserAvatar } from "@/components/ui/user-avatar";
+import { cn } from "@/lib/utils";
 
-export default async function SettingsPage() {
-  const supabase = await createClient()
+export default async function SettingsPage({ searchParams }: { searchParams: Promise<{ tab?: string }> }) {
+  const supabase = await createClient();
   const {
     data: { user },
-  } = await supabase.auth.getUser()
+  } = await supabase.auth.getUser();
 
-  const roles = getUserRoles(user)
-  const hasEmployer = roles.includes("employer")
+  if (!user) {
+    redirect("/login");
+  }
+
+  const { tab: tabParam } = await searchParams;
+  const tab = tabParam === "account" ? "account" : "profile";
+  const meta = user.user_metadata ?? {};
+  const profile = candidateProfileFromMeta(meta);
+  const roles = getUserRoles(user);
+  const hasEmployer = roles.includes("employer");
+  const fullName = [profile.firstName, profile.lastName].filter(Boolean).join(" ") || "Your profile";
+  const avatarUrl = String(meta.avatar_url || meta.picture || "") || null;
+  const provider = String(user.app_metadata?.provider || "email");
 
   return (
-    <div className="max-w-3xl mx-auto py-8">
-      <h1 className="text-3xl font-bold tracking-tight mb-8">Settings</h1>
+    <div className="mx-auto max-w-4xl px-4 pb-32 pt-8 sm:px-6 lg:px-8 lg:pt-12">
+      <header className="flex items-center gap-4">
+        <UserAvatar seed={user.email || fullName} imageUrl={avatarUrl} size={52} />
+        <div className="min-w-0">
+          <h1 className="truncate text-[22px] font-semibold tracking-[-0.025em] text-neutral-900">{fullName}</h1>
+          <p className="truncate text-[14px] text-neutral-500">{profile.title || user.email}</p>
+        </div>
+      </header>
 
-      <div className="glass-panel rounded-2xl p-6 mb-8 relative z-10">
-        <h2 className="text-xl font-semibold mb-6">Appearance</h2>
+      <nav aria-label="Settings" className="mt-8 flex gap-6 border-b border-neutral-200">
+        <Tab href="/dashboard/settings" active={tab === "profile"}>
+          Profile
+        </Tab>
+        <Tab href="/dashboard/settings?tab=account" active={tab === "account"}>
+          Account
+        </Tab>
+      </nav>
 
-        <div className="flex items-center justify-between py-4 border-b border-border/50">
-          <div>
-            <h3 className="font-medium">Theme</h3>
-            <p className="text-sm text-muted-foreground mt-1">
-              Toggle between light mode and the premium {APP_NAME} dark mode.
-            </p>
+      <div key={tab}>
+        {tab === "profile" ? (
+          <ProfileForm initial={profile} />
+        ) : (
+          <div className="divide-y divide-neutral-100">
+            <SettingsRow label="Email" hint="Where we send updates about your applications.">
+              <p className="pt-0.5 text-[14px] text-neutral-900">{user.email}</p>
+            </SettingsRow>
+
+            <SettingsRow label="Sign-in method">
+              <p className="pt-0.5 text-[14px] text-neutral-900">{provider === "google" ? "Google" : "Email and password"}</p>
+            </SettingsRow>
+
+            <SettingsRow label="Employer access" hint={hasEmployer ? "You can post jobs and review applicants." : "Post jobs from this same account."}>
+              {hasEmployer ? (
+                <Link href="/employer/dashboard" className="inline-flex text-[14px] font-medium text-brand underline decoration-brand/30 underline-offset-4 hover:decoration-brand">
+                  Open employer dashboard
+                </Link>
+              ) : (
+                <form action={addRole}>
+                  <input type="hidden" name="role" value="employer" />
+                  <button type="submit" className="text-[14px] font-medium text-brand underline decoration-brand/30 underline-offset-4 hover:decoration-brand">
+                    Add employer access
+                  </button>
+                </form>
+              )}
+            </SettingsRow>
+
+            <SettingsRow label="Sign out" hint="Sign out of JOMP on this device.">
+              <form action="/auth/signout" method="post">
+                <button type="submit" className="text-[14px] font-medium text-red-600 underline decoration-red-200 underline-offset-4 hover:decoration-red-600">
+                  Sign out
+                </button>
+              </form>
+            </SettingsRow>
           </div>
-          <ThemeToggle />
-        </div>
+        )}
       </div>
-
-      <div className="glass-panel rounded-2xl p-6 mb-8 relative z-10">
-        <h2 className="text-xl font-semibold mb-6">Account</h2>
-        <div className="flex flex-col gap-2">
-          <p className="text-sm">
-            <span className="font-medium text-muted-foreground">Email:</span>{" "}
-            {user?.email}
-          </p>
-          <p className="text-sm">
-            <span className="font-medium text-muted-foreground">Name:</span>{" "}
-            {user?.user_metadata?.first_name} {user?.user_metadata?.last_name}
-          </p>
-          <p className="text-sm">
-            <span className="font-medium text-muted-foreground">Roles:</span>{" "}
-            <span className="capitalize">{roles.join(", ")}</span>
-          </p>
-        </div>
-      </div>
-
-      {/* Dual-role: Add Employer */}
-      {!hasEmployer && (
-        <div className="glass-panel rounded-2xl p-6 mb-8 relative z-10 border border-dashed border-[#00bcd4]/40">
-          <h2 className="text-xl font-semibold mb-2">Become an Employer</h2>
-          <p className="text-sm text-muted-foreground mb-4">
-            Want to post jobs and hire talent? Add the Employer role to this
-            account. You will keep your Applicant profile.
-          </p>
-          <form action={addRole}>
-            <input type="hidden" name="role" value="employer" />
-            <Button type="submit" className="bg-[#00838f] hover:bg-[#005662]">
-              Register as Employer
-            </Button>
-          </form>
-        </div>
-      )}
-
-      {/* Dual-role: already has employer → link to it */}
-      {hasEmployer && (
-        <div className="glass-panel rounded-2xl p-6 relative z-10">
-          <h2 className="text-xl font-semibold mb-2">Employer Dashboard</h2>
-          <p className="text-sm text-muted-foreground mb-4">
-            You already have an Employer role on this account.
-          </p>
-          <Link href="/employer/dashboard" className={buttonVariants({ variant: "outline" })}>
-            Go to Employer Dashboard
-          </Link>
-        </div>
-      )}
     </div>
-  )
+  );
+}
+
+function Tab({ href, active, children }: { href: string; active: boolean; children: React.ReactNode }) {
+  return (
+    <Link
+      href={href}
+      scroll={false}
+      aria-current={active ? "page" : undefined}
+      className={cn(
+        "-mb-px border-b-2 pb-3 text-[14px] transition-colors",
+        active ? "border-brand font-medium text-neutral-900" : "border-transparent text-neutral-500 hover:text-neutral-900",
+      )}
+    >
+      {children}
+    </Link>
+  );
 }

@@ -181,14 +181,14 @@ export default function LandingPage() {
                   <line x1="40" y1="78" x2="620" y2="78" />
                   <line x1="40" y1="20" x2="620" y2="20" />
                 </g>
-                <g fill="#93a1c0" fontSize="11" fontFamily="Inter, sans-serif">
+                <g fill="#93a1c0" fontSize="11" fontFamily="var(--font-sans), sans-serif">
                   <text x="10" y="254">0</text>
                   <text x="4" y="197">3k</text>
                   <text x="4" y="139">6k</text>
                   <text x="4" y="82">9k</text>
                   <text x="0" y="24">12k</text>
                 </g>
-                <g fill="#93a1c0" fontSize="11" fontFamily="Inter, sans-serif" textAnchor="middle">
+                <g fill="#93a1c0" fontSize="11" fontFamily="var(--font-sans), sans-serif" textAnchor="middle">
                   <text x="40" y="268">Jan</text>
                   <text x="156" y="268">Feb</text>
                   <text x="272" y="268">Mar</text>

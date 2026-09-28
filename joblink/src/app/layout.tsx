@@ -1,18 +1,17 @@
 import type { Metadata } from "next";
-import { Inter, Poppins } from "next/font/google";
+import { Geist_Mono, Google_Sans } from "next/font/google";
 import "./globals.css";
 import { ThemeProvider } from "@/components/theme-provider";
 import { APP_NAME, APP_TAGLINE } from "@/lib/config";
 
-const inter = Inter({
+const googleSans = Google_Sans({
   subsets: ["latin"],
-  variable: "--font-inter",
+  variable: "--font-sans",
 });
 
-const poppins = Poppins({
+const geistMono = Geist_Mono({
   subsets: ["latin"],
-  weight: ["500", "600", "700", "800"],
-  variable: "--font-heading",
+  variable: "--font-geist-mono",
 });
 
 export const metadata: Metadata = {
@@ -34,10 +33,10 @@ export default function RootLayout({
   return (
     <html
       lang="en"
-      className={`h-full antialiased ${inter.variable} ${poppins.variable}`}
+      className={`h-full antialiased ${googleSans.variable} ${geistMono.variable}`}
       suppressHydrationWarning
     >
-      <body className={`min-h-full flex flex-col ${inter.className}`}>
+      <body className="min-h-full flex flex-col font-sans">
         <ThemeProvider
           attribute="class"
           defaultTheme="system"
