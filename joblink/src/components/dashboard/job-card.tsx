@@ -1,5 +1,6 @@
 "use client";
 
+import { richTextExcerpt } from "@/lib/rich-text";
 import Link from "next/link";
 import { useState, useTransition } from "react";
 import { Building03Icon, Tick02Icon } from "@hugeicons/core-free-icons";
@@ -20,7 +21,7 @@ export function JobRow({
 }) {
   const [expanded, setExpanded] = useState(false);
   const type = jobTypeLabel(jobTypeOf(job));
-  const description = job.description ?? "";
+  const description = richTextExcerpt(job.description ?? "");
   const isLong = description.length > 280;
 
   return (

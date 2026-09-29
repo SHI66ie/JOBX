@@ -1,3 +1,5 @@
+import { richTextExcerpt } from "@/lib/rich-text";
+
 export const JOB_TYPES = [
   { value: "full-time", label: "Full-time" },
   { value: "part-time", label: "Part-time" },
@@ -82,7 +84,7 @@ export function matchSkills(
   job: Pick<JobListing, "title" | "description" | "requirements">,
   skills: string[],
 ) {
-  const text = `${job.title} ${job.description ?? ""} ${job.requirements ?? ""}`;
+  const text = `${job.title} ${richTextExcerpt(job.description ?? "")} ${job.requirements ?? ""}`;
   return skills.filter((skill) => {
     const term = skill.trim();
     if (term.length < 2) return false;

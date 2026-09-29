@@ -502,3 +502,20 @@
 @media (prefers-reduced-motion: reduce) {
   .sheet-panel, .sheet-backdrop { animation: none; }
 }
+
+/* Shared semantic typography for the editor, previews, and published jobs. */
+.job-rich-text { overflow-wrap: anywhere; }
+.job-rich-text > * + * { margin-top: 0.75em; }
+.job-rich-text p { min-height: 1.5em; }
+.job-rich-text h2 { font-size: 1.35em; font-weight: 650; line-height: 1.4; margin-top: 1.25em; }
+.job-rich-text h3 { font-size: 1.15em; font-weight: 600; line-height: 1.5; margin-top: 1em; }
+.job-rich-text ul { list-style: disc; padding-left: 1.5em; }
+.job-rich-text ol { list-style: decimal; padding-left: 1.5em; }
+.job-rich-text li + li { margin-top: 0.25em; }
+.job-rich-text li p { margin: 0; }
+.job-rich-text blockquote { border-left: 3px solid var(--color-brand); padding-left: 1em; font-style: italic; }
+.job-rich-text a { color: var(--color-brand); text-decoration: underline; text-underline-offset: 3px; }
+.job-rich-text hr { border-color: var(--color-neutral-200); margin-block: 1.5em; }
+.description-sheet[open] { animation: sheet-in 0.25s ease-out; }
+@media (prefers-reduced-motion: reduce) { .description-sheet[open] { animation: none; } }
+@media (pointer: coarse) { .job-rich-text[contenteditable] { font-size: 16px; } }

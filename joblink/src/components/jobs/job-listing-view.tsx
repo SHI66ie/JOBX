@@ -1,3 +1,4 @@
+import { RichDescription } from "@/components/jobs/rich-description";
 import type { ReactNode } from "react";
 import { companyMonogram, isNew, jobTypeLabel, postedAgo } from "@/lib/jobs";
 import { cn } from "@/lib/utils";
@@ -80,7 +81,7 @@ export function JobListingView({
 
         <section className="mt-10">
           <h2 className="text-[17px] font-semibold tracking-[-0.015em] text-neutral-900">About the role</h2>
-          <div className="mt-3 whitespace-pre-line text-[15px] leading-7 text-neutral-700">{job.description || "No description yet."}</div>
+          <RichDescription value={job.description} />
         </section>
 
         {job.requirements ? (

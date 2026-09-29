@@ -1,3 +1,4 @@
+import { RichDescription } from "@/components/jobs/rich-description";
 import Link from "next/link";
 import type { ReactNode } from "react";
 import { ArrowLeft01Icon, PencilEdit02Icon } from "@hugeicons/core-free-icons";
@@ -209,7 +210,7 @@ export default async function JobDetailsPage({
         <div className="mt-8 grid gap-12 lg:grid-cols-[minmax(0,1fr)_320px]">
           <article className="min-w-0 max-w-2xl">
             <h2 className="text-[17px] font-semibold tracking-[-0.015em] text-neutral-900">About the role</h2>
-            <div className="mt-3 whitespace-pre-line text-[15px] leading-7 text-neutral-700">{job.description}</div>
+            <RichDescription value={job.description} />
 
             <h2 className="mt-10 text-[17px] font-semibold tracking-[-0.015em] text-neutral-900">Requirements</h2>
             {job.requirements ? (

@@ -65,3 +65,6 @@ pids
 
 # OS
 Thumbs.db
+
+# Supabase CLI local project connection metadata
+**/supabase/.temp/
