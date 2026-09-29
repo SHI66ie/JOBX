@@ -96,6 +96,19 @@ CREATE TRIGGER trg_protect_user_role
   FOR EACH ROW
   EXECUTE FUNCTION public.protect_user_role();
 
+-- Admin Check function (bypass RLS)
+CREATE OR REPLACE FUNCTION public.is_admin()
+RETURNS BOOLEAN
+LANGUAGE sql
+SECURITY DEFINER
+SET search_path = public
+AS $$
+  SELECT EXISTS (
+    SELECT 1 FROM public.users
+    WHERE id = auth.uid() AND role = 'admin'
+  );
+$$;
+
 -- RLS
 ALTER TABLE public.users ENABLE ROW LEVEL SECURITY;
 
@@ -112,10 +125,7 @@ CREATE POLICY "Users and employers can view profiles"
       WHERE a.candidate_id = public.users.id
         AND (j.employer_id = auth.uid() OR c.created_by = auth.uid())
     )
-    OR EXISTS (
-      SELECT 1 FROM public.users u
-      WHERE u.id = auth.uid() AND u.role = 'admin'
-    )
+    OR public.is_admin()
   );
 
 DROP POLICY IF EXISTS "Users can update own profile" ON public.users;
@@ -217,7 +227,7 @@ CREATE POLICY "Anyone can view published/active jobs"
     status IN ('published', 'active')
     OR auth.uid() = employer_id
     OR EXISTS (SELECT 1 FROM public.companies c WHERE c.id = jobs.company_id AND c.created_by = auth.uid())
-    OR EXISTS (SELECT 1 FROM public.users u WHERE u.id = auth.uid() AND u.role = 'admin')
+    OR public.is_admin()
   );
 
 DROP POLICY IF EXISTS "Employers can create jobs" ON public.jobs;
@@ -338,10 +348,7 @@ CREATE POLICY "Authenticated users can insert valid notifications"
       WHERE a.candidate_id = notifications.user_id
         AND (j.employer_id = auth.uid() OR c.created_by = auth.uid())
     )
-    OR EXISTS (
-      SELECT 1 FROM public.users u
-      WHERE u.id = auth.uid() AND u.role = 'admin'
-    )
+    OR public.is_admin()
   );
 
 -- ============================================================

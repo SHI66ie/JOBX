@@ -34,6 +34,19 @@ CREATE TRIGGER trg_protect_user_role
   FOR EACH ROW
   EXECUTE FUNCTION public.protect_user_role();
 
+-- 1.5. ADMIN CHECK FUNCTION (PREVENTS RLS INFINITE RECURSION)
+CREATE OR REPLACE FUNCTION public.is_admin()
+RETURNS BOOLEAN
+LANGUAGE sql
+SECURITY DEFINER
+SET search_path = public
+AS $$
+  SELECT EXISTS (
+    SELECT 1 FROM public.users
+    WHERE id = auth.uid() AND role = 'admin'
+  );
+$$;
+
 -- 2. FIX USERS SELECT POLICY (EMPLOYER APPLICANT VIEW & ADMIN ACCESS)
 DROP POLICY IF EXISTS "Users can view own profile" ON public.users;
 DROP POLICY IF EXISTS "Users and employers can view profiles" ON public.users;
@@ -47,10 +60,7 @@ CREATE POLICY "Users and employers can view profiles"
       WHERE a.candidate_id = public.users.id
         AND j.employer_id = auth.uid()
     )
-    OR EXISTS (
-      SELECT 1 FROM public.users u
-      WHERE u.id = auth.uid() AND u.role = 'admin'
-    )
+    OR public.is_admin()
   );
 
 -- 3. FIX JOBS SELECT POLICY (ALLOW ADMINS TO VIEW ALL LISTINGS)
@@ -60,7 +70,7 @@ CREATE POLICY "Anyone can view published/active jobs"
   USING (
     status IN ('published', 'active')
     OR auth.uid() = employer_id
-    OR EXISTS (SELECT 1 FROM public.users u WHERE u.id = auth.uid() AND u.role = 'admin')
+    OR public.is_admin()
   );
 
 -- 4. FIX NOTIFICATIONS INSERT POLICY (PREVENT NOTIFICATION SPOOFING)
@@ -76,8 +86,5 @@ CREATE POLICY "Authenticated users can insert valid notifications"
       WHERE a.candidate_id = notifications.user_id
         AND j.employer_id = auth.uid()
     )
-    OR EXISTS (
-      SELECT 1 FROM public.users u
-      WHERE u.id = auth.uid() AND u.role = 'admin'
-    )
+    OR public.is_admin()
   );
