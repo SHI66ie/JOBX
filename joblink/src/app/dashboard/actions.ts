@@ -83,12 +83,12 @@ export async function postJob(formData: FormData) {
   redirect("/employer/jobs");
 }
 
-export async function applyForJob(jobId: string) {
+export async function applyForJob(jobId: string): Promise<{ error?: string }> {
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
 
   if (!user) {
-    throw new Error("Unauthorized");
+    return { error: "Please sign in again to apply." };
   }
 
   const { error } = await supabase
@@ -99,16 +99,18 @@ export async function applyForJob(jobId: string) {
       status: "pending",
     });
 
-  if (error) {
-    // Unique violation = already applied; treat as success so the UI can refresh.
-    if (error.code !== "23505") {
-      console.error("Error applying for job:", error);
-      throw new Error(error.message);
-    }
+  // Unique violation = already applied; treat as success.
+  if (error && error.code !== "23505") {
+    console.error("Error applying for job:", error);
+    return {
+      error: /row-level security/i.test(error.message)
+        ? "Applications are blocked by a database permission. Please contact support."
+        : "We couldn't send your application. Please try again.",
+    };
   }
 
-  revalidatePath("/dashboard");
   revalidatePath("/dashboard/applications");
+  return {};
 }
 
 export async function updateApplicationStatus(applicationId: string, status: string, jobId: string) {
@@ -132,4 +134,53 @@ export async function updateApplicationStatus(applicationId: string, status: str
 
   revalidatePath(`/employer/jobs/${jobId}`);
   revalidatePath("/dashboard/applications");
+}
+
+export async function updateCandidateProfile(input: {
+  firstName: string;
+  lastName: string;
+  title: string;
+  bio: string;
+  skills: string[];
+  resumeUrl: string;
+}): Promise<{ error?: string }> {
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+
+  if (!user) {
+    return { error: "Please sign in again." };
+  }
+
+  const first_name = input.firstName.trim().slice(0, 60);
+  const last_name = input.lastName.trim().slice(0, 60);
+  const title = input.title.trim().slice(0, 100);
+  const bio = input.bio.trim().slice(0, 600);
+  const skills = Array.from(new Set(input.skills.map((skill) => skill.trim()).filter(Boolean))).slice(0, 30);
+  const resume_url = input.resumeUrl.trim();
+
+  if (!first_name || !last_name) {
+    return { error: "Your first and last name are required." };
+  }
+  if (resume_url && !/^https:\/\//.test(resume_url)) {
+    return { error: "That CV link doesn't look right. Try uploading it again." };
+  }
+
+  const { error } = await supabase.auth.updateUser({
+    data: { first_name, last_name, title, bio, skills, resume_url },
+  });
+  if (error) {
+    return { error: error.message };
+  }
+
+  // Keep the public profile row (what employers see) in sync; not fatal if it fails.
+  const { error: profileError } = await supabase
+    .from("users")
+    .update({ first_name, last_name, bio })
+    .eq("id", user.id);
+  if (profileError) console.warn("Could not sync public.users profile:", profileError.message);
+
+  revalidatePath("/dashboard", "layout");
+  return {};
 }

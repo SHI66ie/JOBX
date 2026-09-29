@@ -1,0 +1,111 @@
+{
+  "Software Development": [
+    "JavaScript", "TypeScript", "Python", "Java", "C#", "C++", "C", "Go", "Rust", "PHP", "Ruby", "Kotlin", "Swift", "Dart", "Scala", "Elixir", "R",
+    "Object-Oriented Programming", "Functional Programming", "Data Structures & Algorithms", "System Design", "Software Architecture", "Microservices",
+    "REST APIs", "GraphQL", "gRPC", "WebSockets", "Unit Testing", "Test-Driven Development", "Integration Testing", "Debugging", "Code Review",
+    "Git", "GitHub", "GitLab", "Agile", "Scrum", "Technical Documentation", "Open Source"
+  ],
+  "Frontend": [
+    "React", "Next.js", "Vue.js", "Nuxt", "Angular", "Svelte", "SvelteKit", "Remix", "HTML", "CSS", "Sass", "Tailwind CSS", "Bootstrap",
+    "Redux", "Zustand", "React Query", "Vite", "Webpack", "Jest", "Vitest", "Playwright", "Cypress", "Storybook",
+    "Responsive Design", "Web Accessibility", "Web Performance", "SEO (Technical)", "Framer Motion", "GSAP", "Three.js", "WebGL"
+  ],
+  "Backend": [
+    "Node.js", "Express.js", "NestJS", "Fastify", "Django", "Flask", "FastAPI", "Spring Boot", "ASP.NET Core", "Laravel", "Ruby on Rails", "Phoenix",
+    "PostgreSQL", "MySQL", "SQLite", "MongoDB", "Redis", "Elasticsearch", "Supabase", "Firebase", "Prisma", "SQL", "Database Design",
+    "Message Queues", "RabbitMQ", "Apache Kafka", "Authentication & OAuth", "Payment Integration", "Stripe", "Paystack", "Flutterwave", "Caching"
+  ],
+  "Mobile": [
+    "React Native", "Expo", "Flutter", "iOS Development", "Android Development", "SwiftUI", "Jetpack Compose", "Mobile UI Design",
+    "App Store Deployment", "Google Play Deployment", "Push Notifications"
+  ],
+  "Data & AI": [
+    "Data Analysis", "Data Visualization", "Data Engineering", "Data Science", "Machine Learning", "Deep Learning", "Natural Language Processing",
+    "Computer Vision", "Generative AI", "Prompt Engineering", "LLM Integration", "LangChain", "PyTorch", "TensorFlow", "scikit-learn",
+    "Pandas", "NumPy", "Jupyter", "Statistics", "A/B Testing", "ETL", "dbt", "Apache Spark", "Airflow", "Snowflake", "BigQuery",
+    "Power BI", "Tableau", "Looker", "Google Analytics", "Microsoft Excel", "Google Sheets", "Business Intelligence", "Data Entry"
+  ],
+  "Cloud & DevOps": [
+    "AWS", "Google Cloud", "Microsoft Azure", "Docker", "Kubernetes", "Terraform", "CI/CD", "GitHub Actions", "Jenkins", "Linux", "Bash",
+    "Nginx", "Serverless", "Vercel", "Netlify", "Monitoring & Observability", "Site Reliability Engineering", "Networking", "System Administration",
+    "IT Support", "Help Desk", "Windows Server", "Active Directory", "Microsoft 365 Administration"
+  ],
+  "Security": [
+    "Cybersecurity", "Network Security", "Penetration Testing", "Application Security", "Cloud Security", "Security Operations (SOC)",
+    "Incident Response", "Identity & Access Management", "Vulnerability Management", "ISO 27001", "Risk Assessment"
+  ],
+  "Blockchain": [
+    "Solidity", "Smart Contracts", "Web3.js", "Ethers.js", "Solana", "Ethereum", "DeFi", "Blockchain Development"
+  ],
+  "Design": [
+    "UI Design", "UX Design", "Product Design", "UX Research", "Wireframing", "Prototyping", "Design Systems", "Interaction Design",
+    "Figma", "Adobe Photoshop", "Adobe Illustrator", "Adobe InDesign", "Adobe XD", "Canva", "Graphic Design", "Brand Identity", "Logo Design",
+    "Typography", "Illustration", "Motion Graphics", "Adobe After Effects", "Video Editing", "Adobe Premiere Pro", "Final Cut Pro", "CapCut",
+    "3D Modeling", "Blender", "Photography", "Print Design", "Packaging Design"
+  ],
+  "Product & Project": [
+    "Product Management", "Product Strategy", "Roadmapping", "User Stories", "Requirements Gathering", "Project Management", "Program Management",
+    "Stakeholder Management", "Jira", "Confluence", "Notion", "Trello", "Asana", "Kanban", "PRINCE2", "PMP", "Risk Management",
+    "Business Analysis", "Process Improvement", "Change Management", "Budgeting"
+  ],
+  "Marketing": [
+    "Digital Marketing", "Social Media Marketing", "Social Media Management", "Content Marketing", "Content Writing", "Copywriting",
+    "Search Engine Optimization (SEO)", "Search Engine Marketing (SEM)", "Google Ads", "Meta Ads", "TikTok Ads", "Email Marketing",
+    "Marketing Automation", "HubSpot", "Mailchimp", "Influencer Marketing", "Brand Management", "Public Relations", "Community Management",
+    "Growth Marketing", "Performance Marketing", "Marketing Analytics", "Market Research", "Event Planning", "Affiliate Marketing", "Blogging"
+  ],
+  "Sales": [
+    "Sales", "B2B Sales", "B2C Sales", "Business Development", "Lead Generation", "Cold Calling", "Negotiation", "Account Management",
+    "Key Account Management", "CRM", "Salesforce", "Pipeline Management", "Closing Deals", "Retail Sales", "Telemarketing", "Sales Forecasting",
+    "Partnerships", "Presentation Skills"
+  ],
+  "Customer Support": [
+    "Customer Service", "Customer Success", "Customer Experience", "Technical Support", "Call Centre Operations", "Live Chat Support",
+    "Zendesk", "Intercom", "Freshdesk", "Complaint Resolution", "Client Relations"
+  ],
+  "Finance & Accounting": [
+    "Accounting", "Bookkeeping", "Financial Analysis", "Financial Reporting", "Financial Modeling", "Budgeting & Forecasting", "Auditing",
+    "Taxation", "Payroll", "Accounts Payable", "Accounts Receivable", "Reconciliation", "IFRS", "QuickBooks", "Sage", "Xero", "SAP",
+    "Treasury", "Risk Analysis", "Investment Analysis", "Banking Operations", "Credit Analysis", "Cost Accounting", "Compliance"
+  ],
+  "HR & Recruiting": [
+    "Recruitment", "Talent Acquisition", "Sourcing", "Interviewing", "Onboarding", "Employee Relations", "HR Administration",
+    "Performance Management", "Learning & Development", "Compensation & Benefits", "HRIS", "Workday", "Labour Law", "Employer Branding"
+  ],
+  "Operations & Admin": [
+    "Operations Management", "Administrative Support", "Office Management", "Executive Assistance", "Virtual Assistance", "Scheduling",
+    "Calendar Management", "Record Keeping", "Microsoft Word", "Microsoft PowerPoint", "Microsoft Office", "Google Workspace",
+    "Procurement", "Vendor Management", "Inventory Management", "Supply Chain Management", "Logistics", "Fleet Management",
+    "Warehouse Operations", "Quality Assurance", "Health & Safety", "Facilities Management", "Front Desk", "Receptionist", "Typing"
+  ],
+  "Legal": [
+    "Legal Research", "Contract Drafting", "Contract Management", "Corporate Law", "Litigation", "Regulatory Compliance", "Intellectual Property",
+    "Data Protection (GDPR/NDPR)", "Legal Writing", "Company Secretarial", "Due Diligence"
+  ],
+  "Healthcare": [
+    "Patient Care", "Nursing", "Clinical Research", "Medical Records", "Pharmacy", "First Aid", "CPR", "Phlebotomy", "Medical Billing",
+    "Health Education", "Public Health", "Caregiving", "Laboratory Skills", "Telemedicine"
+  ],
+  "Education": [
+    "Teaching", "Lesson Planning", "Curriculum Development", "Classroom Management", "Tutoring", "E-Learning", "Instructional Design",
+    "Special Education", "Early Childhood Education", "STEM Education", "Educational Technology", "Assessment Design", "Mentoring", "Coaching"
+  ],
+  "Construction & Trades": [
+    "Civil Engineering", "Structural Engineering", "Mechanical Engineering", "Electrical Engineering", "AutoCAD", "Revit", "SolidWorks",
+    "Quantity Surveying", "Site Supervision", "Construction Management", "Carpentry", "Plumbing", "Electrical Installation", "Welding",
+    "Masonry", "Painting & Decorating", "HVAC", "Solar Installation", "Generator Maintenance", "Auto Mechanics", "Driving", "Forklift Operation"
+  ],
+  "Hospitality": [
+    "Hospitality Management", "Hotel Operations", "Food & Beverage Service", "Cooking", "Baking", "Pastry", "Catering", "Food Safety",
+    "Housekeeping", "Bartending", "Barista", "Guest Relations", "Tour Guiding", "Event Management", "Cashiering"
+  ],
+  "Writing & Media": [
+    "Writing", "Editing", "Proofreading", "Journalism", "Technical Writing", "Grant Writing", "Scriptwriting", "Translation", "Transcription",
+    "Voice Over", "Podcasting", "Content Creation", "Research"
+  ],
+  "Soft Skills": [
+    "Communication", "Teamwork", "Leadership", "Problem Solving", "Critical Thinking", "Time Management", "Attention to Detail",
+    "Adaptability", "Creativity", "Emotional Intelligence", "Conflict Resolution", "Decision Making", "Public Speaking", "Organisation",
+    "Multitasking", "Work Ethic", "Customer Focus", "Self-Motivation", "People Management", "Strategic Thinking"
+  ]
+}
