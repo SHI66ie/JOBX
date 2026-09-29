@@ -60,7 +60,7 @@ export default async function DashboardLayout({
             {hasEmployer ? (
               <Link
                 href="/employer/dashboard"
-                className="hidden rounded-full px-3 py-1.5 text-[13px] font-medium text-neutral-700 ring-1 ring-inset ring-neutral-200 transition-colors hover:bg-neutral-50 hover:text-neutral-900 sm:block"
+                className="hidden rounded-full px-3 py-1.5 text-[13px] font-medium text-neutral-700 ring-1 ring-inset ring-neutral-200 transition-colors hover:bg-neutral-50 hover:text-neutral-900 lg:block"
               >
                 Employer mode
               </Link>

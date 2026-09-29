@@ -1,74 +1,106 @@
 import Link from "next/link";
-import { buttonVariants } from "@/components/ui/button";
-import { Card, CardContent } from "@/components/ui/card";
-import { Plus } from "lucide-react";
-import { formatDate, getJobsForCompany, requireCompany, statusBadgeClass } from "@/lib/employer";
+import { ArrowRight01Icon } from "@hugeicons/core-free-icons";
+import { EmptyJobsArt } from "@/components/dashboard/empty-jobs-art";
+import { EmptyState, LinkTabs, PageHeader, Pill, PrimaryLink } from "@/components/employer/bits";
+import { Icon } from "@/components/ui/icon";
+import { getJobsForCompany, requireCompany } from "@/lib/employer";
+import { jobStatusMeta, jobTypeLabel, postedAgo } from "@/lib/jobs";
 
-export default async function EmployerJobsPage() {
+type Filter = "all" | "open" | "draft" | "closed";
+
+const FILTERS: { value: Filter; label: string }[] = [
+  { value: "all", label: "All" },
+  { value: "open", label: "Open" },
+  { value: "draft", label: "Drafts" },
+  { value: "closed", label: "Closed" },
+];
+
+export default async function EmployerJobsPage({ searchParams }: { searchParams: Promise<{ status?: string }> }) {
   const { supabase, company } = await requireCompany();
+  const { status } = await searchParams;
+  const filter = (FILTERS.some((item) => item.value === status) ? status : "all") as Filter;
 
   const jobs = await getJobsForCompany(supabase, company.id);
+  const counts: Record<Filter, number> = { all: jobs.length, open: 0, draft: 0, closed: 0 };
+  for (const job of jobs) counts[jobStatusMeta(job.status).value] += 1;
+  const visible = filter === "all" ? jobs : jobs.filter((job) => jobStatusMeta(job.status).value === filter);
 
   return (
-    <div className="space-y-6">
-      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-        <div>
-          <h1 className="text-3xl font-bold tracking-tight">Job listings</h1>
-          <p className="text-muted-foreground">Create, edit, and close roles for {company.name}.</p>
-        </div>
-        <Link href="/employer/jobs/create" className={buttonVariants({ variant: "default" })}>
-          <Plus className="mr-2 h-4 w-4" /> Post a job
-        </Link>
-      </div>
+    <div className="mx-auto max-w-7xl px-4 pb-24 pt-8 sm:px-6 lg:px-8 lg:pt-10">
+      <PageHeader
+        title="Jobs"
+        description={jobs.length ? `${counts.open} open · ${jobs.length} total at ${company.name}` : `Roles you post for ${company.name} live here.`}
+        action={<PrimaryLink href="/employer/jobs/create">Post a job</PrimaryLink>}
+      />
 
-      {jobs.length > 0 ? (
-        <Card>
-          <CardContent className="p-0">
-            <div className="overflow-x-auto">
-              <table className="w-full text-sm">
-                <thead className="border-b text-left text-muted-foreground">
-                  <tr>
-                    <th className="px-4 py-3 font-medium">Role</th>
-                    <th className="px-4 py-3 font-medium">Location</th>
-                    <th className="px-4 py-3 font-medium">Type</th>
-                    <th className="px-4 py-3 font-medium">Applicants</th>
-                    <th className="px-4 py-3 font-medium">Status</th>
-                    <th className="px-4 py-3 font-medium">Posted</th>
-                    <th className="px-4 py-3 font-medium"></th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {jobs.map((job) => (
-                    <tr key={job.id} className="border-b last:border-0">
-                      <td className="px-4 py-3 font-medium">{job.title}</td>
-                      <td className="px-4 py-3 text-muted-foreground">{job.location}</td>
-                      <td className="px-4 py-3 capitalize">{job.type || "—"}</td>
-                      <td className="px-4 py-3">{job.applications?.length || 0}</td>
-                      <td className="px-4 py-3">
-                        <span className={`text-xs px-2 py-1 rounded-full capitalize ${statusBadgeClass(job.status)}`}>
-                          {job.status}
-                        </span>
-                      </td>
-                      <td className="px-4 py-3 text-muted-foreground">{formatDate(job.created_at)}</td>
-                      <td className="px-4 py-3 text-right">
-                        <Link href={`/employer/jobs/${job.id}`} className="text-primary hover:underline">
-                          Manage
-                        </Link>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
+      {jobs.length ? (
+        <>
+          <div className="mt-8">
+            <LinkTabs
+              tabs={FILTERS.map((item) => ({
+                href: item.value === "all" ? "/employer/jobs" : `/employer/jobs?status=${item.value}`,
+                label: item.label,
+                count: counts[item.value],
+                active: item.value === filter,
+              }))}
+            />
+          </div>
+
+          {visible.length ? (
+            <ul className="divide-y divide-neutral-100">
+              {visible.map((job) => {
+                const meta = jobStatusMeta(job.status);
+                const apps = job.applications ?? [];
+                const fresh = apps.filter((app) => app.status === "pending").length;
+                return (
+                  <li key={job.id}>
+                    <Link
+                      href={`/employer/jobs/${job.id}`}
+                      className="group grid gap-3 py-5 transition-colors sm:px-3 sm:hover:bg-neutral-50/70 md:grid-cols-[minmax(0,1fr)_140px_110px_20px] md:items-center md:gap-8"
+                    >
+                      <div className="min-w-0">
+                        <div className="flex flex-wrap items-center gap-2">
+                          <p className="truncate text-[16px] font-semibold tracking-[-0.01em] text-neutral-900 group-hover:text-brand">{job.title}</p>
+                          <Pill className={meta.className}>{meta.label}</Pill>
+                        </div>
+                        <p className="mt-1 truncate text-[13px] text-neutral-500">
+                          {[jobTypeLabel(job.type), "Remote", job.salary_range || null].filter(Boolean).join("  ·  ")}
+                        </p>
+                      </div>
+                      <p className="text-[13px] text-neutral-600">
+                        <span className="font-semibold tabular-nums text-neutral-900">{apps.length}</span> {apps.length === 1 ? "applicant" : "applicants"}
+                        {fresh ? <span className="ml-1.5 text-brand">· {fresh} new</span> : null}
+                      </p>
+                      <p className="text-[13px] text-neutral-500">{postedAgo(job.created_at)}</p>
+                      <Icon icon={ArrowRight01Icon} size={18} className="hidden text-neutral-300 transition-colors group-hover:text-neutral-500 md:block" />
+                    </Link>
+                  </li>
+                );
+              })}
+            </ul>
+          ) : (
+            <div className="mt-6">
+              <EmptyState
+                art={<EmptyJobsArt variant="search" />}
+                title={`No ${FILTERS.find((item) => item.value === filter)?.label.toLowerCase()} jobs`}
+                body="Jobs move between tabs as you publish, close or reopen them."
+                action={
+                  <Link href="/employer/jobs" className="rounded-full bg-surface px-4 py-2 text-[13px] font-medium text-neutral-800 ring-1 ring-inset ring-neutral-200 hover:bg-neutral-50">
+                    See all jobs
+                  </Link>
+                }
+              />
             </div>
-          </CardContent>
-        </Card>
+          )}
+        </>
       ) : (
-        <div className="py-16 text-center border-2 border-dashed rounded-lg">
-          <h3 className="text-xl font-semibold mb-2">No listings yet</h3>
-          <p className="text-muted-foreground mb-6">Your first job post will show up here.</p>
-          <Link href="/employer/jobs/create" className={buttonVariants({ variant: "default" })}>
-            Post a job
-          </Link>
+        <div className="mt-8">
+          <EmptyState
+            art={<EmptyJobsArt variant="empty" />}
+            title="No jobs yet"
+            body="Post your first remote role. You can save it as a draft and publish when you're ready."
+            action={<PrimaryLink href="/employer/jobs/create">Post a job</PrimaryLink>}
+          />
         </div>
       )}
     </div>

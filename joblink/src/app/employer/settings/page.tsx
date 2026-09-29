@@ -33,7 +33,7 @@ export default async function EmployerSettings() {
 
 
   return (
-    <div className="space-y-8 max-w-2xl">
+    <div className="mx-auto max-w-2xl space-y-8 px-4 pb-24 pt-8 sm:px-6 lg:px-8 lg:pt-10">
       <div>
         <h1 className="text-3xl font-bold tracking-tight">Company settings</h1>
         <p className="text-muted-foreground">

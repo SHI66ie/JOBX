@@ -30,3 +30,35 @@ export const STATUS_TONES: Record<StatusMeta["tone"], string> = {
   emerald: "bg-emerald-50 text-emerald-700",
   muted: "bg-neutral-100 text-neutral-500",
 };
+
+/** Employer-facing labels for the same statuses. */
+export const EMPLOYER_STATUS_LABELS: Record<ApplicationStatus, string> = {
+  pending: "New",
+  reviewed: "In review",
+  interviewing: "Interviewing",
+  accepted: "Hired",
+  rejected: "Rejected",
+};
+
+/** The next moves an employer can make from each stage. */
+export function nextMoves(status: ApplicationStatus): { status: ApplicationStatus; label: string; tone: "default" | "positive" | "negative" }[] {
+  const moves: Record<ApplicationStatus, ApplicationStatus[]> = {
+    pending: ["reviewed", "interviewing", "rejected"],
+    reviewed: ["interviewing", "accepted", "rejected"],
+    interviewing: ["accepted", "rejected"],
+    accepted: ["interviewing"],
+    rejected: ["reviewed"],
+  };
+  const labels: Record<ApplicationStatus, string> = {
+    pending: "Mark as new",
+    reviewed: "Move to review",
+    interviewing: "Interview",
+    accepted: "Hire",
+    rejected: "Reject",
+  };
+  return moves[status].map((next) => ({
+    status: next,
+    label: status === "rejected" && next === "reviewed" ? "Reconsider" : status === "accepted" ? "Undo hire" : labels[next],
+    tone: next === "accepted" ? "positive" : next === "rejected" ? "negative" : "default",
+  }));
+}

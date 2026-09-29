@@ -8,7 +8,7 @@ import { Icon } from "@/components/ui/icon";
 import { UserAvatar } from "@/components/ui/user-avatar";
 import { cn } from "@/lib/utils";
 
-type NavItem = { href: string; label: string };
+type NavItem = { href: string; label: string; exact?: boolean };
 
 export function DashboardNavLinks({ items }: { items: NavItem[] }) {
   const pathname = usePathname();
@@ -16,7 +16,7 @@ export function DashboardNavLinks({ items }: { items: NavItem[] }) {
   return (
     <nav aria-label="Dashboard" className="hidden items-center gap-1 md:flex">
       {items.map((item) => {
-        const active = item.href === "/dashboard" ? pathname === "/dashboard" : pathname.startsWith(item.href);
+        const active = item.exact || item.href === "/dashboard" ? pathname === item.href : pathname.startsWith(item.href);
         return (
           <Link
             key={item.href}
@@ -42,7 +42,7 @@ export function DashboardNavMobile({ items }: { items: NavItem[] }) {
   return (
     <nav aria-label="Dashboard" className="-mx-1 flex gap-1 overflow-x-auto pb-3 md:hidden">
       {items.map((item) => {
-        const active = item.href === "/dashboard" ? pathname === "/dashboard" : pathname.startsWith(item.href);
+        const active = item.exact || item.href === "/dashboard" ? pathname === item.href : pathname.startsWith(item.href);
         return (
           <Link
             key={item.href}
@@ -65,12 +65,18 @@ export function UserMenu({
   email,
   avatarUrl,
   hasEmployer = false,
+  settingsHref = "/dashboard/settings",
+  switchTo,
 }: {
   name: string;
   email: string;
   avatarUrl?: string | null;
   hasEmployer?: boolean;
+  settingsHref?: string;
+  /** Mobile-only link to the other side of the app (the header pill covers larger screens). */
+  switchTo?: { href: string; label: string };
 }) {
+  const modeLink = switchTo ?? (hasEmployer ? { href: "/employer/dashboard", label: "Employer mode" } : null);
   const [open, setOpen] = useState(false);
   const ref = useRef<HTMLDivElement>(null);
 
@@ -119,22 +125,22 @@ export function UserMenu({
           <div className="my-1 h-px bg-neutral-100" />
           <Link
             role="menuitem"
-            href="/dashboard/settings"
+            href={settingsHref}
             onClick={() => setOpen(false)}
             className="flex items-center gap-2.5 rounded-lg px-3 py-2 text-sm hover:bg-neutral-100"
           >
             <Icon icon={Settings01Icon} size={16} className="text-neutral-500" />
             Settings
           </Link>
-          {hasEmployer ? (
+          {modeLink ? (
             <Link
               role="menuitem"
-              href="/employer/dashboard"
+              href={modeLink.href}
               onClick={() => setOpen(false)}
-              className="flex items-center gap-2.5 rounded-lg px-3 py-2 text-sm hover:bg-neutral-100 sm:hidden"
+              className="flex items-center gap-2.5 rounded-lg px-3 py-2 text-sm hover:bg-neutral-100 lg:hidden"
             >
               <Icon icon={Briefcase01Icon} size={16} className="text-neutral-500" />
-              Employer mode
+              {modeLink.label}
             </Link>
           ) : null}
           <form action="/auth/signout" method="post">

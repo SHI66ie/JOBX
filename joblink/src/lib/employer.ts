@@ -1,6 +1,6 @@
 import { createClient } from "@/utils/supabase/server";
 import { redirect } from "next/navigation";
-import { MOCK_COMPANY, MOCK_JOBS, MOCK_USER } from "@/lib/mock-data";
+import { MOCK_APPLICATIONS, MOCK_COMPANY, MOCK_JOBS, MOCK_USER } from "@/lib/mock-data";
 
 const USE_MOCK = process.env.NEXT_PUBLIC_USE_MOCK_DATA === "true";
 
@@ -125,4 +125,73 @@ export async function getJobsForCompany(
   }
 
   return (data ?? []) as JobRow[];
+}
+
+export type CandidateSummary = {
+  id?: string;
+  first_name: string | null;
+  last_name: string | null;
+  email: string | null;
+  bio?: string | null;
+};
+
+export type CompanyApplication = {
+  id: string;
+  status: string;
+  created_at: string;
+  job: { id: string; title: string } | null;
+  candidate: CandidateSummary | null;
+};
+
+function firstOf<T>(value: T | T[] | null | undefined): T | null {
+  return Array.isArray(value) ? (value[0] ?? null) : (value ?? null);
+}
+
+export function candidateName(candidate: CandidateSummary | null) {
+  return [candidate?.first_name, candidate?.last_name].filter(Boolean).join(" ") || candidate?.email || "Candidate";
+}
+
+/** Every application across the company's jobs, newest first, with job + candidate details. */
+export async function getCompanyApplications(
+  supabase: Awaited<ReturnType<typeof createClient>>,
+  companyId: string,
+  limit?: number,
+): Promise<CompanyApplication[]> {
+  if (USE_MOCK) {
+    const rows = MOCK_APPLICATIONS.map((app) => ({
+      id: app.id,
+      status: app.status,
+      created_at: app.created_at,
+      job: { id: app.jobId, title: app.jobTitle },
+      candidate: {
+        first_name: app.users.full_name.split(" ")[0] ?? null,
+        last_name: app.users.full_name.split(" ").slice(1).join(" ") || null,
+        email: app.users.email,
+      },
+    }));
+    return limit ? rows.slice(0, limit) : rows;
+  }
+
+  const { data: jobs } = await supabase.from("jobs").select("id").eq("company_id", companyId);
+  const jobIds = (jobs ?? []).map((job) => job.id);
+  if (!jobIds.length) return [];
+
+  let query = supabase
+    .from("applications")
+    .select("id, status, created_at, job:jobs (id, title), candidate:users (id, first_name, last_name, email, bio)")
+    .in("job_id", jobIds)
+    .order("created_at", { ascending: false });
+  if (limit) query = query.limit(limit);
+
+  const { data, error } = await query;
+  if (error) {
+    console.error("[getCompanyApplications] Supabase error:", error.message);
+    return [];
+  }
+
+  type Raw = Omit<CompanyApplication, "job" | "candidate"> & {
+    job: CompanyApplication["job"] | NonNullable<CompanyApplication["job"]>[];
+    candidate: CandidateSummary | CandidateSummary[] | null;
+  };
+  return ((data ?? []) as unknown as Raw[]).map((row) => ({ ...row, job: firstOf(row.job), candidate: firstOf(row.candidate) }));
 }

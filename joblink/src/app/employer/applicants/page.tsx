@@ -1,125 +1,101 @@
 import Link from "next/link";
-import { Card, CardContent } from "@/components/ui/card";
-import { formatDate, requireCompany, statusBadgeClass } from "@/lib/employer";
-import { MOCK_APPLICATIONS } from "@/lib/mock-data";
+import { EmptyApplicationsArt } from "@/components/dashboard/empty-applications-art";
+import { EmptyJobsArt } from "@/components/dashboard/empty-jobs-art";
+import { EmptyState, LinkTabs, PageHeader, Pill, PrimaryLink } from "@/components/employer/bits";
+import { UserAvatar } from "@/components/ui/user-avatar";
+import { EMPLOYER_STATUS_LABELS, STATUS_TONES, applicationStatus, type ApplicationStatus } from "@/lib/applications";
+import { candidateName, getCompanyApplications, requireCompany } from "@/lib/employer";
+import { postedAgo } from "@/lib/jobs";
 
-const USE_MOCK = process.env.NEXT_PUBLIC_USE_MOCK_DATA === "true";
+type Filter = "all" | ApplicationStatus;
+const FILTERS: Filter[] = ["all", "pending", "reviewed", "interviewing", "accepted", "rejected"];
 
-type Candidate = {
-  first_name: string | null;
-  last_name: string | null;
-  email: string | null;
-};
-
-type ApplicationRow = {
-  id: string;
-  status: string;
-  created_at: string;
-  job_id: string;
-  job: { id?: string; title?: string } | { id?: string; title?: string }[] | null;
-  candidate: Candidate | Candidate[] | null;
-};
-
-export default async function EmployerApplicantsPage() {
+export default async function EmployerApplicantsPage({ searchParams }: { searchParams: Promise<{ status?: string }> }) {
   const { supabase, company } = await requireCompany();
+  const { status } = await searchParams;
+  const filter = (FILTERS.includes(status as Filter) ? status : "all") as Filter;
 
-  let applications: ApplicationRow[] = [];
-
-  if (USE_MOCK) {
-    applications = MOCK_APPLICATIONS.map((app) => ({
-      id: app.id,
-      status: app.status,
-      created_at: app.created_at,
-      job_id: app.job_id,
-      job: { id: app.jobId, title: app.jobTitle },
-      candidate: {
-        first_name: app.users.full_name.split(" ")[0] ?? null,
-        last_name: app.users.full_name.split(" ")[1] ?? null,
-        email: app.users.email,
-      },
-    }));
-  } else {
-    const { data: jobs } = await supabase.from("jobs").select("id").eq("company_id", company.id);
-    const jobIds = (jobs || []).map((job) => job.id);
-
-    if (jobIds.length > 0) {
-      const { data, error } = await supabase
-        .from("applications")
-        .select(`
-          id,
-          status,
-          created_at,
-          job_id,
-          job:jobs (id, title),
-          candidate:users (first_name, last_name, email)
-        `)
-        .in("job_id", jobIds)
-        .order("created_at", { ascending: false });
-
-      if (error) {
-        console.error("[EmployerApplicantsPage] Supabase error:", error.message);
-      } else {
-        applications = (data ?? []) as ApplicationRow[];
-      }
-    }
-  }
+  const applications = await getCompanyApplications(supabase, company.id);
+  const counts = Object.fromEntries(FILTERS.map((item) => [item, 0])) as Record<Filter, number>;
+  counts.all = applications.length;
+  for (const app of applications) counts[applicationStatus(app.status).value] += 1;
+  const visible = filter === "all" ? applications : applications.filter((app) => applicationStatus(app.status).value === filter);
 
   return (
-    <div className="space-y-6">
-      <div>
-        <h1 className="text-3xl font-bold tracking-tight">Applicants</h1>
-        <p className="text-muted-foreground">Every candidate who applied to {company.name}.</p>
-      </div>
+    <div className="mx-auto max-w-7xl px-4 pb-24 pt-8 sm:px-6 lg:px-8 lg:pt-10">
+      <PageHeader
+        title="Applicants"
+        description={
+          applications.length
+            ? `${counts.pending} new · ${counts.interviewing} interviewing · ${applications.length} total`
+            : `Everyone who applies to ${company.name} shows up here.`
+        }
+      />
 
-      {applications.length > 0 ? (
-        <Card>
-          <CardContent className="p-0">
-            <div className="overflow-x-auto">
-              <table className="w-full text-sm">
-                <thead className="border-b text-left text-muted-foreground">
-                  <tr>
-                    <th className="px-4 py-3 font-medium">Candidate</th>
-                    <th className="px-4 py-3 font-medium">Role</th>
-                    <th className="px-4 py-3 font-medium">Status</th>
-                    <th className="px-4 py-3 font-medium">Applied</th>
-                    <th className="px-4 py-3 font-medium"></th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {applications.map((app) => {
-                    const candidate = Array.isArray(app.candidate) ? app.candidate[0] : (app.candidate as Candidate | null);
-                    const job = Array.isArray(app.job) ? app.job[0] : (app.job as { id?: string; title?: string } | null);
-                    const name = [candidate?.first_name, candidate?.last_name].filter(Boolean).join(" ") || "Candidate";
-                    return (
-                      <tr key={app.id} className="border-b last:border-0">
-                        <td className="px-4 py-3">
-                          <div className="font-medium">{name}</div>
-                          <div className="text-muted-foreground">{candidate?.email}</div>
-                        </td>
-                        <td className="px-4 py-3">{job?.title || "—"}</td>
-                        <td className="px-4 py-3">
-                          <span className={`text-xs px-2 py-1 rounded-full capitalize ${statusBadgeClass(app.status)}`}>
-                            {app.status}
-                          </span>
-                        </td>
-                        <td className="px-4 py-3 text-muted-foreground">{formatDate(app.created_at)}</td>
-                        <td className="px-4 py-3 text-right">
-                          <Link href={`/employer/jobs/${app.job_id}`} className="text-primary hover:underline">
-                            Review
-                          </Link>
-                        </td>
-                      </tr>
-                    );
-                  })}
-                </tbody>
-              </table>
+      {applications.length ? (
+        <>
+          <div className="mt-8">
+            <LinkTabs
+              tabs={FILTERS.map((item) => ({
+                href: item === "all" ? "/employer/applicants" : `/employer/applicants?status=${item}`,
+                label: item === "all" ? "All" : EMPLOYER_STATUS_LABELS[item],
+                count: counts[item],
+                active: item === filter,
+              }))}
+            />
+          </div>
+
+          {visible.length ? (
+            <ul className="divide-y divide-neutral-100">
+              {visible.map((app) => {
+                const meta = applicationStatus(app.status);
+                const name = candidateName(app.candidate);
+                return (
+                  <li key={app.id}>
+                    <Link
+                      href={app.job ? `/employer/jobs/${app.job.id}#${app.id}` : "/employer/applicants"}
+                      className="group grid gap-3 py-4 transition-colors sm:px-3 sm:hover:bg-neutral-50/70 md:grid-cols-[minmax(0,1.2fr)_minmax(0,1fr)_120px_100px] md:items-center md:gap-8"
+                    >
+                      <div className="flex min-w-0 items-center gap-3">
+                        <UserAvatar seed={app.candidate?.email || name} size={40} />
+                        <div className="min-w-0">
+                          <p className="truncate text-[15px] font-medium text-neutral-900 group-hover:text-brand">{name}</p>
+                          <p className="truncate text-[13px] text-neutral-500">{app.candidate?.email}</p>
+                        </div>
+                      </div>
+                      <p className="truncate pl-[52px] text-[13px] text-neutral-600 md:pl-0">{app.job?.title ?? "—"}</p>
+                      <div className="pl-[52px] md:pl-0">
+                        <Pill className={STATUS_TONES[meta.tone]}>{EMPLOYER_STATUS_LABELS[meta.value]}</Pill>
+                      </div>
+                      <p className="hidden text-[13px] text-neutral-500 md:block">{postedAgo(app.created_at)}</p>
+                    </Link>
+                  </li>
+                );
+              })}
+            </ul>
+          ) : (
+            <div className="mt-6">
+              <EmptyState
+                art={<EmptyJobsArt variant="search" />}
+                title={`No ${filter === "all" ? "" : EMPLOYER_STATUS_LABELS[filter].toLowerCase()} applicants`}
+                body="Applicants move between these tabs as you review them."
+                action={
+                  <Link href="/employer/applicants" className="rounded-full bg-surface px-4 py-2 text-[13px] font-medium text-neutral-800 ring-1 ring-inset ring-neutral-200 hover:bg-neutral-50">
+                    See everyone
+                  </Link>
+                }
+              />
             </div>
-          </CardContent>
-        </Card>
+          )}
+        </>
       ) : (
-        <div className="py-16 text-center border-2 border-dashed rounded-lg">
-          <h3 className="text-xl font-semibold mb-2">No applicants yet</h3>
-          <p className="text-muted-foreground">When candidates apply, they will appear in this inbox.</p>
+        <div className="mt-8">
+          <EmptyState
+            art={<EmptyApplicationsArt />}
+            title="No applicants yet"
+            body="Once your jobs are live, every application lands here so you can review, interview and hire."
+            action={<PrimaryLink href="/employer/jobs/create">Post a job</PrimaryLink>}
+          />
         </div>
       )}
     </div>

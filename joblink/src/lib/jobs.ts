@@ -95,3 +95,16 @@ export function matchSkills(
 export function sanitizeSearch(value: string) {
   return value.replace(/[%,()*\\]/g, " ").trim().slice(0, 80);
 }
+
+/** Listing status as employers see it. */
+export function jobStatusMeta(status: string | null | undefined) {
+  switch (status) {
+    case "published":
+    case "active":
+      return { value: "open" as const, label: "Open", className: "bg-emerald-50 text-emerald-700" };
+    case "draft":
+      return { value: "draft" as const, label: "Draft", className: "bg-neutral-100 text-neutral-600" };
+    default:
+      return { value: "closed" as const, label: "Closed", className: "bg-neutral-100 text-neutral-500" };
+  }
+}
