@@ -1,7 +1,7 @@
 "use client";
 
 import { useTheme } from "next-themes";
-import { useSyncExternalStore, type MouseEvent } from "react";
+import { useSyncExternalStore } from "react";
 import { flushSync } from "react-dom";
 import { Moon02Icon, Sun03Icon } from "@hugeicons/core-free-icons";
 import { Icon } from "@/components/ui/icon";
@@ -22,7 +22,7 @@ export function ThemeSwitch({ className }: { className?: string }) {
   const mounted = useSyncExternalStore(noopSubscribe, () => true, () => false);
   const isDark = mounted && resolvedTheme === "dark";
 
-  function toggle(event: MouseEvent<HTMLButtonElement>) {
+  function toggle() {
     const next = isDark ? "light" : "dark";
     const doc = document as ViewTransitionDocument;
     const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
@@ -32,20 +32,9 @@ export function ThemeSwitch({ className }: { className?: string }) {
       return;
     }
 
-    const rect = event.currentTarget.getBoundingClientRect();
-    const x = rect.left + rect.width / 2;
-    const y = rect.top + rect.height / 2;
-    const radius = Math.hypot(Math.max(x, window.innerWidth - x), Math.max(y, window.innerHeight - y));
-
-    const transition = doc.startViewTransition(() => {
+    // Soft crossfade between themes (duration/easing set in globals.css).
+    doc.startViewTransition(() => {
       flushSync(() => setTheme(next));
-    });
-
-    transition.ready.then(() => {
-      document.documentElement.animate(
-        { clipPath: [`circle(0px at ${x}px ${y}px)`, `circle(${radius}px at ${x}px ${y}px)`] },
-        { duration: 550, easing: "cubic-bezier(0.22, 1, 0.36, 1)", pseudoElement: "::view-transition-new(root)" },
-      );
     });
   }
 
@@ -62,16 +51,16 @@ export function ThemeSwitch({ className }: { className?: string }) {
     >
       <span
         className={cn(
-          "absolute flex transition-[transform,opacity] duration-500 ease-[cubic-bezier(0.34,1.56,0.64,1)]",
-          isDark ? "-rotate-90 scale-50 opacity-0" : "rotate-0 scale-100 opacity-100",
+          "absolute flex transition-[transform,opacity] duration-200 ease-out",
+          isDark ? "-rotate-45 opacity-0" : "rotate-0 opacity-100",
         )}
       >
         <Icon icon={Sun03Icon} size={19} />
       </span>
       <span
         className={cn(
-          "absolute flex transition-[transform,opacity] duration-500 ease-[cubic-bezier(0.34,1.56,0.64,1)]",
-          isDark ? "rotate-0 scale-100 opacity-100" : "rotate-90 scale-50 opacity-0",
+          "absolute flex transition-[transform,opacity] duration-200 ease-out",
+          isDark ? "rotate-0 opacity-100" : "rotate-45 opacity-0",
         )}
       >
         <Icon icon={Moon02Icon} size={18} />
