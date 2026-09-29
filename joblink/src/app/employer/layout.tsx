@@ -12,7 +12,7 @@ const NAV = [
   { href: "/employer/dashboard", label: "Overview", exact: true },
   { href: "/employer/jobs", label: "Jobs" },
   { href: "/employer/applicants", label: "Applicants" },
-  { href: "/employer/settings", label: "Company" },
+  { href: "/employer/settings", label: "Settings" },
 ];
 
 export default async function EmployerLayout({ children }: { children: React.ReactNode }) {

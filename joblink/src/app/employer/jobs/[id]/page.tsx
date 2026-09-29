@@ -1,14 +1,28 @@
 import Link from "next/link";
 import type { ReactNode } from "react";
-import { ArrowLeft01Icon, File01Icon, PencilEdit02Icon } from "@hugeicons/core-free-icons";
+import { ArrowLeft01Icon, PencilEdit02Icon } from "@hugeicons/core-free-icons";
 import { EmptyApplicationsArt } from "@/components/dashboard/empty-applications-art";
 import { EmptyState, LinkTabs, Pill } from "@/components/employer/bits";
 import { JobMenu } from "@/components/employer/job-menu";
 import { StageActions } from "@/components/employer/pipeline-actions";
+import { CvViewer } from "@/components/employer/cv-viewer";
+import { CandidateProfileTrigger } from "@/components/employer/candidate-profile-sheet";
+import type { CandidateProfileData } from "@/lib/candidate-profile";
+import type { MOCK_CANDIDATE_EXTRAS } from "@/lib/mock-data";
+
+type MockExtras = (typeof MOCK_CANDIDATE_EXTRAS)[string];
 import { Icon } from "@/components/ui/icon";
 import { UserAvatar } from "@/components/ui/user-avatar";
 import { EMPLOYER_STATUS_LABELS, STATUS_TONES, applicationStatus } from "@/lib/applications";
-import { candidateName, formatDate, requireCompany, type CandidateSummary } from "@/lib/employer";
+import {
+  isMockId,
+  candidateName,
+  formatDate,
+  getMockJob,
+  getMockJobApplications,
+  requireCompany,
+  type CandidateSummary,
+} from "@/lib/employer";
 import { jobStatusMeta, jobTypeLabel, postedAgo } from "@/lib/jobs";
 
 type ApplicationRow = {
@@ -31,7 +45,9 @@ export default async function JobDetailsPage({
   const tab = tabParam === "details" ? "details" : "applicants";
   const { supabase, company } = await requireCompany();
 
-  const { data: job } = await supabase.from("jobs").select("*").eq("id", id).eq("company_id", company.id).maybeSingle();
+  const job = isMockId(id)
+    ? getMockJob(id)
+    : (await supabase.from("jobs").select("*").eq("id", id).eq("company_id", company.id).maybeSingle()).data;
 
   if (!job) {
     return (
@@ -50,13 +66,17 @@ export default async function JobDetailsPage({
     );
   }
 
-  const { data } = await supabase
-    .from("applications")
-    .select("id, status, cover_letter, resume_url, created_at, candidate:users (id, first_name, last_name, email, bio)")
-    .eq("job_id", job.id)
-    .order("created_at", { ascending: false });
+  const data = isMockId(job.id)
+    ? getMockJobApplications(job.id)
+    : (
+        await supabase
+          .from("applications")
+          .select("id, status, cover_letter, resume_url, created_at, candidate:users (id, first_name, last_name, email, bio)")
+          .eq("job_id", job.id)
+          .order("created_at", { ascending: false })
+      ).data;
 
-  const apps = ((data ?? []) as ApplicationRow[]).map((app) => ({
+  const apps = ((data ?? []) as (ApplicationRow & { extras?: MockExtras | null })[]).map((app) => ({
     ...app,
     candidate: Array.isArray(app.candidate) ? (app.candidate[0] ?? null) : app.candidate,
   }));
@@ -116,17 +136,37 @@ export default async function JobDetailsPage({
                 {apps.map((app) => {
                   const status = applicationStatus(app.status);
                   const name = candidateName(app.candidate);
+                  const profile: CandidateProfileData = {
+                    name,
+                    email: app.candidate?.email ?? null,
+                    bio: app.candidate?.bio ?? null,
+                    title: app.extras?.title ?? null,
+                    skills: app.extras?.skills ?? [],
+                    memberSince: app.extras?.memberSince ?? null,
+                    rating: app.extras?.rating ?? null,
+                    jobsCompleted: app.extras?.jobsCompleted ?? 0,
+                    history: app.extras?.history ?? [],
+                    resumeUrl: app.resume_url,
+                    application: { status: app.status, appliedAt: app.created_at, coverLetter: app.cover_letter },
+                  };
                   return (
                     <li key={app.id} id={app.id} className="scroll-mt-24 py-5 target:-mx-3 target:rounded-xl target:bg-brand/[0.05] target:px-3">
                       <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
-                        <div className="flex min-w-0 gap-3">
-                          <UserAvatar seed={app.candidate?.email || name} size={40} />
-                          <div className="min-w-0">
-                            <div className="flex flex-wrap items-center gap-2">
-                              <p className="text-[15px] font-semibold text-neutral-900">{name}</p>
-                              <Pill className={STATUS_TONES[status.tone]}>{EMPLOYER_STATUS_LABELS[status.value]}</Pill>
-                            </div>
-                            <p className="mt-0.5 text-[13px] text-neutral-500">
+                        <div className="min-w-0">
+                          <div className="flex flex-wrap items-center gap-x-3 gap-y-1">
+                            <CandidateProfileTrigger profile={profile}>
+                              <UserAvatar seed={app.candidate?.email || name} size={40} />
+                              <span className="min-w-0 pt-0.5">
+                                <span className="block text-[15px] font-semibold text-neutral-900 decoration-neutral-300 underline-offset-4 group-hover/profile:text-brand group-hover/profile:underline">
+                                  {name}
+                                </span>
+                                {profile.title ? <span className="block text-[12.5px] text-neutral-500">{profile.title}</span> : null}
+                              </span>
+                            </CandidateProfileTrigger>
+                            <Pill className={STATUS_TONES[status.tone]}>{EMPLOYER_STATUS_LABELS[status.value]}</Pill>
+                          </div>
+                          <div className="pl-[52px]">
+                            <p className="mt-1 text-[13px] text-neutral-500">
                               {app.candidate?.email ? (
                                 <a href={`mailto:${app.candidate.email}`} className="hover:text-neutral-900 hover:underline">
                                   {app.candidate.email}
@@ -142,15 +182,7 @@ export default async function JobDetailsPage({
                               </p>
                             ) : null}
                             {app.resume_url ? (
-                              <a
-                                href={app.resume_url}
-                                target="_blank"
-                                rel="noopener noreferrer"
-                                className="mt-2 inline-flex items-center gap-1.5 text-[13px] font-medium text-brand hover:underline"
-                              >
-                                <Icon icon={File01Icon} size={15} />
-                                View CV
-                              </a>
+                              <CvViewer url={app.resume_url} candidateName={name} candidateEmail={app.candidate?.email} />
                             ) : null}
                           </div>
                         </div>

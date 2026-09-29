@@ -32,7 +32,7 @@ export const MOCK_APPLICATIONS = [
     },
     cover_letter:
       "I've followed JOMP since launch and love the remote-first mission. I'd bring deep React/Next.js experience and a strong eye for UI polish.",
-    resume_url: "https://example.com/cv/adaeze-okonkwo.pdf",
+    resume_url: "/mock/sample-cv.pdf",
   },
   {
     id: "app-2",
@@ -48,7 +48,7 @@ export const MOCK_APPLICATIONS = [
       bio: "Full-stack developer leaning frontend. Next.js, Tailwind, and a soft spot for accessibility and performance budgets.",
     },
     cover_letter: null,
-    resume_url: "https://example.com/cv/emeka-obi.pdf",
+    resume_url: "/mock/sample-cv.pdf",
   },
   {
     id: "app-3",
@@ -65,7 +65,7 @@ export const MOCK_APPLICATIONS = [
     },
     cover_letter:
       "Happy to share a walkthrough of the component library I built — it cut our feature build time roughly in half.",
-    resume_url: "https://example.com/cv/fatima-bello.pdf",
+    resume_url: "/mock/sample-cv.pdf",
   },
   {
     id: "app-4",
@@ -113,7 +113,7 @@ export const MOCK_APPLICATIONS = [
       bio: "Product manager with a background in engineering. Took a B2B payments product from 0 to 1,200 paying merchants.",
     },
     cover_letter: "Excited about building marketplaces that work for both sides.",
-    resume_url: "https://example.com/cv/chidi-eze.pdf",
+    resume_url: "/mock/sample-cv.pdf",
   },
   {
     id: "app-7",
@@ -129,7 +129,7 @@ export const MOCK_APPLICATIONS = [
       bio: "Growth PM. Ran experimentation at a consumer lending app and grew activation by 22%.",
     },
     cover_letter: null,
-    resume_url: "https://example.com/cv/ngozi-adeleke.pdf",
+    resume_url: "/mock/sample-cv.pdf",
   },
   {
     id: "app-8",
@@ -145,7 +145,7 @@ export const MOCK_APPLICATIONS = [
       bio: "Product designer focused on fintech and marketplaces. Figma, prototyping, and running usability tests on a shoestring.",
     },
     cover_letter: null,
-    resume_url: "https://example.com/cv/tunde-ajayi.pdf",
+    resume_url: "/mock/sample-cv.pdf",
   },
   {
     id: "app-9",
@@ -257,4 +257,91 @@ export const MOCK_ADMIN_STATS = {
   totalCompanies: 34,
   totalApplications: 3821,
   pendingVerifications: 6,
+};
+
+/** Extra JOMP profile details for sample applicants (title, skills, ratings, work history). */
+export const MOCK_CANDIDATE_EXTRAS: Record<
+  string,
+  {
+    title: string;
+    skills: string[];
+    memberSince: string;
+    rating: { average: number; count: number } | null;
+    jobsCompleted: number;
+    history: { title: string; company: string; period: string; rating?: number; review?: string }[];
+  }
+> = {
+  "mock-candidate-001": {
+    title: "Senior Frontend Engineer",
+    skills: ["React", "Next.js", "TypeScript", "Tailwind CSS", "Design Systems", "Web Accessibility"],
+    memberSince: "Mar 2025",
+    rating: { average: 4.9, count: 7 },
+    jobsCompleted: 7,
+    history: [
+      {
+        title: "Dashboard rebuild (Next.js)",
+        company: "Brightpath Logistics",
+        period: "Jan – Apr 2026",
+        rating: 5,
+        review: "Shipped ahead of schedule and left us with a component library the whole team now uses.",
+      },
+      {
+        title: "Accessibility audit & fixes",
+        company: "Kora Health",
+        period: "Oct – Nov 2025",
+        rating: 5,
+        review: "Thorough, clear communicator. Our Lighthouse accessibility score went from 70 to 98.",
+      },
+      { title: "Landing page build", company: "Nuvo Studio", period: "Aug 2025", rating: 4 },
+    ],
+  },
+  "mock-candidate-002": {
+    title: "Full-stack Developer",
+    skills: ["Next.js", "Node.js", "PostgreSQL", "Tailwind CSS"],
+    memberSince: "Jul 2026",
+    rating: null,
+    jobsCompleted: 0,
+    history: [],
+  },
+  "mock-candidate-003": {
+    title: "Senior Software Engineer",
+    skills: ["React", "TypeScript", "Redux", "Jest", "Web Performance"],
+    memberSince: "Nov 2024",
+    rating: { average: 4.7, count: 12 },
+    jobsCompleted: 12,
+    history: [
+      {
+        title: "Checkout optimisation",
+        company: "Shoplink Africa",
+        period: "2025",
+        rating: 5,
+        review: "Cut checkout drop-off by a third. Would hire again in a heartbeat.",
+      },
+      { title: "React Native app maintenance", company: "Tella Pay", period: "2024 – 2025", rating: 4 },
+    ],
+  },
+  "mock-candidate-004": {
+    title: "React & React Native Engineer",
+    skills: ["React", "React Native", "Expo", "TypeScript", "Mentoring"],
+    memberSince: "Feb 2025",
+    rating: { average: 4.8, count: 5 },
+    jobsCompleted: 5,
+    history: [
+      {
+        title: "Mobile app v2",
+        company: "Harvest Farms",
+        period: "Mar – Jun 2026",
+        rating: 5,
+        review: "Turned a messy spec into a clean app our farmers actually enjoy using.",
+      },
+    ],
+  },
+  "mock-candidate-006": {
+    title: "Product Manager",
+    skills: ["Product Strategy", "Roadmapping", "SQL", "User Stories"],
+    memberSince: "May 2025",
+    rating: { average: 4.6, count: 3 },
+    jobsCompleted: 3,
+    history: [{ title: "Payments roadmap (contract)", company: "Tella Pay", period: "2025", rating: 5 }],
+  },
 };

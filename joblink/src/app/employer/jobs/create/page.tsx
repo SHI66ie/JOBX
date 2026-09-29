@@ -18,7 +18,7 @@ export default async function CreateJobPage() {
       <p className="mt-1 text-[14px] text-neutral-500">A remote role at {company.name}. Publish now or save it as a draft.</p>
 
       <div className="mt-4">
-        <JobForm action={async (fd: FormData) => { await postJob(null, fd); }} mode="create" />
+        <JobForm stateAction={postJob} mode="create" />
       </div>
     </div>
   );

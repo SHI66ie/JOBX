@@ -1,6 +1,6 @@
 import { createClient } from "@/utils/supabase/server";
 import { redirect } from "next/navigation";
-import { MOCK_APPLICATIONS, MOCK_COMPANY, MOCK_JOBS, MOCK_USER } from "@/lib/mock-data";
+import { MOCK_APPLICATIONS, MOCK_CANDIDATE_EXTRAS, MOCK_COMPANY, MOCK_JOBS, MOCK_USER } from "@/lib/mock-data";
 
 const USE_MOCK = process.env.NEXT_PUBLIC_USE_MOCK_DATA === "true";
 
@@ -200,6 +200,11 @@ export async function getCompanyApplications(
   return ((data ?? []) as unknown as Raw[]).map((row) => ({ ...row, job: firstOf(row.job), candidate: firstOf(row.candidate) }));
 }
 
+/** Sample jobs (ids starting "mock-") always render from mock data, so the UI can be previewed without the env flag. */
+export function isMockId(id: string) {
+  return USE_MOCK || id.startsWith("mock-");
+}
+
 /** Mock job (with full listing fields) for the detail, preview and edit pages. */
 export function getMockJob(jobId: string) {
   const job = MOCK_JOBS.find((item) => item.id === jobId);
@@ -217,6 +222,7 @@ export function getMockJobApplications(jobId: string) {
       resume_url: app.resume_url,
       created_at: app.created_at,
       candidate: { id: app.candidate_id, first_name, last_name: rest.join(" ") || null, email: app.users.email, bio: app.users.bio },
+      extras: MOCK_CANDIDATE_EXTRAS[app.candidate_id] ?? null,
     };
   });
 }

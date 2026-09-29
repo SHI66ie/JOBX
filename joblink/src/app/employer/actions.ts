@@ -84,18 +84,29 @@ export async function upsertCompanyProfile(formData: FormData): Promise<ActionRe
 
   const first_name = String(formData.get("first_name") || "").trim();
   const last_name = String(formData.get("last_name") || "").trim();
-  const name = String(formData.get("name") || "").trim();
   const description = String(formData.get("description") || "").trim();
   const website = String(formData.get("website") || "").trim();
-  const hiring_for = String(formData.get("hiring_for") || "").trim();
+  const hiring_for = String(formData.get("hiring_for") || "")
+    .split(",")
+    .map((item) => item.trim())
+    .filter(Boolean)
+    .slice(0, 3)
+    .join(",");
   const team_size = String(formData.get("team_size") || "").trim();
   const account_type = String(formData.get("account_type") || "").trim();
   const vat_number = String(formData.get("vat_number") || "").trim();
   const business_registration = String(formData.get("business_registration") || "").trim();
   const requestVerification = formData.get("request_verification") === "true";
+  // Not every employer is a company: the display name falls back to the person's own name.
+  const name =
+    String(formData.get("name") || "").trim() ||
+    [first_name || user.user_metadata?.first_name, last_name || user.user_metadata?.last_name].filter(Boolean).join(" ");
 
-  if (!name) {
-    return { error: "Company name is required." };
+  if (!first_name || !last_name) {
+    return { error: "Your first and last name are required." };
+  }
+  if (team_size === "enterprise" && (!vat_number || !business_registration)) {
+    return { error: "Enterprise accounts need a VAT / tax ID and business registration number." };
   }
 
   const currentRoles = getUserRoles(user);
@@ -125,7 +136,7 @@ export async function upsertCompanyProfile(formData: FormData): Promise<ActionRe
     description: description || null,
     website: website || null,
     hiring_for: hiring_for || null,
-    industry: hiring_for || null,
+    industry: hiring_for.split(",")[0] || null,
     team_size: team_size || null,
     account_type: account_type || null,
     vat_number: vat_number || null,
@@ -183,11 +194,8 @@ export async function upsertCompanyProfile(formData: FormData): Promise<ActionRe
     };
   }
 
-  revalidatePath("/", "layout");
   revalidatePath("/employer", "layout");
-  revalidatePath("/employer/settings");
-  revalidatePath("/employer/dashboard");
-  redirect("/employer/dashboard");
+  return {};
 }
 
 function jobPayload(formData: FormData, companyId: string, employerId: string) {
@@ -217,7 +225,7 @@ function jobPayload(formData: FormData, companyId: string, employerId: string) {
   };
 }
 
-export async function postJob(prevState: any, formData: FormData) {
+export async function postJob(_prevState: unknown, formData: FormData): Promise<{ error?: string }> {
   const supabase = await createClient();
   const {
     data: { user },
@@ -229,14 +237,14 @@ export async function postJob(prevState: any, formData: FormData) {
 
   const company = await getOwnedCompany(supabase, user.id);
   if (!company) {
-    return { error: "You must create a company profile first." };
+    return { error: "Finish your hiring profile in Settings before posting a job." };
   }
 
   let payload;
   try {
     payload = jobPayload(formData, company.id, user.id);
-  } catch (err: any) {
-    return { error: err.message };
+  } catch (err) {
+    return { error: err instanceof Error ? err.message : "Please check the job details and try again." };
   }
 
   const { error } = await supabase.from("jobs").insert(payload);

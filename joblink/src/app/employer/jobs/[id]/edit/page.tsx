@@ -3,14 +3,16 @@ import { notFound } from "next/navigation";
 import { ArrowLeft01Icon } from "@hugeicons/core-free-icons";
 import { JobForm } from "@/components/employer/job-form";
 import { Icon } from "@/components/ui/icon";
-import { requireCompany } from "@/lib/employer";
+import { getMockJob, isMockId, requireCompany } from "@/lib/employer";
 import { updateJob } from "../../../actions";
 
 export default async function EditJobPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
   const { supabase, company } = await requireCompany();
 
-  const { data: job } = await supabase.from("jobs").select("*").eq("id", id).eq("company_id", company.id).maybeSingle();
+  const job = isMockId(id)
+    ? getMockJob(id)
+    : (await supabase.from("jobs").select("*").eq("id", id).eq("company_id", company.id).maybeSingle()).data;
 
   if (!job) {
     notFound();
