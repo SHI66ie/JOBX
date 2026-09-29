@@ -1,6 +1,6 @@
 import { createClient } from "@/utils/supabase/server";
 import { redirect } from "next/navigation";
-import { MOCK_APPLICATIONS, MOCK_COMPANY, MOCK_JOBS, MOCK_USER } from "@/lib/mock-data";
+import { MOCK_APPLICATIONS, MOCK_CANDIDATE_EXTRAS, MOCK_COMPANY, MOCK_JOBS, MOCK_USER } from "@/lib/mock-data";
 
 const USE_MOCK = process.env.NEXT_PUBLIC_USE_MOCK_DATA === "true";
 
@@ -222,6 +222,7 @@ export function getMockJobApplications(jobId: string) {
       resume_url: app.resume_url,
       created_at: app.created_at,
       candidate: { id: app.candidate_id, first_name, last_name: rest.join(" ") || null, email: app.users.email, bio: app.users.bio },
+      extras: MOCK_CANDIDATE_EXTRAS[app.candidate_id] ?? null,
     };
   });
 }

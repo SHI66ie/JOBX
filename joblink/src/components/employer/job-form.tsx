@@ -1,5 +1,6 @@
 "use client";
 
+import { useActionState } from "react";
 import { useFormStatus } from "react-dom";
 import { TextField } from "@/components/auth/auth-fields";
 import { TextArea } from "@/components/onboarding/onboarding-fields";
@@ -47,19 +48,32 @@ function SubmitButtons({ mode, currentStatus }: { mode: "create" | "edit"; curre
 }
 
 /** Post / edit a remote job. Posts to a server action; location is always Remote. */
+type FormState = { error?: string | null } | undefined;
+
+/**
+ * Pass `stateAction` for actions shaped (prevState, formData) => { error } (e.g. postJob),
+ * or `action` for plain (formData) actions that throw/redirect (e.g. updateJob bound to an id).
+ */
 export function JobForm({
   action,
+  stateAction,
   defaults = {},
   mode,
 }: {
-  action: (formData: FormData) => void | Promise<void>;
+  action?: (formData: FormData) => Promise<void>;
+  stateAction?: (prevState: FormState, formData: FormData) => Promise<FormState | void>;
   defaults?: JobDefaults;
   mode: "create" | "edit";
 }) {
   const currentType = defaults.type || "full-time";
+  const [state, formAction] = useActionState<FormState, FormData>(async (prev, formData) => {
+    if (stateAction) return (await stateAction(prev, formData)) ?? {};
+    await action?.(formData);
+    return {};
+  }, {});
 
   return (
-    <form action={action}>
+    <form action={formAction}>
       <input type="hidden" name="location" value="Remote" />
 
       <div className="divide-y divide-neutral-100">
@@ -126,6 +140,12 @@ export function JobForm({
           />
         </SettingsRow>
       </div>
+
+      {state?.error ? (
+        <p role="alert" className="auth-shake mt-6 rounded-xl bg-red-50 px-3.5 py-2.5 text-[13px] text-red-700">
+          {state.error}
+        </p>
+      ) : null}
 
       <SubmitButtons mode={mode} currentStatus={defaults.status || "published"} />
     </form>
