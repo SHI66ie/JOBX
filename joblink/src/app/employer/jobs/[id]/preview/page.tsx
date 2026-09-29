@@ -3,13 +3,13 @@ import { notFound } from "next/navigation";
 import { ArrowLeft01Icon, PencilEdit02Icon, ViewIcon } from "@hugeicons/core-free-icons";
 import { JobListingView } from "@/components/jobs/job-listing-view";
 import { Icon } from "@/components/ui/icon";
-import { requireCompany } from "@/lib/employer";
+import { getMockJob, isMockId, requireCompany } from "@/lib/employer";
 import { getJobListing, jobStatusMeta } from "@/lib/jobs";
 
 export default async function JobPreviewPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
   const { supabase, company } = await requireCompany();
-  const job = await getJobListing(supabase, id, { companyId: company.id });
+  const job = isMockId(id) ? getMockJob(id) : await getJobListing(supabase, id, { companyId: company.id });
 
   if (!job) {
     notFound();

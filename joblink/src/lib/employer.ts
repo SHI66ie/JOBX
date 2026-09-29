@@ -200,6 +200,11 @@ export async function getCompanyApplications(
   return ((data ?? []) as unknown as Raw[]).map((row) => ({ ...row, job: firstOf(row.job), candidate: firstOf(row.candidate) }));
 }
 
+/** Sample jobs (ids starting "mock-") always render from mock data, so the UI can be previewed without the env flag. */
+export function isMockId(id: string) {
+  return USE_MOCK || id.startsWith("mock-");
+}
+
 /** Mock job (with full listing fields) for the detail, preview and edit pages. */
 export function getMockJob(jobId: string) {
   const job = MOCK_JOBS.find((item) => item.id === jobId);

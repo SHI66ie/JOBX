@@ -1,14 +1,23 @@
 import Link from "next/link";
 import type { ReactNode } from "react";
-import { ArrowLeft01Icon, File01Icon, PencilEdit02Icon } from "@hugeicons/core-free-icons";
+import { ArrowLeft01Icon, PencilEdit02Icon } from "@hugeicons/core-free-icons";
 import { EmptyApplicationsArt } from "@/components/dashboard/empty-applications-art";
 import { EmptyState, LinkTabs, Pill } from "@/components/employer/bits";
 import { JobMenu } from "@/components/employer/job-menu";
 import { StageActions } from "@/components/employer/pipeline-actions";
+import { CvViewer } from "@/components/employer/cv-viewer";
 import { Icon } from "@/components/ui/icon";
 import { UserAvatar } from "@/components/ui/user-avatar";
 import { EMPLOYER_STATUS_LABELS, STATUS_TONES, applicationStatus } from "@/lib/applications";
-import { candidateName, formatDate, requireCompany, type CandidateSummary } from "@/lib/employer";
+import {
+  isMockId,
+  candidateName,
+  formatDate,
+  getMockJob,
+  getMockJobApplications,
+  requireCompany,
+  type CandidateSummary,
+} from "@/lib/employer";
 import { jobStatusMeta, jobTypeLabel, postedAgo } from "@/lib/jobs";
 
 type ApplicationRow = {
@@ -31,7 +40,9 @@ export default async function JobDetailsPage({
   const tab = tabParam === "details" ? "details" : "applicants";
   const { supabase, company } = await requireCompany();
 
-  const { data: job } = await supabase.from("jobs").select("*").eq("id", id).eq("company_id", company.id).maybeSingle();
+  const job = isMockId(id)
+    ? getMockJob(id)
+    : (await supabase.from("jobs").select("*").eq("id", id).eq("company_id", company.id).maybeSingle()).data;
 
   if (!job) {
     return (
@@ -50,11 +61,15 @@ export default async function JobDetailsPage({
     );
   }
 
-  const { data } = await supabase
-    .from("applications")
-    .select("id, status, cover_letter, resume_url, created_at, candidate:users (id, first_name, last_name, email, bio)")
-    .eq("job_id", job.id)
-    .order("created_at", { ascending: false });
+  const data = isMockId(job.id)
+    ? getMockJobApplications(job.id)
+    : (
+        await supabase
+          .from("applications")
+          .select("id, status, cover_letter, resume_url, created_at, candidate:users (id, first_name, last_name, email, bio)")
+          .eq("job_id", job.id)
+          .order("created_at", { ascending: false })
+      ).data;
 
   const apps = ((data ?? []) as ApplicationRow[]).map((app) => ({
     ...app,
@@ -142,15 +157,7 @@ export default async function JobDetailsPage({
                               </p>
                             ) : null}
                             {app.resume_url ? (
-                              <a
-                                href={app.resume_url}
-                                target="_blank"
-                                rel="noopener noreferrer"
-                                className="mt-2 inline-flex items-center gap-1.5 text-[13px] font-medium text-brand hover:underline"
-                              >
-                                <Icon icon={File01Icon} size={15} />
-                                View CV
-                              </a>
+                              <CvViewer url={app.resume_url} candidateName={name} candidateEmail={app.candidate?.email} />
                             ) : null}
                           </div>
                         </div>
