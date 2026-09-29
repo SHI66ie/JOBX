@@ -429,23 +429,23 @@
 .dark .app-theme {
   color-scheme: dark;
 
-  /* Deep charcoal with a faint cool tint — dark, never pure black. */
-  --app-surface: #121417;
+  /* Deep navy-ink, tinted toward the JOMP brand navy — dark, never pure black. */
+  --app-surface: #0c1729;
   --app-brand: #8fb4e8;
   --app-brand-hover: #a8c6ef;
   --app-brand-fg: #01224f;
 
-  --color-neutral-50: #181b1f;
-  --color-neutral-100: #1f2227;
-  --color-neutral-200: #2b2f36;
-  --color-neutral-300: #3b4048;
-  --color-neutral-400: #6b717b;
-  --color-neutral-500: #8d939c;
-  --color-neutral-600: #aab0b8;
-  --color-neutral-700: #c5c9cf;
-  --color-neutral-800: #dcdfe3;
-  --color-neutral-900: #eceef1;
-  --color-neutral-950: #f6f7f8;
+  --color-neutral-50: #111e33;
+  --color-neutral-100: #16253d;
+  --color-neutral-200: #213150;
+  --color-neutral-300: #2e4065;
+  --color-neutral-400: #5d6f8f;
+  --color-neutral-500: #8392ab;
+  --color-neutral-600: #a5b1c4;
+  --color-neutral-700: #c3ccda;
+  --color-neutral-800: #dce2ea;
+  --color-neutral-900: #ebeff5;
+  --color-neutral-950: #f5f7fa;
 
   /* Status / tag tints: low-alpha fills with light text. */
   --color-emerald-50: rgb(16 185 129 / 0.14);
@@ -470,9 +470,9 @@
   --color-red-700: #fca5a5;
 }
 
-/* Theme switch: circular reveal from the toggle (View Transitions API). */
+/* Theme switch: a quick, soft crossfade (View Transitions API). */
 ::view-transition-old(root),
 ::view-transition-new(root) {
-  animation: none;
-  mix-blend-mode: normal;
+  animation-duration: 240ms;
+  animation-timing-function: ease-out;
 }
