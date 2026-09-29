@@ -217,26 +217,33 @@ function jobPayload(formData: FormData, companyId: string, employerId: string) {
   };
 }
 
-export async function postJob(formData: FormData) {
+export async function postJob(prevState: any, formData: FormData) {
   const supabase = await createClient();
   const {
     data: { user },
   } = await supabase.auth.getUser();
 
   if (!user) {
-    throw new Error("Unauthorized");
+    return { error: "Unauthorized" };
   }
 
   const company = await getOwnedCompany(supabase, user.id);
   if (!company) {
-    throw new Error("You must create a company profile first.");
+    return { error: "You must create a company profile first." };
   }
 
-  const { error } = await supabase.from("jobs").insert(jobPayload(formData, company.id, user.id));
+  let payload;
+  try {
+    payload = jobPayload(formData, company.id, user.id);
+  } catch (err: any) {
+    return { error: err.message };
+  }
+
+  const { error } = await supabase.from("jobs").insert(payload);
 
   if (error) {
     console.error("Error posting job:", error);
-    throw new Error(error.message);
+    return { error: error.message };
   }
 
   revalidatePath("/employer/dashboard");

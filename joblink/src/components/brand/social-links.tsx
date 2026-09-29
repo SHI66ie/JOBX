@@ -1,6 +1,15 @@
 import { APP_SOCIALS } from "@/lib/config";
 import { cn } from "@/lib/utils";
 
+function LinkedInIcon({ className }: { className?: string }) {
+  return (
+    <svg viewBox="0 0 24 24" className={className} aria-hidden="true">
+      <rect x="2" y="2" width="20" height="20" rx="6" fill="#0A66C2" />
+      <path d="M8.75 10.5v5.25h-1.7V10.5h1.7zm-.85-2.7c.55 0 1 .45 1 1s-.45 1-1 1-1-.45-1-1 .45-1 1-1zm2.6 2.7h1.63v.72h.02c.23-.43.78-.88 1.6-.88 1.72 0 2.03 1.13 2.03 2.6v3h-1.7v-2.66c0-.63-.01-1.45-.88-1.45-.88 0-1.02.69-1.02 1.4v2.72h-1.7V10.5z" fill="#fff" />
+    </svg>
+  );
+}
+
 function InstagramIcon({ className }: { className?: string }) {
   return (
     <svg viewBox="0 0 24 24" className={className} aria-hidden="true">
@@ -49,6 +58,7 @@ function XIcon({ className }: { className?: string }) {
 }
 
 const ICONS = {
+  LinkedIn: LinkedInIcon,
   Instagram: InstagramIcon,
   TikTok: TikTokIcon,
   Facebook: FacebookIcon,

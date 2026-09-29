@@ -8,6 +8,7 @@ export const APP_BLACK = "#111111";
 export const APP_NAVY_RGB = { r: 1, g: 34, b: 79 };
 
 export const APP_SOCIALS = [
+  { name: "LinkedIn", href: "https://ng.linkedin.com/in/jomp-ng-1ba3b2434" },
   { name: "Instagram", href: "https://www.instagram.com/jomponline" },
   { name: "TikTok", href: "https://www.tiktok.com/@jomponline" },
   { name: "Facebook", href: "https://www.facebook.com/jomponline" },
