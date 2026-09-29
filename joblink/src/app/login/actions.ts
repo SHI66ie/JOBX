@@ -121,6 +121,8 @@ export async function signInWithGoogle(formData?: FormData) {
     provider: 'google',
     options: {
       redirectTo: callback,
+      // Always show Google's account picker instead of silently reusing a signed-in account.
+      queryParams: { prompt: 'select_account' },
     },
   })
 

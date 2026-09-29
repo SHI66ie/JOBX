@@ -1,26 +1,25 @@
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import Link from "next/link";
+import { ArrowLeft01Icon } from "@hugeicons/core-free-icons";
+import { JobForm } from "@/components/employer/job-form";
+import { Icon } from "@/components/ui/icon";
 import { requireCompany } from "@/lib/employer";
-import { JobForm } from "./job-form";
+import { postJob } from "../../actions";
 
 export default async function CreateJobPage() {
-  await requireCompany();
+  const { company } = await requireCompany();
 
   return (
-    <div className="space-y-8 max-w-2xl">
-      <div>
-        <h1 className="text-3xl font-bold tracking-tight">Post a new job</h1>
-        <p className="text-muted-foreground">Publish a role and start collecting applications.</p>
-      </div>
+    <div className="mx-auto max-w-4xl px-4 pb-24 pt-6 sm:px-6 lg:px-8 lg:pt-8">
+      <Link href="/employer/jobs" className="inline-flex items-center gap-1 text-[13px] font-medium text-neutral-500 hover:text-neutral-900">
+        <Icon icon={ArrowLeft01Icon} size={16} />
+        Jobs
+      </Link>
+      <h1 className="mt-4 text-[26px] font-semibold tracking-[-0.03em] text-neutral-900">Post a job</h1>
+      <p className="mt-1 text-[14px] text-neutral-500">A remote role at {company.name}. Publish now or save it as a draft.</p>
 
-      <Card>
-        <CardHeader>
-          <CardTitle>Job details</CardTitle>
-          <CardDescription>These fields appear on the public listing.</CardDescription>
-        </CardHeader>
-        <CardContent>
-          <JobForm />
-        </CardContent>
-      </Card>
+      <div className="mt-4">
+        <JobForm action={postJob} mode="create" />
+      </div>
     </div>
   );
 }

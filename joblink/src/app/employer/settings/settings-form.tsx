@@ -116,7 +116,7 @@ export function EmployerSettingsForm({ user, company }: SettingsFormProps) {
 
       <div className="space-y-2">
         <Label htmlFor="hiring_for">What are you hiring for?</Label>
-        <select id="hiring_for" name="hiring_for" defaultValue={company?.hiring_for || company?.industry || "business-owner"} className={selectClassName}>
+        <select id="hiring_for" name="hiring_for" defaultValue={(company?.hiring_for || company?.industry || "business-owner").split(",")[0]} className={selectClassName}>
           {HIRING_CATEGORIES.map((option) => (
             <option key={option.value} value={option.value}>{option.label}</option>
           ))}

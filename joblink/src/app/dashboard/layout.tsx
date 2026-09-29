@@ -1,9 +1,10 @@
 import { createClient } from "@/utils/supabase/server";
 import { redirect } from "next/navigation";
 import Link from "next/link";
-import { Button } from "@/components/ui/button";
 import { getUserRoles, hasCompletedOnboarding, onboardingPath } from "@/utils/auth";
-import { Logo } from "@/components/brand/logo";
+import { JompMark, JompWordmark } from "@/components/brand/logo";
+import { DashboardNavLinks, DashboardNavMobile, UserMenu } from "@/components/dashboard/dashboard-nav";
+import { ThemeSwitch } from "@/components/dashboard/theme-switch";
 
 export default async function DashboardLayout({
   children,
@@ -24,40 +25,56 @@ export default async function DashboardLayout({
     redirect(onboardingPath("candidate"));
   }
 
-  const firstName = user.user_metadata?.first_name || "Applicant";
+  const firstName = String(user.user_metadata?.first_name || "");
+  const lastName = String(user.user_metadata?.last_name || "");
+  const name = [firstName, lastName].filter(Boolean).join(" ") || "Applicant";
+  const avatarUrl = String(user.user_metadata?.avatar_url || user.user_metadata?.picture || "") || null;
   const roles = getUserRoles(user);
   const hasEmployer = roles.includes("employer");
   const isAdmin = roles.includes("admin") || user.user_metadata?.role === "admin";
 
+  const navItems = [
+    { href: "/dashboard", label: "Find jobs" },
+    { href: "/dashboard/applications", label: "My applications" },
+    { href: "/dashboard/settings", label: "Settings" },
+    ...(isAdmin ? [{ href: "/admin", label: "Admin" }] : []),
+  ];
+
   return (
-    <div className="auth-bg min-h-screen flex flex-col text-foreground transition-colors">
-      <header className="sticky top-0 z-40 glass-panel border-b px-6 h-16 flex items-center justify-between bg-white dark:bg-[#01224F]">
-        <div className="flex items-center gap-6">
-          <Link href="/" className="text-[#01224F] dark:text-white">
-            <Logo variant="lockup" tone="current" className="h-10" markClassName="h-8 w-8" />
-          </Link>
-          <nav className="hidden md:flex gap-4">
-            <Link href="/dashboard" className="text-sm font-medium text-[#111111]/70 hover:text-[#01224F] dark:text-white/70 dark:hover:text-white">Dashboard</Link>
-            <Link href="/dashboard/applications" className="text-sm font-medium text-[#111111]/70 hover:text-[#01224F] dark:text-white/70 dark:hover:text-white">My Applications</Link>
-            {isAdmin && (
-              <Link href="/admin" className="text-sm font-medium text-[#111111]/70 hover:text-[#01224F] dark:text-white/70 dark:hover:text-white">Admin Panel</Link>
-            )}
-            <Link href="/dashboard/settings" className="text-sm font-medium text-[#111111]/70 hover:text-[#01224F] dark:text-white/70 dark:hover:text-white">Settings</Link>
-            {hasEmployer && (
-              <Link href="/employer/dashboard" className="text-sm font-medium text-[#01224F] dark:text-white">
-                Employer Mode
+    <div className="app-theme flex min-h-screen flex-col bg-surface text-neutral-900">
+      <header className="sticky top-0 z-40 border-b border-neutral-200/80 bg-surface/90 backdrop-blur-md">
+        <div className="mx-auto flex h-16 max-w-7xl items-center justify-between gap-4 px-4 sm:px-6 lg:px-8">
+          <div className="flex items-center gap-8">
+            <Link
+              href="/dashboard"
+              aria-label="JOMP home"
+              className="flex items-center gap-2 rounded-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand"
+            >
+              <JompMark tone="current" className="h-8 w-8 text-[#01224F] dark:text-white" />
+              <JompWordmark tone="current" className="h-[18px] w-auto text-[#01224F] dark:text-white" />
+            </Link>
+            <DashboardNavLinks items={navItems} />
+          </div>
+
+          <div className="flex items-center gap-2">
+            {hasEmployer ? (
+              <Link
+                href="/employer/dashboard"
+                className="hidden rounded-full px-3 py-1.5 text-[13px] font-medium text-neutral-700 ring-1 ring-inset ring-neutral-200 transition-colors hover:bg-neutral-50 hover:text-neutral-900 lg:block"
+              >
+                Employer mode
               </Link>
-            )}
-          </nav>
+            ) : null}
+            <ThemeSwitch />
+            <UserMenu name={name} email={user.email || ""} avatarUrl={avatarUrl} hasEmployer={hasEmployer} />
+          </div>
         </div>
-        <div className="flex items-center gap-4">
-          <span className="text-sm text-[#111111]/70 dark:text-white/70 hidden sm:inline-block">Welcome, {firstName}</span>
-          <form action="/auth/signout" method="post">
-            <Button variant="outline" size="sm">Sign Out</Button>
-          </form>
+        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+          <DashboardNavMobile items={navItems} />
         </div>
       </header>
-      <main className="flex-1 max-w-7xl w-full mx-auto p-4 sm:p-6 lg:p-8">{children}</main>
+
+      <main className="flex-1">{children}</main>
     </div>
   );
 }

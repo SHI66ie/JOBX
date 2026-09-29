@@ -3,7 +3,6 @@ import { redirect } from "next/navigation";
 import { getUserRoles, hasCompletedOnboarding } from "@/utils/auth";
 import OnboardingForm from "./onboarding-form";
 import EmployerOnboardingForm from "./employer-onboarding-form";
-import { Logo } from "@/components/brand/logo";
 
 function nameFromUser(user: {
   user_metadata?: Record<string, string | undefined>;
@@ -35,12 +34,10 @@ export default async function OnboardingPage({
   const roles = getUserRoles(user);
   const isEmployer = params.role === "employer" || (params.role !== "candidate" && roles.includes("employer") && !roles.includes("candidate"));
 
-  if (isEmployer && hasCompletedOnboarding(user, "employer")) {
-    redirect("/employer/dashboard");
-  }
-  if (!isEmployer && hasCompletedOnboarding(user, "candidate")) {
-    redirect("/dashboard");
-  }
+  // Finished accounts see the success screen rather than a server redirect.
+  // Completing onboarding sets auth cookies, which re-renders this page; a
+  // redirect here would yank people off the success screen.
+  const isComplete = hasCompletedOnboarding(user, isEmployer ? "employer" : "candidate");
 
   const names = nameFromUser(user);
   const initialData = {
@@ -54,31 +51,9 @@ export default async function OnboardingPage({
       : String(user.user_metadata?.skills || ""),
   };
 
-  return (
-    <div className="min-h-screen bg-zinc-50 dark:bg-zinc-950 flex flex-col justify-center py-12 sm:px-6 lg:px-8">
-      <div className="sm:mx-auto sm:w-full sm:max-w-md text-center">
-        <div className="flex justify-center mb-6 text-[#01224F] dark:text-white">
-          <Logo variant="lockup" tone="current" className="h-10" markClassName="h-8 w-8" />
-        </div>
-        <h2 className="text-3xl font-extrabold text-zinc-900 dark:text-white">
-          {isEmployer ? "Set up your hiring profile" : "Complete your applicant profile"}
-        </h2>
-        <p className="mt-2 text-sm text-zinc-600 dark:text-zinc-400">
-          {isEmployer
-            ? "Tell us who you are hiring for so we can tailor JOMP to your team."
-            : "Add the details employers will see, then you can browse and apply to jobs."}
-        </p>
-      </div>
-
-      <div className="mt-8 sm:mx-auto sm:w-full sm:max-w-xl">
-        <div className="bg-white dark:bg-zinc-900 py-8 px-4 shadow sm:rounded-lg sm:px-10 border border-zinc-200 dark:border-zinc-800">
-          {isEmployer ? (
-            <EmployerOnboardingForm initialData={initialData} />
-          ) : (
-            <OnboardingForm initialData={initialData} />
-          )}
-        </div>
-      </div>
-    </div>
+  return isEmployer ? (
+    <EmployerOnboardingForm initialData={initialData} isComplete={isComplete} />
+  ) : (
+    <OnboardingForm initialData={initialData} isComplete={isComplete} />
   );
 }

@@ -4,9 +4,21 @@ import Link from "next/link";
 import { Suspense } from "react";
 import { useSearchParams } from "next/navigation";
 import { signup, signInWithGoogle } from "../login/actions";
-import { APP_NAME } from "@/lib/config";
-import { Logo } from "@/components/brand/logo";
-import { SocialLinks } from "@/components/brand/social-links";
+import { cn } from "@/lib/utils";
+import { AuthHeading, AuthShell } from "@/components/auth/auth-shell";
+import {
+  FormMessage,
+  GoogleButton,
+  OrDivider,
+  PasswordField,
+  SubmitButton,
+  TextField,
+} from "@/components/auth/auth-fields";
+
+const ROLES = [
+  { value: "candidate", label: "I'm job hunting", href: "/signup" },
+  { value: "employer", label: "I'm hiring", href: "/signup?role=employer" },
+] as const;
 
 function SignupForm() {
   const searchParams = useSearchParams();
@@ -15,107 +27,101 @@ function SignupForm() {
   const isEmployer = role === "employer";
 
   return (
-    <div className="landing-split flex min-h-screen">
-      <div className="landing-left-panel flex-1 flex flex-col justify-center px-10 lg:px-16 py-12 relative">
-        <div className="relative z-10 max-w-md">
-          <div className="mb-8">
-            <Logo variant="lockup" tone="white" tagline markClassName="h-10 w-10" />
-          </div>
-          <h1 className="text-4xl lg:text-5xl font-extrabold leading-tight mb-6 text-white">
-            {isEmployer ? (
-              <>
-                Hire Top Talent
-                <br />
-                Faster
-              </>
-            ) : (
-              <>
-                Join the Network
-                <br />
-                Start Today
-              </>
-            )}
-          </h1>
-          <p className="text-base lg:text-lg leading-relaxed text-white/70">
-            {isEmployer
-              ? "Create your employer account to post jobs, manage applications, and connect with qualified candidates."
-              : `Create your account to browse jobs, apply easily, and build valuable connections within the ${APP_NAME} ecosystem.`}
-          </p>
-          <div className="mt-10">
-            <p className="mb-3 text-xs font-medium uppercase tracking-[0.16em] text-white/55">Follow @jomponline</p>
-            <SocialLinks />
-          </div>
-        </div>
+    <AuthShell
+      alternate={{ prompt: "Already have an account?", label: "Sign in", href: "/login" }}
+      showcase={
+        isEmployer
+          ? {
+              title: "Hire the right people, faster.",
+              body: "Post roles, review applicants in one place, and connect with qualified candidates across the JOMP network.",
+            }
+          : {
+              title: "Your next role starts here.",
+              body: "Browse employer-posted jobs, apply in a few clicks, and build connections that move your career forward.",
+            }
+      }
+    >
+      <AuthHeading
+        title={isEmployer ? "Create an employer account" : "Create your account"}
+        description={isEmployer ? "Start posting roles in minutes." : "Free forever for job seekers."}
+      />
+
+      <nav
+        aria-label="Account type"
+        className="auth-rise mt-7 grid grid-cols-2 gap-1 rounded-xl bg-neutral-100 p-1 [animation-delay:60ms]"
+      >
+        {ROLES.map((option) => {
+          const active = option.value === role;
+          return (
+            <Link
+              key={option.value}
+              href={option.href}
+              replace
+              scroll={false}
+              aria-current={active ? "page" : undefined}
+              className={cn(
+                "flex h-9 items-center justify-center rounded-[9px] text-[13px] font-medium transition-[background-color,color,box-shadow] duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#01224F]",
+                active
+                  ? "bg-white text-neutral-900 shadow-[0_1px_2px_rgba(0,0,0,0.06),0_1px_3px_rgba(0,0,0,0.06)]"
+                  : "text-neutral-500 hover:text-neutral-800",
+              )}
+            >
+              {option.label}
+            </Link>
+          );
+        })}
+      </nav>
+
+      <div className="auth-rise mt-6 [animation-delay:120ms]">
+        <form action={signInWithGoogle}>
+          <input type="hidden" name="role" value={role} />
+          <GoogleButton label="Sign up with Google" />
+        </form>
       </div>
 
-      <div className="flex-1 flex flex-col bg-white min-h-screen">
-        <div className="px-8 lg:px-16 pt-8">
-          <Link href="/" className="inline-flex items-center gap-2 text-sm text-[#111111] hover:opacity-70">
-            ← Go back
-          </Link>
+      <OrDivider />
+
+      <form action={signup} className="auth-rise space-y-5 [animation-delay:180ms]">
+        <input type="hidden" name="role" value={role} />
+        <div className="grid grid-cols-2 gap-3">
+          <TextField id="first_name" name="first_name" label="First name" placeholder="Ada" autoComplete="given-name" required />
+          <TextField id="last_name" name="last_name" label="Last name" placeholder="Obi" autoComplete="family-name" required />
         </div>
-        <div className="flex-1 flex items-start justify-center px-8 lg:px-16 pt-8">
-          <div className="w-full max-w-sm">
-            <h2 className="text-3xl font-bold mb-1 text-[#111111]">Sign Up</h2>
-            <p className="mb-4 text-[#111111]/70 text-[0.95rem]">
-              Create your account as an{" "}
-              <span className="font-medium text-[#01224F]">{isEmployer ? "Employer" : "Applicant"}</span>.
-            </p>
-            <div className="mb-6">
-              <Link
-                href={isEmployer ? "/signup" : "/signup?role=employer"}
-                className="inline-flex items-center justify-center w-full border border-dashed rounded-md px-4 py-2.5 text-sm font-medium border-[#01224F] text-[#01224F] hover:bg-[#01224F]/5"
-              >
-                {isEmployer ? "Looking for a job? Register as an Applicant →" : "Looking to hire? Register as an Employer →"}
-              </Link>
-            </div>
-            <form action={signup} className="space-y-5">
-              <input type="hidden" name="role" value={role} />
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <label htmlFor="first_name" className="block text-sm font-medium mb-1.5 text-[#111111]">First Name</label>
-                  <input id="first_name" name="first_name" type="text" required placeholder="John" className="landing-input w-full border rounded-md px-3.5 py-2.5 text-sm text-[#111111] bg-white border-[#ccc]" />
-                </div>
-                <div>
-                  <label htmlFor="last_name" className="block text-sm font-medium mb-1.5 text-[#111111]">Last Name</label>
-                  <input id="last_name" name="last_name" type="text" required placeholder="Doe" className="landing-input w-full border rounded-md px-3.5 py-2.5 text-sm text-[#111111] bg-white border-[#ccc]" />
-                </div>
-              </div>
-              <div>
-                <label htmlFor="signup-email" className="block text-sm font-medium mb-1.5 text-[#111111]">Email</label>
-                <input id="signup-email" name="email" type="email" required placeholder="m@example.com" className="landing-input w-full border rounded-md px-3.5 py-2.5 text-sm text-[#111111] bg-white border-[#ccc]" />
-              </div>
-              <div>
-                <label htmlFor="signup-password" className="block text-sm font-medium mb-1.5 text-[#111111]">Password</label>
-                <input id="signup-password" name="password" type="password" required pattern='(?=.*[A-Z])(?=.*[!@#$%^&*(),.?":{}|<>]).{8,}' title="Must contain at least one uppercase letter and one special character." className="landing-input w-full border rounded-md px-3.5 py-2.5 text-sm text-[#111111] bg-white border-[#ccc]" />
-                <p className="text-xs text-[#111111]/60 mt-1.5">Password must contain at least one uppercase letter and one special character.</p>
-              </div>
-              {message && (
-                <p className="text-sm font-medium text-destructive bg-destructive/10 p-3 rounded-md">{message}</p>
-              )}
-              <button type="submit" className="landing-login-btn">
-                {isEmployer ? "Create Employer Account" : "Sign up"}
-              </button>
-            </form>
-            <div className="landing-divider">Or continue with</div>
-            <form action={signInWithGoogle} className="flex justify-center">
-              <input type="hidden" name="role" value={role} />
-              <button type="submit" className="landing-google-btn">Google</button>
-            </form>
-            <div className="mt-10 pt-6 text-center text-sm border-t border-[#eee] text-[#111111]/70">
-              Already have an account?{" "}
-              <Link href="/login" className="font-semibold hover:underline text-[#01224F]">Log in</Link>
-            </div>
-          </div>
+        <TextField
+          id="signup-email"
+          name="email"
+          type="email"
+          label={isEmployer ? "Work email" : "Email"}
+          placeholder={isEmployer ? "you@company.com" : "you@example.com"}
+          autoComplete="email"
+          spellCheck={false}
+          required
+        />
+        <PasswordField
+          id="signup-password"
+          name="password"
+          label="Password"
+          placeholder="Create a password"
+          autoComplete="new-password"
+          required
+          pattern={'(?=.*[A-Z])(?=.*[!@#$%^&*(),.?":{}|<>]).{8,}'}
+          title="At least 8 characters, one uppercase letter and one special character."
+          hint="At least 8 characters, with an uppercase letter and a symbol."
+        />
+
+        <FormMessage message={message} />
+
+        <div className="pt-2">
+          <SubmitButton label={isEmployer ? "Create employer account" : "Create account"} pendingLabel="Creating account…" />
         </div>
-      </div>
-    </div>
+      </form>
+    </AuthShell>
   );
 }
 
 export default function SignupPage() {
   return (
-    <Suspense fallback={<div className="min-h-screen flex items-center justify-center">Loading...</div>}>
+    <Suspense fallback={<div className="min-h-screen bg-white" />}>
       <SignupForm />
     </Suspense>
   );

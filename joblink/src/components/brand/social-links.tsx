@@ -1,58 +1,46 @@
 import { APP_SOCIALS } from "@/lib/config";
 import { cn } from "@/lib/utils";
 
-function LinkedInIcon({ className }: { className?: string }) {
+type IconProps = { className?: string };
+
+function LinkedInIcon({ className }: IconProps) {
   return (
-    <svg viewBox="0 0 24 24" className={className} aria-hidden="true">
-      <rect x="2" y="2" width="20" height="20" rx="6" fill="#0A66C2" />
-      <path d="M8.75 10.5v5.25h-1.7V10.5h1.7zm-.85-2.7c.55 0 1 .45 1 1s-.45 1-1 1-1-.45-1-1 .45-1 1-1zm2.6 2.7h1.63v.72h.02c.23-.43.78-.88 1.6-.88 1.72 0 2.03 1.13 2.03 2.6v3h-1.7v-2.66c0-.63-.01-1.45-.88-1.45-.88 0-1.02.69-1.02 1.4v2.72h-1.7V10.5z" fill="#fff" />
+    <svg viewBox="0 0 24 24" className={className} aria-hidden="true" fill="currentColor">
+      <path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433a2.062 2.062 0 0 1-2.063-2.065 2.064 2.064 0 1 1 2.063 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z" />
     </svg>
   );
 }
 
-function InstagramIcon({ className }: { className?: string }) {
+function InstagramIcon({ className }: IconProps) {
   return (
-    <svg viewBox="0 0 24 24" className={className} aria-hidden="true">
-      <defs>
-        <radialGradient id="ig-a" cx="30%" cy="107%" r="150%">
-          <stop offset="0%" stopColor="#fdf497" />
-          <stop offset="45%" stopColor="#fd5949" />
-          <stop offset="60%" stopColor="#d6249f" />
-          <stop offset="90%" stopColor="#285AEB" />
-        </radialGradient>
-      </defs>
-      <rect x="2" y="2" width="20" height="20" rx="6" fill="url(#ig-a)" />
-      <circle cx="12" cy="12" r="4.15" fill="none" stroke="#fff" strokeWidth="1.7" />
-      <circle cx="16.6" cy="7.4" r="1.05" fill="#fff" />
+    <svg viewBox="0 0 24 24" className={className} aria-hidden="true" fill="none" stroke="currentColor" strokeWidth="1.9">
+      <rect x="3" y="3" width="18" height="18" rx="5.5" />
+      <circle cx="12" cy="12" r="4.1" />
+      <circle cx="17.3" cy="6.7" r="1.1" fill="currentColor" stroke="none" />
     </svg>
   );
 }
 
-function TikTokIcon({ className }: { className?: string }) {
+function TikTokIcon({ className }: IconProps) {
   return (
-    <svg viewBox="0 0 24 24" className={className} aria-hidden="true">
-      <rect x="2" y="2" width="20" height="20" rx="6" fill="#111111" />
-      <path d="M14.1 6.2c.28 1.7 1.28 2.85 3 3.05v1.85c-1.02-.03-1.96-.35-2.85-.9v4.55c0 2.35-1.82 4.15-4.2 4.15S5.85 17.1 5.85 14.75 7.67 10.6 10.05 10.6c.28 0 .55.03.82.08v1.9c-.26-.1-.54-.16-.82-.16-1.28 0-2.32 1.05-2.32 2.33s1.04 2.33 2.32 2.33 2.32-1.05 2.32-2.33V6.2h1.73z" fill="#fff" />
-      <path d="M14.1 6.2c.28 1.7 1.28 2.85 3 3.05v1.85c-1.02-.03-1.96-.35-2.85-.9" fill="none" stroke="#25F4EE" strokeWidth="1.1" transform="translate(-0.7 0.5)" />
-      <path d="M14.1 6.2c.28 1.7 1.28 2.85 3 3.05v1.85c-1.02-.03-1.96-.35-2.85-.9" fill="none" stroke="#FE2C55" strokeWidth="1.1" transform="translate(0.55 -0.35)" />
+    <svg viewBox="0 0 24 24" className={className} aria-hidden="true" fill="currentColor">
+      <path d="M12.525.02c1.31-.02 2.61-.01 3.91-.02.08 1.53.63 3.09 1.75 4.17 1.12 1.11 2.7 1.62 4.24 1.79v4.03c-1.44-.05-2.89-.35-4.2-.97-.57-.26-1.1-.59-1.62-.93-.01 2.92.01 5.84-.02 8.75-.08 1.4-.54 2.79-1.35 3.94-1.31 1.92-3.58 3.17-5.91 3.21-1.43.08-2.86-.31-4.08-1.03-2.02-1.19-3.44-3.37-3.65-5.71-.02-.5-.03-1-.01-1.49.18-1.9 1.12-3.72 2.58-4.96 1.66-1.44 3.98-2.13 6.15-1.72.02 1.48-.04 2.96-.04 4.44-.99-.32-2.15-.23-3.02.37-.63.41-1.11 1.04-1.36 1.75-.21.51-.15 1.07-.14 1.61.24 1.64 1.82 3.02 3.5 2.87 1.12-.01 2.19-.66 2.77-1.61.19-.33.4-.67.41-1.06.1-1.79.06-3.57.07-5.36.01-4.03-.01-8.05.02-12.07z" />
     </svg>
   );
 }
 
-function FacebookIcon({ className }: { className?: string }) {
+function FacebookIcon({ className }: IconProps) {
   return (
-    <svg viewBox="0 0 24 24" className={className} aria-hidden="true">
-      <rect x="2" y="2" width="20" height="20" rx="6" fill="#1877F2" />
-      <path d="M13.4 19.2v-5.3h1.78l.27-2.08h-2.05V10.5c0-.6.17-1.01 1.03-1.01h1.1V7.6c-.19-.03-.84-.08-1.6-.08-1.58 0-2.66.97-2.66 2.74v1.56H9.4v2.08h1.87v5.3h2.13z" fill="#fff" />
+    <svg viewBox="0 0 24 24" className={className} aria-hidden="true" fill="currentColor">
+      <path d="M14 13.5h2.5l1-4H14v-2c0-1.03 0-2 2-2h1.5V2.14c-.326-.043-1.557-.14-2.857-.14C11.928 2 10 3.657 10 6.7v2.8H7v4h3V22h4v-8.5z" />
     </svg>
   );
 }
 
-function XIcon({ className }: { className?: string }) {
+function XIcon({ className }: IconProps) {
   return (
-    <svg viewBox="0 0 24 24" className={className} aria-hidden="true">
-      <rect x="2" y="2" width="20" height="20" rx="6" fill="#111111" />
-      <path d="M8.05 7.2h2.02l2.16 2.92 2.5-2.92h1.92l-3.46 4.04L17 16.8h-2.04l-2.3-3.12-2.66 3.12H8.1l3.64-4.26L8.05 7.2zm1.3.95 5.55 7.5h.86L10.2 8.15H9.35z" fill="#fff" />
+    <svg viewBox="0 0 24 24" className={className} aria-hidden="true" fill="currentColor">
+      <path d="M18.901 1.153h3.68l-8.04 9.19L24 22.846h-7.406l-5.8-7.584-6.638 7.584H.474l8.6-9.83L0 1.154h7.594l5.243 6.932ZM17.61 20.644h2.039L6.486 3.24H4.298Z" />
     </svg>
   );
 }
@@ -65,6 +53,7 @@ const ICONS = {
   X: XIcon,
 } as const;
 
+/** Monochrome social icons in soft round buttons, built for dark surfaces. */
 export function SocialLinks({
   className,
   iconClassName,
@@ -75,7 +64,7 @@ export function SocialLinks({
   compact?: boolean;
 }) {
   return (
-    <nav aria-label="JOMP on social media" className={cn("flex items-center gap-2.5", className)}>
+    <nav aria-label="JOMP on social media" className={cn("flex items-center gap-2", className)}>
       {APP_SOCIALS.map((social) => {
         const Icon = ICONS[social.name];
         return (
@@ -87,11 +76,11 @@ export function SocialLinks({
             aria-label={`${social.name} — @jomponline`}
             title={`${social.name} @jomponline`}
             className={cn(
-              "inline-flex items-center justify-center rounded-xl transition hover:scale-105 hover:opacity-90 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white",
-              compact ? "h-9 w-9" : "h-11 w-11"
+              "inline-flex items-center justify-center rounded-full bg-white/[0.07] text-white/70 ring-1 ring-inset ring-white/10 backdrop-blur-sm transition-[background-color,color,transform] duration-200 hover:-translate-y-0.5 hover:bg-white/[0.14] hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/70",
+              compact ? "size-9" : "size-10"
             )}
           >
-            <Icon className={cn(compact ? "h-8 w-8" : "h-10 w-10", iconClassName)} />
+            <Icon className={cn(compact ? "size-4" : "size-[18px]", iconClassName)} />
           </a>
         );
       })}
