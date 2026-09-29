@@ -3,6 +3,7 @@ import { ArrowRight01Icon } from "@hugeicons/core-free-icons";
 import { EmptyApplicationsArt } from "@/components/dashboard/empty-applications-art";
 import { EmptyJobsArt } from "@/components/dashboard/empty-jobs-art";
 import { EmptyState, PageHeader, Pill, PrimaryLink } from "@/components/employer/bits";
+import { JobMenu } from "@/components/employer/job-menu";
 import { Icon } from "@/components/ui/icon";
 import { UserAvatar } from "@/components/ui/user-avatar";
 import { EMPLOYER_STATUS_LABELS, STATUS_TONES, applicationStatus } from "@/lib/applications";
@@ -88,10 +89,15 @@ export default async function EmployerOverview() {
                 ];
                 return (
                   <li key={job.id}>
-                    <Link href={`/employer/jobs/${job.id}`} className="group grid gap-3 py-4 sm:grid-cols-[minmax(0,1fr)_160px] sm:items-center sm:gap-8">
+                    <div className="group relative grid gap-3 py-4 pr-12 sm:grid-cols-[minmax(0,1fr)_160px] sm:items-center sm:gap-8">
                       <div className="min-w-0">
                         <div className="flex items-center gap-2">
-                          <p className="truncate text-[15px] font-semibold text-neutral-900 group-hover:text-brand">{job.title}</p>
+                          <Link
+                            href={`/employer/jobs/${job.id}`}
+                            className="truncate text-[15px] font-semibold text-neutral-900 after:absolute after:inset-0 group-hover:text-brand"
+                          >
+                            {job.title}
+                          </Link>
                           <Pill className={status.className}>{status.label}</Pill>
                         </div>
                         <p className="mt-1 text-[13px] text-neutral-500">
@@ -110,7 +116,8 @@ export default async function EmployerOverview() {
                             : null}
                         </div>
                       </div>
-                    </Link>
+                      <JobMenu jobId={job.id} status={status.value} className="absolute right-0 top-3 z-10 sm:top-1/2 sm:-translate-y-1/2" />
+                    </div>
                   </li>
                 );
               })}

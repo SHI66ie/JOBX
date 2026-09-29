@@ -4,6 +4,9 @@ import { MOCK_APPLICATIONS, MOCK_COMPANY, MOCK_JOBS, MOCK_USER } from "@/lib/moc
 
 const USE_MOCK = process.env.NEXT_PUBLIC_USE_MOCK_DATA === "true";
 
+/** True when NEXT_PUBLIC_USE_MOCK_DATA=true: employer pages render sample data. */
+export const IS_MOCK = USE_MOCK;
+
 export type Company = {
   id: string;
   name: string;
@@ -167,6 +170,7 @@ export async function getCompanyApplications(
         first_name: app.users.full_name.split(" ")[0] ?? null,
         last_name: app.users.full_name.split(" ").slice(1).join(" ") || null,
         email: app.users.email,
+        bio: app.users.bio,
       },
     }));
     return limit ? rows.slice(0, limit) : rows;
@@ -194,4 +198,25 @@ export async function getCompanyApplications(
     candidate: CandidateSummary | CandidateSummary[] | null;
   };
   return ((data ?? []) as unknown as Raw[]).map((row) => ({ ...row, job: firstOf(row.job), candidate: firstOf(row.candidate) }));
+}
+
+/** Mock job (with full listing fields) for the detail, preview and edit pages. */
+export function getMockJob(jobId: string) {
+  const job = MOCK_JOBS.find((item) => item.id === jobId);
+  return job ? { ...job, company: { name: MOCK_COMPANY.name, description: MOCK_COMPANY.description, website: MOCK_COMPANY.website, team_size: "small" } } : null;
+}
+
+/** Mock applicants for one job, shaped like the detail page's Supabase query. */
+export function getMockJobApplications(jobId: string) {
+  return MOCK_APPLICATIONS.filter((app) => app.job_id === jobId).map((app) => {
+    const [first_name, ...rest] = app.users.full_name.split(" ");
+    return {
+      id: app.id,
+      status: app.status,
+      cover_letter: app.cover_letter,
+      resume_url: app.resume_url,
+      created_at: app.created_at,
+      candidate: { id: app.candidate_id, first_name, last_name: rest.join(" ") || null, email: app.users.email, bio: app.users.bio },
+    };
+  });
 }
