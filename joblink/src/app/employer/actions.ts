@@ -402,3 +402,52 @@ export async function updateApplicationStatus(applicationId: string, status: str
   revalidatePath("/employer/dashboard");
   revalidatePath("/dashboard/applications");
 }
+
+/** Copy a job as a new draft and open it for editing. */
+export async function duplicateJob(jobId: string) {
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+
+  if (!user) {
+    throw new Error("Unauthorized");
+  }
+
+  const company = await getOwnedCompany(supabase, user.id);
+  if (!company) {
+    throw new Error("You must create a company profile first.");
+  }
+
+  const { data: job, error: readError } = await supabase
+    .from("jobs")
+    .select("title, description, requirements, location, type, job_type, salary_range")
+    .eq("id", jobId)
+    .eq("company_id", company.id)
+    .maybeSingle();
+
+  if (readError || !job) {
+    throw new Error(readError?.message || "Job not found.");
+  }
+
+  const { data: copy, error } = await supabase
+    .from("jobs")
+    .insert({
+      ...job,
+      title: `${job.title} (copy)`,
+      company_id: company.id,
+      employer_id: user.id,
+      status: "draft",
+    })
+    .select("id")
+    .single();
+
+  if (error || !copy) {
+    console.error("Error duplicating job:", error);
+    throw new Error(error?.message || "Could not duplicate job.");
+  }
+
+  revalidatePath("/employer/dashboard");
+  revalidatePath("/employer/jobs");
+  redirect(`/employer/jobs/${copy.id}/edit`);
+}

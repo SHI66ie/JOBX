@@ -108,3 +108,36 @@ export function jobStatusMeta(status: string | null | undefined) {
       return { value: "closed" as const, label: "Closed", className: "bg-neutral-100 text-neutral-500" };
   }
 }
+
+type SupabaseLike = Awaited<ReturnType<typeof import("@/utils/supabase/server").createClient>>;
+
+/** Loads a job with its company for the listing view. Falls back if newer company columns are missing. */
+export async function getJobListing(supabase: SupabaseLike, jobId: string, filter: { companyId?: string; publishedOnly?: boolean } = {}) {
+  const baseCols = "id, title, description, requirements, type, job_type, salary_range, status, created_at, company_id";
+  const attempts = [`${baseCols}, company:companies (name, description, website, team_size)`, `${baseCols}, company:companies (name, description, website)`];
+
+  for (const select of attempts) {
+    let query = supabase.from("jobs").select(select).eq("id", jobId);
+    if (filter.companyId) query = query.eq("company_id", filter.companyId);
+    if (filter.publishedOnly) query = query.eq("status", "published");
+    const { data, error } = await query.maybeSingle();
+    if (!error) {
+      if (!data) return null;
+      const row = data as unknown as { company: unknown } & Record<string, unknown>;
+      const company = Array.isArray(row.company) ? (row.company[0] ?? null) : (row.company ?? null);
+      return { ...row, company } as {
+        id: string;
+        title: string;
+        description: string | null;
+        requirements: string | null;
+        type: string | null;
+        job_type: string | null;
+        salary_range: string | null;
+        status: string;
+        created_at: string;
+        company: { name: string | null; description?: string | null; website?: string | null; team_size?: string | null } | null;
+      };
+    }
+  }
+  return null;
+}

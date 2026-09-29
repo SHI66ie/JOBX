@@ -1,8 +1,7 @@
 import Link from "next/link";
-import { ArrowRight01Icon } from "@hugeicons/core-free-icons";
 import { EmptyJobsArt } from "@/components/dashboard/empty-jobs-art";
 import { EmptyState, LinkTabs, PageHeader, Pill, PrimaryLink } from "@/components/employer/bits";
-import { Icon } from "@/components/ui/icon";
+import { JobMenu } from "@/components/employer/job-menu";
 import { getJobsForCompany, requireCompany } from "@/lib/employer";
 import { jobStatusMeta, jobTypeLabel, postedAgo } from "@/lib/jobs";
 
@@ -54,13 +53,15 @@ export default async function EmployerJobsPage({ searchParams }: { searchParams:
                 const fresh = apps.filter((app) => app.status === "pending").length;
                 return (
                   <li key={job.id}>
-                    <Link
-                      href={`/employer/jobs/${job.id}`}
-                      className="group grid gap-3 py-5 transition-colors sm:px-3 sm:hover:bg-neutral-50/70 md:grid-cols-[minmax(0,1fr)_140px_110px_20px] md:items-center md:gap-8"
-                    >
+                    <div className="group relative grid gap-3 py-5 pr-12 transition-colors sm:px-3 sm:pr-14 sm:hover:bg-neutral-50/70 md:grid-cols-[minmax(0,1fr)_140px_110px] md:items-center md:gap-8">
                       <div className="min-w-0">
                         <div className="flex flex-wrap items-center gap-2">
-                          <p className="truncate text-[16px] font-semibold tracking-[-0.01em] text-neutral-900 group-hover:text-brand">{job.title}</p>
+                          <Link
+                            href={`/employer/jobs/${job.id}`}
+                            className="truncate text-[16px] font-semibold tracking-[-0.01em] text-neutral-900 after:absolute after:inset-0 group-hover:text-brand"
+                          >
+                            {job.title}
+                          </Link>
                           <Pill className={meta.className}>{meta.label}</Pill>
                         </div>
                         <p className="mt-1 truncate text-[13px] text-neutral-500">
@@ -72,8 +73,8 @@ export default async function EmployerJobsPage({ searchParams }: { searchParams:
                         {fresh ? <span className="ml-1.5 text-brand">· {fresh} new</span> : null}
                       </p>
                       <p className="text-[13px] text-neutral-500">{postedAgo(job.created_at)}</p>
-                      <Icon icon={ArrowRight01Icon} size={18} className="hidden text-neutral-300 transition-colors group-hover:text-neutral-500 md:block" />
-                    </Link>
+                      <JobMenu jobId={job.id} status={meta.value} className="absolute right-0 top-4 z-10 sm:right-2 md:top-1/2 md:-translate-y-1/2" />
+                    </div>
                   </li>
                 );
               })}

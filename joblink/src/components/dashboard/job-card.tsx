@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useState, useTransition } from "react";
 import { Building03Icon, Tick02Icon } from "@hugeicons/core-free-icons";
 import { Icon } from "@/components/ui/icon";
@@ -32,8 +33,10 @@ export function JobRow({
       </p>
 
       <div className="mt-1.5 flex items-start justify-between gap-4">
-        <h3 className="text-[18px] font-semibold leading-snug tracking-[-0.015em] text-neutral-900 group-hover:text-brand">
-          {job.title}
+        <h3 className="text-[18px] font-semibold leading-snug tracking-[-0.015em] text-neutral-900">
+          <Link href={`/dashboard/jobs/${job.id}`} className="hover:text-brand hover:underline hover:decoration-brand/30 hover:underline-offset-4">
+            {job.title}
+          </Link>
         </h3>
         <ApplyButton jobId={job.id} hasApplied={hasApplied} />
       </div>
@@ -78,7 +81,7 @@ export function JobRow({
   );
 }
 
-function ApplyButton({ jobId, hasApplied }: { jobId: string; hasApplied: boolean }) {
+export function ApplyButton({ jobId, hasApplied }: { jobId: string; hasApplied: boolean }) {
   const [applied, setApplied] = useState(hasApplied);
   const [error, setError] = useState("");
   const [isPending, startTransition] = useTransition();
