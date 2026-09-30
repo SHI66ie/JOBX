@@ -57,7 +57,7 @@ export function LiveApplications({ userId }: { userId: string }) {
           <p className="truncate text-[12.5px] text-neutral-500">{arrival.jobTitle ? `For ${arrival.jobTitle}` : "Just now"}</p>
         </div>
         <Link
-          href={`/employer/jobs/${arrival.jobId}#${arrival.id}`}
+          href={`/employer/jobs/${arrival.jobId}?review=${arrival.id}#${arrival.id}`}
           onClick={() => setArrival(null)}
           className="rounded-full px-3 py-1.5 text-[13px] font-medium text-brand transition-colors hover:bg-brand/[0.06] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand"
         >
