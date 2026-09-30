@@ -70,15 +70,18 @@ export default async function JobDetailsPage({
     );
   }
 
-  const data = isMockId(job.id)
-    ? getMockJobApplications(job.id)
-    : (
-        await supabase
-          .from("applications")
-          .select("*, candidate:users (id, first_name, last_name, email, bio)")
-          .eq("job_id", job.id)
-          .order("created_at", { ascending: false })
-      ).data;
+  let data: unknown[] | null = null;
+  if (isMockId(job.id)) data = getMockJobApplications(job.id);
+  else {
+    const result = await supabase
+      .from("applications")
+      .select("*, candidate:users (id, first_name, last_name, email, bio)")
+      .eq("job_id", job.id)
+      .order("created_at", { ascending: false });
+    // Surface failures (e.g. schema drift) instead of silently rendering "no applicants".
+    if (result.error) console.error("[job applicants] Supabase error:", result.error.message);
+    data = result.data;
+  }
 
   const rows = (data ?? []) as (ApplicationRow & { extras?: MockExtras | null })[];
   // CVs are private: swap each stored path for a short-lived signed link this employer may open.
