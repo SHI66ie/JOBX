@@ -21,6 +21,7 @@ import { Sheet, SheetIconButton } from "@/components/employer/sheet";
 import { fileNameOf } from "@/components/employer/cv-viewer";
 import { applyForJob, saveResume } from "@/app/dashboard/actions";
 import { COVER_NOTE_LIMIT } from "@/lib/applications";
+import type { ApplyJob } from "@/lib/jobs";
 import type { CandidateProfile } from "@/lib/profile";
 import { RESUME_BUCKET } from "@/lib/resumes";
 import { createClient } from "@/utils/supabase/client";
@@ -28,7 +29,6 @@ import { cn } from "@/lib/utils";
 
 /** `resumeViewUrl` is a short-lived signed link for the CV at `resumeUrl` (an object path). */
 export type Applicant = CandidateProfile & { email: string; resumeViewUrl?: string | null };
-export type ApplyJob = { id: string; title: string; company: string; meta: string };
 
 const STEPS = [
   { label: "Your details", title: "Check what you're sending", hint: "This is exactly what the employer will see. Add or replace your CV right here." },

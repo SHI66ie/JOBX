@@ -23,6 +23,18 @@ export type JobListing = {
   company: { name: string } | null;
 };
 
+/** The job summary shown at the top of the apply sheet. Plain data, so server pages can build it. */
+export type ApplyJob = { id: string; title: string; company: string; meta: string };
+
+export function applyJob(job: Pick<JobListing, "id" | "title" | "type" | "job_type" | "salary_range"> & { company: { name: string | null } | null }): ApplyJob {
+  return {
+    id: job.id,
+    title: job.title,
+    company: job.company?.name ?? "",
+    meta: [jobTypeLabel(jobTypeOf(job)), "Remote", job.salary_range].filter(Boolean).join(" · "),
+  };
+}
+
 export function jobTypeOf(job: Pick<JobListing, "type" | "job_type">) {
   return job.type || job.job_type || null;
 }

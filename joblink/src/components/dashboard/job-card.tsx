@@ -5,19 +5,9 @@ import Link from "next/link";
 import { useState } from "react";
 import { Building03Icon, Tick02Icon } from "@hugeicons/core-free-icons";
 import { Icon } from "@/components/ui/icon";
-import { ApplySheet, type Applicant, type ApplyJob } from "@/components/dashboard/apply-sheet";
-import { isNew, jobTypeLabel, jobTypeOf, postedAgo, type JobListing } from "@/lib/jobs";
+import { ApplySheet, type Applicant } from "@/components/dashboard/apply-sheet";
+import { applyJob, isNew, jobTypeLabel, jobTypeOf, postedAgo, type ApplyJob, type JobListing } from "@/lib/jobs";
 import { cn } from "@/lib/utils";
-
-/** The job summary shown at the top of the apply sheet. */
-export function applyJob(job: Pick<JobListing, "id" | "title" | "type" | "job_type" | "salary_range"> & { company: { name: string | null } | null }): ApplyJob {
-  return {
-    id: job.id,
-    title: job.title,
-    company: job.company?.name ?? "",
-    meta: [jobTypeLabel(jobTypeOf(job)), "Remote", job.salary_range].filter(Boolean).join(" · "),
-  };
-}
 
 /** One job in the feed: Upwork-style full-width row. */
 export function JobRow({

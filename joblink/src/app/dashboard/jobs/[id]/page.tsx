@@ -2,11 +2,11 @@ import Link from "next/link";
 import { redirect } from "next/navigation";
 import { ArrowLeft01Icon } from "@hugeicons/core-free-icons";
 import { createClient } from "@/utils/supabase/server";
-import { ApplyButton, applyJob } from "@/components/dashboard/job-card";
+import { ApplyButton } from "@/components/dashboard/job-card";
 import { EmptyJobsArt } from "@/components/dashboard/empty-jobs-art";
 import { JobListingView } from "@/components/jobs/job-listing-view";
 import { Icon } from "@/components/ui/icon";
-import { getJobListing, matchSkills } from "@/lib/jobs";
+import { applyJob, getJobListing, matchSkills } from "@/lib/jobs";
 import { candidateProfileFromMeta } from "@/lib/profile";
 import { signResume } from "@/lib/resumes";
 
