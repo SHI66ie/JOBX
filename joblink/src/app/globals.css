@@ -136,6 +136,17 @@
   h1, h2, h3 {
     letter-spacing: -0.025em;
   }
+  /* Tailwind v4 dropped the pointer cursor on buttons; restore it app-wide. */
+  button:not(:disabled),
+  [role="button"]:not([aria-disabled="true"]),
+  select:not(:disabled),
+  summary {
+    cursor: pointer;
+  }
+  button:disabled,
+  [aria-disabled="true"] {
+    cursor: not-allowed;
+  }
 }
 
 .auth-bg {
@@ -516,6 +527,12 @@
 .job-rich-text blockquote { border-left: 3px solid var(--color-brand); padding-left: 1em; font-style: italic; }
 .job-rich-text a { color: var(--color-brand); text-decoration: underline; text-underline-offset: 3px; }
 .job-rich-text hr { border-color: var(--color-neutral-200); margin-block: 1.5em; }
-.description-sheet[open] { animation: sheet-in 0.25s ease-out; }
-@media (prefers-reduced-motion: reduce) { .description-sheet[open] { animation: none; } }
 @media (pointer: coarse) { .job-rich-text[contenteditable] { font-size: 16px; } }
+
+/* Apply flow: a single soft ring that ripples out from the success tick. */
+@keyframes apply-ring {
+  from { transform: scale(0.85); opacity: 1; }
+  to { transform: scale(1.6); opacity: 0; }
+}
+.apply-ring { animation: apply-ring 0.9s cubic-bezier(0.22, 1, 0.36, 1) 0.15s both; }
+@media (prefers-reduced-motion: reduce) { .apply-ring { animation: none; opacity: 0; } }
