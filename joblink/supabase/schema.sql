@@ -262,6 +262,14 @@ CREATE TABLE IF NOT EXISTS public.applications (
   UNIQUE(job_id, candidate_id)
 );
 
+-- Snapshot of what the candidate sent (see migrations/20260930130000_apply_flow.sql).
+ALTER TABLE public.applications ADD COLUMN IF NOT EXISTS candidate_title TEXT;
+ALTER TABLE public.applications ADD COLUMN IF NOT EXISTS candidate_skills TEXT[] NOT NULL DEFAULT '{}';
+
+ALTER TABLE public.applications DROP CONSTRAINT IF EXISTS applications_status_check;
+ALTER TABLE public.applications ADD CONSTRAINT applications_status_check
+  CHECK (status IN ('pending', 'reviewed', 'interviewing', 'accepted', 'rejected'));
+
 DROP TRIGGER IF EXISTS update_applications_updated_at ON public.applications;
 CREATE TRIGGER update_applications_updated_at
   BEFORE UPDATE ON public.applications
