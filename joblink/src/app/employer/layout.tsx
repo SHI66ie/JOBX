@@ -7,6 +7,7 @@ import { JompMark, JompWordmark } from "@/components/brand/logo";
 import { DashboardNavLinks, DashboardNavMobile, UserMenu } from "@/components/dashboard/dashboard-nav";
 import { ThemeSwitch } from "@/components/dashboard/theme-switch";
 import { Icon } from "@/components/ui/icon";
+import { LiveApplications } from "@/components/employer/live-applications";
 
 const NAV = [
   { href: "/employer/dashboard", label: "Overview", exact: true },
@@ -84,6 +85,7 @@ export default async function EmployerLayout({ children }: { children: React.Rea
       </header>
 
       <main className="flex-1">{children}</main>
+      <LiveApplications userId={user.id} />
     </div>
   );
 }

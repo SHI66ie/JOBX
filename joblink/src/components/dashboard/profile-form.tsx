@@ -7,6 +7,8 @@ import { TextField } from "@/components/auth/auth-fields";
 import { FileDrop, SkillPicker, TextArea } from "@/components/onboarding/onboarding-fields";
 import { updateCandidateProfile } from "@/app/dashboard/actions";
 import { profileStrength, type CandidateProfile } from "@/lib/profile";
+import { RESUME_BUCKET } from "@/lib/resumes";
+import { fileNameOf } from "@/components/employer/cv-viewer";
 import { createClient } from "@/utils/supabase/client";
 import { cn } from "@/lib/utils";
 
@@ -35,7 +37,8 @@ export function SettingsRow({
   );
 }
 
-export function ProfileForm({ initial }: { initial: CandidateProfile }) {
+/** `cvLink` is a signed viewing link for the CV saved at `cvLink.path`; it goes stale once the CV changes. */
+export function ProfileForm({ initial, cvLink }: { initial: CandidateProfile; cvLink?: { path: string; url: string | null } }) {
   const [saved, setSaved] = useState(initial);
   const [draft, setDraft] = useState(initial);
   const [newFile, setNewFile] = useState<File | null>(null);
@@ -76,13 +79,15 @@ export function ProfileForm({ initial }: { initial: CandidateProfile }) {
         const ext = newFile.name.split(".").pop();
         const path = `${user.id}/resume-${Date.now()}.${ext}`;
         const { error: uploadError } = await supabase.storage
-          .from("resumes")
+          .from(RESUME_BUCKET)
           .upload(path, newFile, { cacheControl: "3600", upsert: true });
         if (uploadError) {
+          console.error("CV upload failed:", uploadError.message);
           setError("We couldn't upload your CV. Please try again.");
           return;
         }
-        resumeUrl = supabase.storage.from("resumes").getPublicUrl(path).data.publicUrl;
+        // Private bucket: keep the object path; the server signs a viewing link per page load.
+        resumeUrl = path;
       }
 
       const next = { ...draft, resumeUrl };
@@ -100,7 +105,8 @@ export function ProfileForm({ initial }: { initial: CandidateProfile }) {
     });
   }
 
-  const cvName = draft.resumeUrl ? decodeURIComponent(draft.resumeUrl.split("/").pop() ?? "CV") : "";
+  const cvName = draft.resumeUrl ? fileNameOf(draft.resumeUrl) : "";
+  const cvViewUrl = cvLink?.url && cvLink.path === draft.resumeUrl ? cvLink.url : null;
 
   return (
     <div>
@@ -141,9 +147,11 @@ export function ProfileForm({ initial }: { initial: CandidateProfile }) {
               <Icon icon={File01Icon} size={20} className="shrink-0 text-neutral-400" />
               <span className="min-w-0 flex-1 truncate text-[14px] text-neutral-900">{cvName}</span>
               <div className="flex shrink-0 items-center gap-1 text-[13px] font-medium">
-                <a href={draft.resumeUrl} target="_blank" rel="noopener noreferrer" className="rounded-md px-2 py-1 text-neutral-600 hover:bg-neutral-100 hover:text-neutral-900">
-                  View
-                </a>
+                {cvViewUrl ? (
+                  <a href={cvViewUrl} target="_blank" rel="noopener noreferrer" className="rounded-md px-2 py-1 text-neutral-600 hover:bg-neutral-100 hover:text-neutral-900">
+                    View
+                  </a>
+                ) : null}
                 <button type="button" onClick={() => setReplacingCv(true)} className="rounded-md px-2 py-1 text-neutral-600 hover:bg-neutral-100 hover:text-neutral-900">
                   Replace
                 </button>

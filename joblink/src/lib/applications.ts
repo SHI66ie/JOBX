@@ -1,5 +1,8 @@
 export type ApplicationStatus = "pending" | "reviewed" | "interviewing" | "accepted" | "rejected";
 
+/** Max length of the optional note a candidate sends with an application. */
+export const COVER_NOTE_LIMIT = 2000;
+
 export const APPLICATION_STAGES = ["Applied", "In review", "Interview", "Decision"] as const;
 
 type StatusMeta = {

@@ -25,12 +25,15 @@ import {
   type CandidateSummary,
 } from "@/lib/employer";
 import { jobStatusMeta, jobTypeLabel, postedAgo } from "@/lib/jobs";
+import { signResumes } from "@/lib/resumes";
 
 type ApplicationRow = {
   id: string;
   status: string;
   cover_letter: string | null;
   resume_url: string | null;
+  candidate_title?: string | null;
+  candidate_skills?: string[] | null;
   created_at: string;
   candidate: CandidateSummary | CandidateSummary[] | null;
 };
@@ -72,13 +75,17 @@ export default async function JobDetailsPage({
     : (
         await supabase
           .from("applications")
-          .select("id, status, cover_letter, resume_url, created_at, candidate:users (id, first_name, last_name, email, bio)")
+          .select("*, candidate:users (id, first_name, last_name, email, bio)")
           .eq("job_id", job.id)
           .order("created_at", { ascending: false })
       ).data;
 
-  const apps = ((data ?? []) as (ApplicationRow & { extras?: MockExtras | null })[]).map((app) => ({
+  const rows = (data ?? []) as (ApplicationRow & { extras?: MockExtras | null })[];
+  // CVs are private: swap each stored path for a short-lived signed link this employer may open.
+  const cvLinks = await signResumes(supabase, rows.map((app) => app.resume_url));
+  const apps = rows.map((app) => ({
     ...app,
+    resume_url: app.resume_url ? (cvLinks.get(app.resume_url) ?? null) : null,
     candidate: Array.isArray(app.candidate) ? (app.candidate[0] ?? null) : app.candidate,
   }));
 
@@ -141,8 +148,8 @@ export default async function JobDetailsPage({
                     name,
                     email: app.candidate?.email ?? null,
                     bio: app.candidate?.bio ?? null,
-                    title: app.extras?.title ?? null,
-                    skills: app.extras?.skills ?? [],
+                    title: app.candidate_title ?? app.extras?.title ?? null,
+                    skills: app.candidate_skills?.length ? app.candidate_skills : (app.extras?.skills ?? []),
                     memberSince: app.extras?.memberSince ?? null,
                     rating: app.extras?.rating ?? null,
                     jobsCompleted: app.extras?.jobsCompleted ?? 0,

@@ -3,6 +3,9 @@
 import { createClient } from "@/utils/supabase/server";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
+import { COVER_NOTE_LIMIT } from "@/lib/applications";
+import { candidateProfileFromMeta } from "@/lib/profile";
+import { ownsResume, resumePath, signResume } from "@/lib/resumes";
 
 export async function createCompanyProfile(formData: FormData) {
   const supabase = await createClient();
@@ -83,7 +86,7 @@ export async function postJob(formData: FormData) {
   redirect("/employer/jobs");
 }
 
-export async function applyForJob(jobId: string): Promise<{ error?: string }> {
+export async function applyForJob(jobId: string, input: { coverLetter?: string } = {}): Promise<{ error?: string }> {
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
 
@@ -91,13 +94,41 @@ export async function applyForJob(jobId: string): Promise<{ error?: string }> {
     return { error: "Please sign in again to apply." };
   }
 
-  const { error } = await supabase
-    .from("applications")
-    .insert({
-      job_id: jobId,
-      candidate_id: user.id,
-      status: "pending",
-    });
+  // The CV is read from the profile on the server, never trusted from the client,
+  // and its object path is snapshotted onto the application so later profile edits
+  // don't change what was sent (storage RLS lets the employer open exactly this file).
+  const stored = String(user.user_metadata?.resume_url || "");
+  const resume_url = ownsResume(stored, user.id) ? resumePath(stored) : null;
+  if (!resume_url) {
+    return { error: "Add your CV to your profile before applying." };
+  }
+  const cover_letter = (input.coverLetter ?? "").trim();
+  if (cover_letter.length > COVER_NOTE_LIMIT) {
+    return { error: `Keep your cover note to ${COVER_NOTE_LIMIT.toLocaleString()} characters or fewer.` };
+  }
+
+  const { data: job } = await supabase.from("jobs").select("id").eq("id", jobId).eq("status", "published").maybeSingle();
+  if (!job) {
+    return { error: "This job is no longer taking applications." };
+  }
+
+  const profile = candidateProfileFromMeta(user.user_metadata);
+  const application = {
+    job_id: jobId,
+    candidate_id: user.id,
+    status: "pending",
+    resume_url,
+    cover_letter: cover_letter || null,
+  };
+  let { error } = await supabase.from("applications").insert({
+    ...application,
+    candidate_title: profile.title.trim().slice(0, 100) || null,
+    candidate_skills: profile.skills.slice(0, 30),
+  });
+  // Before the apply-flow migration adds the snapshot columns, still accept the application.
+  if (error?.code === "PGRST204") {
+    ({ error } = await supabase.from("applications").insert(application));
+  }
 
   // Unique violation = already applied; treat as success.
   if (error && error.code !== "23505") {
@@ -109,8 +140,30 @@ export async function applyForJob(jobId: string): Promise<{ error?: string }> {
     };
   }
 
-  revalidatePath("/dashboard/applications");
+  revalidatePath("/dashboard", "layout");
   return {};
+}
+
+/** Saves a freshly uploaded CV (an object path in the user's own folder) to the profile. */
+export async function saveResume(path: string): Promise<{ error?: string; path?: string; viewUrl?: string | null }> {
+  const supabase = await createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) {
+    return { error: "Please sign in again." };
+  }
+
+  const resume_url = ownsResume(path, user.id) ? resumePath(path) : null;
+  if (!resume_url) {
+    return { error: "That CV upload didn't go through. Please try again." };
+  }
+
+  const { error } = await supabase.auth.updateUser({ data: { resume_url } });
+  if (error) {
+    return { error: error.message };
+  }
+
+  revalidatePath("/dashboard", "layout");
+  return { path: resume_url, viewUrl: await signResume(supabase, resume_url) };
 }
 
 export async function updateApplicationStatus(applicationId: string, status: string, jobId: string) {
@@ -158,12 +211,12 @@ export async function updateCandidateProfile(input: {
   const title = input.title.trim().slice(0, 100);
   const bio = input.bio.trim().slice(0, 600);
   const skills = Array.from(new Set(input.skills.map((skill) => skill.trim()).filter(Boolean))).slice(0, 30);
-  const resume_url = input.resumeUrl.trim();
+  const resume_url = resumePath(input.resumeUrl) ?? "";
 
   if (!first_name || !last_name) {
     return { error: "Your first and last name are required." };
   }
-  if (resume_url && !/^https:\/\//.test(resume_url)) {
+  if (input.resumeUrl.trim() && !ownsResume(input.resumeUrl, user.id)) {
     return { error: "That CV link doesn't look right. Try uploading it again." };
   }
 

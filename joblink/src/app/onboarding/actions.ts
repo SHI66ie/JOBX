@@ -4,6 +4,7 @@ import { createClient } from "@/utils/supabase/server";
 import { revalidatePath } from "next/cache";
 import { isEnterpriseTeam } from "@/lib/employer-options";
 import { getUserRoles } from "@/utils/auth";
+import { ownsResume, resumePath } from "@/lib/resumes";
 import { ensurePublicUser, publicErrorMessage } from "@/lib/public-user";
 
 export async function startOnboardingRole(role: "employer" | "candidate") {
@@ -62,10 +63,14 @@ export async function completeCandidateOnboarding(formData: FormData) {
     .split(",")
     .map((item) => item.trim())
     .filter(Boolean);
-  const resume_url = String(formData.get("resume_url") || "").trim();
+  const rawResume = String(formData.get("resume_url") || "").trim();
+  const resume_url = rawResume && ownsResume(rawResume, user.id) ? resumePath(rawResume) : "";
 
   if (!first_name || !last_name) {
     return { error: "Full name is required." };
+  }
+  if (rawResume && !resume_url) {
+    return { error: "That CV upload didn't go through. Please add it again." };
   }
   if (!title || !bio || skills.length === 0) {
     return { error: "Add your title, bio, and at least one skill." };

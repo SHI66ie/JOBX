@@ -60,7 +60,7 @@ export default async function EmployerApplicantsPage({ searchParams }: { searchP
                         <UserAvatar seed={app.candidate?.email || name} size={40} />
                         <div className="min-w-0">
                           <p className="truncate text-[15px] font-medium text-neutral-900 group-hover:text-brand">{name}</p>
-                          <p className="truncate text-[13px] text-neutral-500">{app.candidate?.email}</p>
+                          <p className="truncate text-[13px] text-neutral-500">{app.candidate_title || app.candidate?.email}</p>
                         </div>
                       </div>
                       <p className="truncate pl-[52px] text-[13px] text-neutral-600 md:pl-0">{app.job?.title ?? "—"}</p>

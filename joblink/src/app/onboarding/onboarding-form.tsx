@@ -15,6 +15,7 @@ import {
   TextArea,
 } from "@/components/onboarding/onboarding-fields";
 import { completeCandidateOnboarding } from "./actions";
+import { RESUME_BUCKET } from "@/lib/resumes";
 
 const STEPS = [
   { label: "About you", hint: "Your name as employers will see it." },
@@ -92,11 +93,15 @@ export default function OnboardingForm({ initialData, isComplete = false }: Onbo
           const ext = resumeFile.name.split(".").pop();
           const filePath = `${user.id}/resume-${Date.now()}.${ext}`;
           const { error: uploadError } = await supabase.storage
-            .from("resumes")
+            .from(RESUME_BUCKET)
             .upload(filePath, resumeFile, { cacheControl: "3600", upsert: true });
-          if (!uploadError) {
-            resumeUrl = supabase.storage.from("resumes").getPublicUrl(filePath).data.publicUrl;
+          if (uploadError) {
+            console.error("CV upload failed:", uploadError.message);
+            setErrorMsg("We couldn't upload your CV. Please try again, or remove it and add it later from your profile.");
+            setIsSubmitting(false);
+            return;
           }
+          resumeUrl = filePath;
         }
       }
 
