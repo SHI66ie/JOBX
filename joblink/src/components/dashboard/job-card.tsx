@@ -91,8 +91,8 @@ export function ApplyButton({ job, applicant, hasApplied }: { job: ApplyJob; app
   return (
     <>
       {applied ? (
-        <span className="auth-pop inline-flex h-9 shrink-0 items-center gap-1.5 rounded-full bg-emerald-50 px-3.5 text-[13px] font-medium text-emerald-700">
-          <Icon icon={Tick02Icon} size={15} strokeWidth={2.2} />
+        <span className="auth-pop inline-flex h-9 shrink-0 items-center gap-1.5 rounded-full bg-neutral-100 px-3.5 text-[13px] font-medium text-neutral-700">
+          <Icon icon={Tick02Icon} size={15} strokeWidth={2.2} className="text-neutral-500" />
           Applied
         </span>
       ) : (
