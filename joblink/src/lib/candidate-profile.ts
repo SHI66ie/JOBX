@@ -1,4 +1,3 @@
-/** What an employer sees about an applicant in the profile sheet. Optional fields render empty states. */
 export type CandidateProfileData = {
   name: string;
   email: string | null;
@@ -11,4 +10,8 @@ export type CandidateProfileData = {
   history?: { title: string; company: string; period: string; rating?: number; review?: string }[];
   resumeUrl?: string | null;
   application: { status: string; appliedAt: string; coverLetter?: string | null };
+  jobTitle?: string;
+  jobDescription?: string;
+  jobRequirements?: string;
 };
+

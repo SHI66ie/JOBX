@@ -6,7 +6,9 @@ import { Icon } from "@/components/ui/icon";
 import { UserAvatar } from "@/components/ui/user-avatar";
 import { CvPane, fileNameOf } from "@/components/employer/cv-viewer";
 import { Sheet, SheetIconButton } from "@/components/employer/sheet";
+import { AICandidateScreening } from "@/components/ai/ai-candidate-screening";
 import { EMPLOYER_STATUS_LABELS, STATUS_TONES, applicationStatus } from "@/lib/applications";
+
 import type { CandidateProfileData } from "@/lib/candidate-profile";
 import { postedAgo } from "@/lib/jobs";
 import { cn } from "@/lib/utils";
@@ -134,6 +136,18 @@ export function CandidateProfileTrigger({ profile, children }: { profile: Candid
                   <dd className="mt-1 text-[14px] font-medium">{postedAgo(profile.application.appliedAt)}</dd>
                 </div>
               </dl>
+
+              {/* AI Screening Copilot */}
+              <AICandidateScreening
+                jobTitle={profile.jobTitle || "Remote Position"}
+                jobDescription={profile.jobDescription}
+                jobRequirements={profile.jobRequirements}
+                candidateName={profile.name}
+                candidateTitle={profile.title}
+                candidateBio={profile.bio}
+                candidateSkills={profile.skills}
+                coverLetter={profile.application.coverLetter}
+              />
 
               <div className="divide-y divide-neutral-100">
                 <Section title="About">

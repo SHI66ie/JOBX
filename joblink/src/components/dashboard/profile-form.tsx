@@ -9,6 +9,8 @@ import { updateCandidateProfile } from "@/app/dashboard/actions";
 import { profileStrength, type CandidateProfile } from "@/lib/profile";
 import { createClient } from "@/utils/supabase/client";
 import { cn } from "@/lib/utils";
+import { AIBioEnhancer } from "@/components/ai/ai-bio-enhancer";
+
 
 const SKILL_SUGGESTIONS = ["Communication", "Customer service", "Microsoft Excel", "Project management", "Sales", "React"];
 
@@ -119,9 +121,27 @@ export function ProfileForm({ initial }: { initial: CandidateProfile }) {
         </SettingsRow>
 
         <SettingsRow id="field-bio" label="Bio" hint="Your experience, wins, and what you want next.">
+          <div className="mb-2 flex items-center justify-between">
+            <span className="text-[12.5px] text-neutral-400">Let AI polish your intro & extract skills</span>
+            <AIBioEnhancer
+              currentBio={draft.bio}
+              currentTitle={draft.title}
+              skills={draft.skills}
+              onApply={(data) => {
+                setDraft((curr) => ({
+                  ...curr,
+                  bio: data.bio,
+                  title: data.title || curr.title,
+                  skills: data.skills || curr.skills,
+                }));
+                setJustSaved(false);
+              }}
+            />
+          </div>
           <TextArea id="bio" label="Bio" hideLabel maxLength={600} value={draft.bio} onChange={(e) => update("bio", e.target.value)} placeholder="A few sentences about you." />
           <p className="mt-1.5 text-right text-xs tabular-nums text-neutral-400">{draft.bio.length}/600</p>
         </SettingsRow>
+
 
         <SettingsRow id="field-skills" label="Skills" hint="Powers your Best matches on the job board.">
           <SkillPicker

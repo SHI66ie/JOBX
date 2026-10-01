@@ -5,6 +5,7 @@ import { createClient } from "@/utils/supabase/server";
 import { ApplyButton } from "@/components/dashboard/job-card";
 import { EmptyJobsArt } from "@/components/dashboard/empty-jobs-art";
 import { JobListingView } from "@/components/jobs/job-listing-view";
+import { AIApplicationPitch } from "@/components/ai/ai-application-pitch";
 import { Icon } from "@/components/ui/icon";
 import { getJobListing, matchSkills } from "@/lib/jobs";
 import { candidateProfileFromMeta } from "@/lib/profile";
@@ -60,8 +61,17 @@ export default async function CandidateJobPage({ params }: { params: Promise<{ i
           company={job.company}
           matchedSkills={matched}
           action={
-            <div className="flex items-center gap-3">
+            <div className="flex flex-wrap items-center gap-2.5">
               <ApplyButton jobId={job.id} hasApplied={Boolean(application)} />
+              <AIApplicationPitch
+                jobTitle={job.title}
+                companyName={job.company?.name || undefined}
+                jobDescription={job.description || undefined}
+                candidateName={`${profile.firstName} ${profile.lastName}`.trim() || undefined}
+                candidateTitle={profile.title}
+                candidateBio={profile.bio}
+                candidateSkills={profile.skills}
+              />
               {application ? (
                 <Link href="/dashboard/applications" className="text-[13px] font-medium text-neutral-500 hover:text-neutral-900">
                   Track application
@@ -74,3 +84,4 @@ export default async function CandidateJobPage({ params }: { params: Promise<{ i
     </div>
   );
 }
+

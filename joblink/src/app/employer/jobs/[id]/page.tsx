@@ -148,6 +148,9 @@ export default async function JobDetailsPage({
                     history: app.extras?.history ?? [],
                     resumeUrl: app.resume_url,
                     application: { status: app.status, appliedAt: app.created_at, coverLetter: app.cover_letter },
+                    jobTitle: job.title,
+                    jobDescription: job.description,
+                    jobRequirements: job.requirements,
                   };
                   return (
                     <li key={app.id} id={app.id} className="scroll-mt-24 py-5 target:-mx-3 target:rounded-xl target:bg-brand/[0.05] target:px-3">

@@ -22,6 +22,14 @@ Required env vars:
 - `NEXT_PUBLIC_SUPABASE_URL`
 - `NEXT_PUBLIC_SUPABASE_ANON_KEY` (or `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY`)
 - `NEXT_PUBLIC_SITE_URL=https://jomponline.com`
+- `OPENAI_API_KEY` (Optional for production OpenAI GPT-4o / GPT-4o-mini; smart fallbacks operate when unset)
+- `OPENAI_MODEL=gpt-4o-mini` (Optional, defaults to `gpt-4o-mini`)
+
+## AI Features
+
+- **Employer**: AI Job Description Drafter & Enhancer, AI Candidate Screening & Match Scoring (0-100% breakdown, pros & areas to probe), AI Interview Question Generator.
+- **Job Seeker**: AI Profile & Bio Polish with smart skill extractor, AI Tailored Application Pitch & Fit Breakdown.
+
 
 ## Deploy
 

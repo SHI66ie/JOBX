@@ -1,12 +1,13 @@
 "use client";
 
-import { useActionState } from "react";
+import { useActionState, useState } from "react";
 import { useFormStatus } from "react-dom";
 import { TextField } from "@/components/auth/auth-fields";
 import { TextArea } from "@/components/onboarding/onboarding-fields";
 import { SettingsRow } from "@/components/dashboard/profile-form";
 import { JOB_TYPES } from "@/lib/jobs";
 import { cn } from "@/lib/utils";
+import { AIJobAssistant } from "@/components/ai/ai-job-assistant";
 
 type JobDefaults = {
   title?: string;
@@ -65,10 +66,17 @@ export function JobForm({
   defaults?: JobDefaults;
   mode: "create" | "edit";
 }) {
-  const currentType = defaults.type || "full-time";
-  const [state, formAction] = useActionState<FormState, FormData>(async (prev, formData) => {
-    if (stateAction) return (await stateAction(prev, formData)) ?? {};
-    await action?.(formData);
+  const [formData, setFormData] = useState({
+    title: defaults.title || "",
+    type: defaults.type || "full-time",
+    salary_range: defaults.salary_range || "",
+    description: defaults.description || "",
+    requirements: defaults.requirements || "",
+  });
+
+  const [state, formAction] = useActionState<FormState, FormData>(async (prev, fd) => {
+    if (stateAction) return (await stateAction(prev, fd)) ?? {};
+    await action?.(fd);
     return {};
   }, {});
 
@@ -76,9 +84,34 @@ export function JobForm({
     <form action={formAction}>
       <input type="hidden" name="location" value="Remote" />
 
+      <div className="mb-4 flex items-center justify-between">
+        <p className="text-[13px] text-neutral-500">All jobs on JOMP are remote.</p>
+        <AIJobAssistant
+          onApply={(aiJob) => {
+            setFormData({
+              title: aiJob.title,
+              type: aiJob.type || "full-time",
+              salary_range: aiJob.salary_range || "",
+              description: aiJob.description,
+              requirements: aiJob.requirements,
+            });
+          }}
+        />
+      </div>
+
       <div className="divide-y divide-neutral-100">
         <SettingsRow label="Job title" hint="Short and specific works best.">
-          <TextField id="title" name="title" label="Job title" hideLabel required defaultValue={defaults.title} placeholder="e.g. Senior Frontend Engineer" maxLength={120} />
+          <TextField
+            id="title"
+            name="title"
+            label="Job title"
+            hideLabel
+            required
+            value={formData.title}
+            onChange={(e) => setFormData((d) => ({ ...d, title: e.target.value }))}
+            placeholder="e.g. Senior Frontend Engineer"
+            maxLength={120}
+          />
         </SettingsRow>
 
         <SettingsRow label="Job type" hint="All roles on JOMP are remote.">
@@ -91,11 +124,19 @@ export function JobForm({
                   className={cn(
                     "inline-flex h-9 cursor-pointer items-center rounded-full px-3.5 text-[13px] font-medium ring-1 ring-inset transition-colors",
                     "bg-neutral-100 text-neutral-600 ring-transparent hover:bg-neutral-200/70 hover:text-neutral-900",
-                    "has-[:checked]:bg-brand/[0.06] has-[:checked]:text-brand has-[:checked]:ring-brand/35",
-                    "has-[:focus-visible]:ring-2 has-[:focus-visible]:ring-brand",
+                    formData.type === type.value
+                      ? "bg-brand/[0.06] text-brand ring-brand/35"
+                      : "",
                   )}
                 >
-                  <input type="radio" name="type" value={type.value} defaultChecked={type.value === currentType} className="sr-only" />
+                  <input
+                    type="radio"
+                    name="type"
+                    value={type.value}
+                    checked={formData.type === type.value}
+                    onChange={() => setFormData((d) => ({ ...d, type: type.value }))}
+                    className="sr-only"
+                  />
                   {type.label}
                 </label>
               ))}
@@ -109,7 +150,8 @@ export function JobForm({
             name="salary_range"
             label="Pay"
             hideLabel
-            defaultValue={defaults.salary_range ?? ""}
+            value={formData.salary_range}
+            onChange={(e) => setFormData((d) => ({ ...d, salary_range: e.target.value }))}
             placeholder="e.g. $2,000 – $3,000 / month"
             maxLength={80}
           />
@@ -122,7 +164,8 @@ export function JobForm({
             label="Description"
             hideLabel
             required
-            defaultValue={defaults.description}
+            value={formData.description}
+            onChange={(e) => setFormData((d) => ({ ...d, description: e.target.value }))}
             placeholder="Describe the role and what success looks like."
             className="min-h-[200px]"
           />
@@ -134,7 +177,8 @@ export function JobForm({
             name="requirements"
             label="Requirements"
             hideLabel
-            defaultValue={defaults.requirements ?? ""}
+            value={formData.requirements}
+            onChange={(e) => setFormData((d) => ({ ...d, requirements: e.target.value }))}
             placeholder={"e.g.\n• 3+ years with React and TypeScript\n• Comfortable working async across time zones"}
             className="min-h-[140px]"
           />
@@ -151,3 +195,4 @@ export function JobForm({
     </form>
   );
 }
+
