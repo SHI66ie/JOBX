@@ -177,7 +177,7 @@ export async function updateCandidateProfile(input: {
   // Keep the public profile row (what employers see) in sync; not fatal if it fails.
   const { error: profileError } = await supabase
     .from("users")
-    .update({ first_name, last_name, bio })
+    .update({ first_name, last_name, bio, title, skills, resume_url })
     .eq("id", user.id);
   if (profileError) console.warn("Could not sync public.users profile:", profileError.message);
 

@@ -8,8 +8,36 @@ import { MOCK_ADMIN_STATS, MOCK_COMPANY, MOCK_JOBS, MOCK_USER } from "@/lib/mock
 
 const USE_MOCK = process.env.NEXT_PUBLIC_USE_MOCK_DATA === "true";
 
+type AdminUserProfile = {
+  role: string;
+  first_name: string | null;
+};
+
+type CompanySummary = {
+  id: string;
+  name: string;
+  website?: string | null;
+};
+
+type JobSummary = {
+  id: string;
+  title: string;
+  location: string;
+  type?: string | null;
+  status: string;
+  company_id?: string | null;
+};
+
+type UserSummary = {
+  id: string;
+  first_name: string | null;
+  last_name?: string | null;
+  role: string | null;
+  email?: string | null;
+};
+
 export default async function AdminDashboard() {
-  let userProfile = { role: "admin", first_name: "Admin" };
+  let userProfile: AdminUserProfile = { role: "admin", first_name: "Admin" };
   
   if (!USE_MOCK) {
     const supabase = await createClient();
@@ -28,7 +56,7 @@ export default async function AdminDashboard() {
       .single();
       
     if (data) {
-      userProfile = data as any;
+      userProfile = data as AdminUserProfile;
     }
 
     if (userProfile?.role !== "admin") {
@@ -40,9 +68,9 @@ export default async function AdminDashboard() {
   let jobCount = { count: USE_MOCK ? MOCK_ADMIN_STATS.totalJobs : 0 };
   let userCount = { count: USE_MOCK ? MOCK_ADMIN_STATS.totalUsers : 0 };
   
-  let latestCompanies: any[] = USE_MOCK ? [MOCK_COMPANY] : [];
-  let latestJobs: any[] = USE_MOCK ? MOCK_JOBS.slice(0, 3) : [];
-  let latestUsers: any[] = USE_MOCK ? [{ ...MOCK_USER, first_name: MOCK_USER.user_metadata.full_name, role: "employer" }] : [];
+  let latestCompanies: CompanySummary[] = USE_MOCK ? [MOCK_COMPANY] : [];
+  let latestJobs: JobSummary[] = USE_MOCK ? (MOCK_JOBS.slice(0, 3) as unknown as JobSummary[]) : [];
+  let latestUsers: UserSummary[] = USE_MOCK ? [{ id: MOCK_USER.id, first_name: MOCK_USER.user_metadata.full_name, last_name: "", role: "employer", email: MOCK_USER.email }] : [];
 
   if (!USE_MOCK) {
     const adminClient = await createAdminClient();
@@ -77,9 +105,9 @@ export default async function AdminDashboard() {
     companyCount = { count: companyCountRes.count ?? 0 };
     jobCount = { count: jobCountRes.count ?? 0 };
     userCount = { count: userCountRes.count ?? 0 };
-    latestCompanies = latestCompaniesRes.data ?? [];
-    latestJobs = latestJobsRes.data ?? [];
-    latestUsers = latestUsersRes.data ?? [];
+    latestCompanies = (latestCompaniesRes.data ?? []) as CompanySummary[];
+    latestJobs = (latestJobsRes.data ?? []) as JobSummary[];
+    latestUsers = (latestUsersRes.data ?? []) as UserSummary[];
   }
 
   return (

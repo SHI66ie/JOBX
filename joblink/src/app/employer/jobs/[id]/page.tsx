@@ -71,7 +71,7 @@ export default async function JobDetailsPage({
     : (
         await supabase
           .from("applications")
-          .select("id, status, cover_letter, resume_url, created_at, candidate:users (id, first_name, last_name, email, bio)")
+          .select("id, status, cover_letter, resume_url, created_at, candidate:users (id, first_name, last_name, email, bio, title, skills, resume_url, rating_avg, rating_count, jobs_completed)")
           .eq("job_id", job.id)
           .order("created_at", { ascending: false })
       ).data;
@@ -136,17 +136,20 @@ export default async function JobDetailsPage({
                 {apps.map((app) => {
                   const status = applicationStatus(app.status);
                   const name = candidateName(app.candidate);
+                  const candidate = app.candidate as CandidateSummary | null;
                   const profile: CandidateProfileData = {
                     name,
-                    email: app.candidate?.email ?? null,
-                    bio: app.candidate?.bio ?? null,
-                    title: app.extras?.title ?? null,
-                    skills: app.extras?.skills ?? [],
+                    email: candidate?.email ?? null,
+                    bio: candidate?.bio ?? null,
+                    title: candidate?.title ?? app.extras?.title ?? null,
+                    skills: candidate?.skills ?? app.extras?.skills ?? [],
                     memberSince: app.extras?.memberSince ?? null,
-                    rating: app.extras?.rating ?? null,
-                    jobsCompleted: app.extras?.jobsCompleted ?? 0,
+                    rating: candidate?.rating_avg
+                      ? { average: Number(candidate.rating_avg), count: candidate.rating_count ?? 1 }
+                      : app.extras?.rating ?? null,
+                    jobsCompleted: candidate?.jobs_completed ?? app.extras?.jobsCompleted ?? 0,
                     history: app.extras?.history ?? [],
-                    resumeUrl: app.resume_url,
+                    resumeUrl: app.resume_url || candidate?.resume_url || null,
                     application: { status: app.status, appliedAt: app.created_at, coverLetter: app.cover_letter },
                     jobTitle: job.title,
                     jobDescription: job.description,

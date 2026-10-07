@@ -1,7 +1,7 @@
 import { type NextRequest, NextResponse } from "next/server";
 import { updateSession } from "@/utils/supabase/middleware";
 
-export async function proxy(request: NextRequest) {
+export async function middleware(request: NextRequest) {
   // Supabase falls back to the bare Site URL when redirect_to isn't allow-listed,
   // which drops the OAuth code (or error) on the homepage. Hand it to the callback.
   const { pathname, searchParams } = request.nextUrl;

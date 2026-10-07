@@ -109,8 +109,7 @@ export type JobRow = {
 /** Fetch jobs for a company — returns mock data when USE_MOCK is set or on Supabase error */
 export async function getJobsForCompany(
   supabase: Awaited<ReturnType<typeof createClient>>,
-  companyId: string,
-  _selectClause = "id, title, location, type, status, salary_range, created_at, applications(id, status, created_at)"
+  companyId: string
 ): Promise<JobRow[]> {
   if (USE_MOCK) {
     return MOCK_JOBS as JobRow[];
@@ -136,6 +135,12 @@ export type CandidateSummary = {
   last_name: string | null;
   email: string | null;
   bio?: string | null;
+  title?: string | null;
+  skills?: string[] | null;
+  resume_url?: string | null;
+  rating_avg?: number | null;
+  rating_count?: number | null;
+  jobs_completed?: number | null;
 };
 
 export type CompanyApplication = {
@@ -182,7 +187,7 @@ export async function getCompanyApplications(
 
   let query = supabase
     .from("applications")
-    .select("id, status, created_at, job:jobs (id, title), candidate:users (id, first_name, last_name, email, bio)")
+    .select("id, status, created_at, job:jobs (id, title), candidate:users (id, first_name, last_name, email, bio, title, skills, resume_url)")
     .in("job_id", jobIds)
     .order("created_at", { ascending: false });
   if (limit) query = query.limit(limit);

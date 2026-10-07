@@ -1,7 +1,6 @@
 -- ============================================================
--- JOBX / Joblink - Fixed & complete schema
--- Safe to run after project pause/resume
--- Compatible with current app code (companies, notifications, etc.)
+-- JOBX / JOMP - Consolidated Platform Schema & Security Rules
+-- Compatible with Supabase Postgres, Auth, and Storage
 -- ============================================================
 
 -- Extensions
@@ -17,12 +16,38 @@ CREATE TABLE IF NOT EXISTS public.users (
   last_name TEXT,
   role TEXT DEFAULT 'candidate',
   bio TEXT,
+  title TEXT,
+  skills TEXT[] DEFAULT '{}'::TEXT[],
+  resume_url TEXT,
+  rating_avg NUMERIC(3,2),
+  rating_count INT DEFAULT 0,
+  jobs_completed INT DEFAULT 0,
   created_at TIMESTAMPTZ DEFAULT timezone('utc'::text, now()) NOT NULL,
   updated_at TIMESTAMPTZ DEFAULT timezone('utc'::text, now()) NOT NULL
 );
 
--- Remove old restrictive check if it exists
-ALTER TABLE public.users DROP CONSTRAINT IF EXISTS users_role_check;
+-- Safely add missing columns if upgrading an existing users table
+DO $$
+BEGIN
+  IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_schema = 'public' AND table_name = 'users' AND column_name = 'title') THEN
+    ALTER TABLE public.users ADD COLUMN title TEXT;
+  END IF;
+  IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_schema = 'public' AND table_name = 'users' AND column_name = 'skills') THEN
+    ALTER TABLE public.users ADD COLUMN skills TEXT[] DEFAULT '{}'::TEXT[];
+  END IF;
+  IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_schema = 'public' AND table_name = 'users' AND column_name = 'resume_url') THEN
+    ALTER TABLE public.users ADD COLUMN resume_url TEXT;
+  END IF;
+  IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_schema = 'public' AND table_name = 'users' AND column_name = 'rating_avg') THEN
+    ALTER TABLE public.users ADD COLUMN rating_avg NUMERIC(3,2);
+  END IF;
+  IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_schema = 'public' AND table_name = 'users' AND column_name = 'rating_count') THEN
+    ALTER TABLE public.users ADD COLUMN rating_count INT DEFAULT 0;
+  END IF;
+  IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_schema = 'public' AND table_name = 'users' AND column_name = 'jobs_completed') THEN
+    ALTER TABLE public.users ADD COLUMN jobs_completed INT DEFAULT 0;
+  END IF;
+END $$;
 
 -- Trigger function: create/update profile on signup
 CREATE OR REPLACE FUNCTION public.handle_new_user()
@@ -46,6 +71,9 @@ BEGIN
     role = COALESCE(EXCLUDED.role, public.users.role),
     updated_at = now();
   RETURN NEW;
+EXCEPTION WHEN OTHERS THEN
+  RAISE WARNING 'handle_new_user failed: %', SQLERRM;
+  RETURN NEW;
 END;
 $$;
 
@@ -68,7 +96,7 @@ CREATE TRIGGER update_users_updated_at
   BEFORE UPDATE ON public.users
   FOR EACH ROW EXECUTE FUNCTION public.update_updated_at_column();
 
--- Prevent non-admins from changing role on users
+-- Prevent privilege escalation on user roles (permits candidate <-> employer, blocks unauthorized admin)
 CREATE OR REPLACE FUNCTION public.protect_user_role()
 RETURNS TRIGGER
 LANGUAGE plpgsql
@@ -77,12 +105,14 @@ SET search_path = public
 AS $$
 BEGIN
   IF OLD.role IS NOT NULL AND NEW.role IS DISTINCT FROM OLD.role THEN
-    IF current_setting('request.jwt.claim.role', true) != 'service_role' THEN
-      IF NOT EXISTS (
-        SELECT 1 FROM public.users
-        WHERE id = auth.uid() AND role = 'admin'
-      ) THEN
-        RAISE EXCEPTION 'Unauthorized: Only platform administrators can change user roles.';
+    IF NEW.role = 'admin' THEN
+      IF current_setting('request.jwt.claim.role', true) != 'service_role' THEN
+        IF NOT EXISTS (
+          SELECT 1 FROM public.users
+          WHERE id = auth.uid() AND role = 'admin'
+        ) THEN
+          RAISE EXCEPTION 'Unauthorized: Only platform administrators can grant admin privileges.';
+        END IF;
       END IF;
     END IF;
   END IF;
@@ -109,7 +139,7 @@ AS $$
   );
 $$;
 
--- RLS
+-- RLS for public.users
 ALTER TABLE public.users ENABLE ROW LEVEL SECURITY;
 
 DROP POLICY IF EXISTS "Users can view own profile" ON public.users;
@@ -144,12 +174,22 @@ CREATE TABLE IF NOT EXISTS public.companies (
   name TEXT NOT NULL,
   description TEXT,
   website TEXT,
+  hiring_for TEXT,
+  industry TEXT,
+  team_size TEXT,
+  account_type TEXT,
+  vat_number TEXT,
+  business_registration TEXT,
+  verification_status TEXT DEFAULT 'unverified',
   created_by UUID REFERENCES public.users(id) ON DELETE CASCADE NOT NULL,
   created_at TIMESTAMPTZ DEFAULT timezone('utc'::text, now()) NOT NULL,
   updated_at TIMESTAMPTZ DEFAULT timezone('utc'::text, now()) NOT NULL
 );
 
 CREATE UNIQUE INDEX IF NOT EXISTS companies_created_by_unique
+  ON public.companies (created_by);
+
+CREATE INDEX IF NOT EXISTS idx_companies_created_by
   ON public.companies (created_by);
 
 DROP TRIGGER IF EXISTS update_companies_updated_at ON public.companies;
@@ -176,7 +216,7 @@ CREATE POLICY "Owners can delete companies"
   ON public.companies FOR DELETE USING (auth.uid() = created_by);
 
 -- ============================================================
--- 3. jobs (supports both old and new column names)
+-- 3. jobs
 -- ============================================================
 CREATE TABLE IF NOT EXISTS public.jobs (
   id UUID DEFAULT uuid_generate_v4() PRIMARY KEY,
@@ -196,22 +236,11 @@ CREATE TABLE IF NOT EXISTS public.jobs (
   updated_at TIMESTAMPTZ DEFAULT timezone('utc'::text, now()) NOT NULL
 );
 
--- Safely add missing columns if an older version of the table exists
-DO $$
-BEGIN
-  IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_schema = 'public' AND table_name = 'jobs' AND column_name = 'company_id') THEN
-    ALTER TABLE public.jobs ADD COLUMN company_id UUID REFERENCES public.companies(id) ON DELETE CASCADE;
-  END IF;
-  IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_schema = 'public' AND table_name = 'jobs' AND column_name = 'type') THEN
-    ALTER TABLE public.jobs ADD COLUMN type TEXT;
-  END IF;
-  IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_schema = 'public' AND table_name = 'jobs' AND column_name = 'salary_range') THEN
-    ALTER TABLE public.jobs ADD COLUMN salary_range TEXT;
-  END IF;
-  IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_schema = 'public' AND table_name = 'jobs' AND column_name = 'employer_id') THEN
-    ALTER TABLE public.jobs ADD COLUMN employer_id UUID REFERENCES public.users(id) ON DELETE CASCADE;
-  END IF;
-END $$;
+-- Performance & foreign key indexes
+CREATE INDEX IF NOT EXISTS idx_jobs_company_id ON public.jobs(company_id);
+CREATE INDEX IF NOT EXISTS idx_jobs_employer_id ON public.jobs(employer_id);
+CREATE INDEX IF NOT EXISTS idx_jobs_status ON public.jobs(status);
+CREATE INDEX IF NOT EXISTS idx_jobs_created_at ON public.jobs(created_at DESC);
 
 DROP TRIGGER IF EXISTS update_jobs_updated_at ON public.jobs;
 CREATE TRIGGER update_jobs_updated_at
@@ -269,6 +298,11 @@ CREATE TABLE IF NOT EXISTS public.applications (
   UNIQUE(job_id, candidate_id)
 );
 
+CREATE INDEX IF NOT EXISTS idx_applications_job_id ON public.applications(job_id);
+CREATE INDEX IF NOT EXISTS idx_applications_candidate_id ON public.applications(candidate_id);
+CREATE INDEX IF NOT EXISTS idx_applications_status ON public.applications(status);
+CREATE INDEX IF NOT EXISTS idx_applications_created_at ON public.applications(created_at DESC);
+
 DROP TRIGGER IF EXISTS update_applications_updated_at ON public.applications;
 CREATE TRIGGER update_applications_updated_at
   BEFORE UPDATE ON public.applications
@@ -290,6 +324,7 @@ CREATE POLICY "Employers can view applications for their jobs"
       WHERE j.id = applications.job_id
         AND (j.employer_id = auth.uid() OR c.created_by = auth.uid())
     )
+    OR public.is_admin()
   );
 
 DROP POLICY IF EXISTS "Candidates can create applications" ON public.applications;
@@ -306,6 +341,7 @@ CREATE POLICY "Employers can update applications for their jobs"
       WHERE j.id = applications.job_id
         AND (j.employer_id = auth.uid() OR c.created_by = auth.uid())
     )
+    OR public.is_admin()
   );
 
 -- ============================================================
@@ -350,6 +386,34 @@ CREATE POLICY "Authenticated users can insert valid notifications"
     )
     OR public.is_admin()
   );
+
+-- ============================================================
+-- 6. Storage Bucket & Policies (resumes)
+-- ============================================================
+INSERT INTO storage.buckets (id, name, public)
+VALUES ('resumes', 'resumes', true)
+ON CONFLICT (id) DO UPDATE SET public = true;
+
+DROP POLICY IF EXISTS "Authenticated users can upload CV" ON storage.objects;
+CREATE POLICY "Authenticated users can upload CV"
+  ON storage.objects FOR INSERT
+  WITH CHECK (
+    bucket_id = 'resumes'
+    AND auth.role() = 'authenticated'
+  );
+
+DROP POLICY IF EXISTS "Users can update own CV" ON storage.objects;
+CREATE POLICY "Users can update own CV"
+  ON storage.objects FOR UPDATE
+  USING (
+    bucket_id = 'resumes'
+    AND (auth.uid()::text = (storage.foldername(name))[1] OR auth.uid()::text = owner::text)
+  );
+
+DROP POLICY IF EXISTS "Public can view resumes" ON storage.objects;
+CREATE POLICY "Public can view resumes"
+  ON storage.objects FOR SELECT
+  USING (bucket_id = 'resumes');
 
 -- ============================================================
 -- Done

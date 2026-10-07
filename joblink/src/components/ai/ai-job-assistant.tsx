@@ -1,10 +1,9 @@
 "use client";
 
 import { useState, useTransition } from "react";
-import { SparklesIcon, MagicWand01Icon, Cancel01Icon, ArrowRight01Icon, CheckmarkCircle02Icon } from "@hugeicons/core-free-icons";
+import { SparklesIcon, MagicWand01Icon, Cancel01Icon, CheckmarkCircle02Icon } from "@hugeicons/core-free-icons";
 import { Icon } from "@/components/ui/icon";
 import { actionGenerateJob } from "@/app/actions/ai";
-import { cn } from "@/lib/utils";
 
 type GeneratedData = {
   title: string;
@@ -33,7 +32,7 @@ export function AIJobAssistant({
   const [open, setOpen] = useState(false);
   const [promptTitle, setPromptTitle] = useState("");
   const [promptNotes, setPromptNotes] = useState("");
-  const [selectedType, setSelectedType] = useState("full-time");
+  const selectedType = "full-time";
   const [result, setResult] = useState<GeneratedData | null>(null);
   const [error, setError] = useState("");
   const [isGenerating, startGenerating] = useTransition();

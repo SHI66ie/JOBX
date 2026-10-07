@@ -7,7 +7,6 @@ import {
   CheckmarkCircle02Icon,
   AlertCircleIcon,
   ThumbsUpIcon,
-  Cancel01Icon,
 } from "@hugeicons/core-free-icons";
 import { Icon } from "@/components/ui/icon";
 import { actionScreenCandidate, actionGenerateInterviewQuestions } from "@/app/actions/ai";

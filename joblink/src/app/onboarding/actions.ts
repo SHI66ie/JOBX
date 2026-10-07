@@ -92,7 +92,10 @@ export async function completeCandidateOnboarding(formData: FormData) {
   }
 
   try {
-    await supabase.from("users").update({ first_name, last_name, role: "candidate", bio }).eq("id", user.id);
+    await supabase
+      .from("users")
+      .update({ first_name, last_name, role: "candidate", bio, title, skills, resume_url })
+      .eq("id", user.id);
   } catch (err) {
     console.warn("Could not update public.users:", err);
   }
