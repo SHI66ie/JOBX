@@ -8,6 +8,7 @@ import { DashboardNavLinks, DashboardNavMobile, UserMenu } from "@/components/da
 import { ThemeSwitch } from "@/components/dashboard/theme-switch";
 import { Icon } from "@/components/ui/icon";
 import { LiveApplications } from "@/components/employer/live-applications";
+import { NotificationBell } from "@/components/notifications/notification-bell";
 
 const NAV = [
   { href: "/employer/dashboard", label: "Overview", exact: true },
@@ -69,6 +70,7 @@ export default async function EmployerLayout({ children }: { children: React.Rea
               <Icon icon={Add01Icon} size={16} strokeWidth={2} />
               Post a job
             </Link>
+            <NotificationBell userId={user.id} />
             <ThemeSwitch />
             <UserMenu
               name={name}

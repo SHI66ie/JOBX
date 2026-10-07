@@ -64,12 +64,28 @@ CREATE INDEX IF NOT EXISTS idx_applications_created_at ON public.applications(cr
 CREATE INDEX IF NOT EXISTS idx_companies_created_by ON public.companies(created_by);
 
 -- 5. STORAGE BUCKET CONFIGURATION FOR RESUMES
-INSERT INTO storage.buckets (id, name, public)
-VALUES ('resumes', 'resumes', true)
-ON CONFLICT (id) DO UPDATE SET public = true;
+DO $$
+BEGIN
+  INSERT INTO storage.buckets (id, name, public)
+  VALUES ('resumes', 'resumes', true)
+  ON CONFLICT (id) DO UPDATE SET public = true;
+EXCEPTION WHEN OTHERS THEN
+  NULL;
+END $$;
 
--- Storage RLS Policies
-DROP POLICY IF EXISTS "Authenticated users can upload CV" ON storage.objects;
+-- Drop all old/existing storage policies first
+DO $$
+BEGIN
+  DROP POLICY IF EXISTS "Authenticated users can upload CV" ON storage.objects;
+  DROP POLICY IF EXISTS "Users can update own CV" ON storage.objects;
+  DROP POLICY IF EXISTS "Public can view resumes" ON storage.objects;
+  DROP POLICY IF EXISTS "Anyone can read resumes" ON storage.objects;
+  DROP POLICY IF EXISTS "Authenticated can upload resumes" ON storage.objects;
+EXCEPTION WHEN OTHERS THEN
+  NULL;
+END $$;
+
+-- Recreate storage policies cleanly
 CREATE POLICY "Authenticated users can upload CV"
   ON storage.objects FOR INSERT
   WITH CHECK (
@@ -77,7 +93,6 @@ CREATE POLICY "Authenticated users can upload CV"
     AND auth.role() = 'authenticated'
   );
 
-DROP POLICY IF EXISTS "Users can update own CV" ON storage.objects;
 CREATE POLICY "Users can update own CV"
   ON storage.objects FOR UPDATE
   USING (
@@ -85,7 +100,9 @@ CREATE POLICY "Users can update own CV"
     AND (auth.uid()::text = (storage.foldername(name))[1] OR auth.uid()::text = owner::text)
   );
 
-DROP POLICY IF EXISTS "Public can view resumes" ON storage.objects;
 CREATE POLICY "Public can view resumes"
   ON storage.objects FOR SELECT
   USING (bucket_id = 'resumes');
+
+-- Notify PostgREST to reload schema
+NOTIFY pgrst, 'reload schema';

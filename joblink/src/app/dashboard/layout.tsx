@@ -6,6 +6,8 @@ import { JompMark, JompWordmark } from "@/components/brand/logo";
 import { DashboardNavLinks, DashboardNavMobile, UserMenu } from "@/components/dashboard/dashboard-nav";
 import { ThemeSwitch } from "@/components/dashboard/theme-switch";
 
+import { NotificationBell } from "@/components/notifications/notification-bell";
+
 export default async function DashboardLayout({
   children,
 }: {
@@ -65,6 +67,7 @@ export default async function DashboardLayout({
                 Employer mode
               </Link>
             ) : null}
+            <NotificationBell userId={user.id} />
             <ThemeSwitch />
             <UserMenu name={name} email={user.email || ""} avatarUrl={avatarUrl} hasEmployer={hasEmployer} />
           </div>
