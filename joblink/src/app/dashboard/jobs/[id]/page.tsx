@@ -7,8 +7,9 @@ import { EmptyJobsArt } from "@/components/dashboard/empty-jobs-art";
 import { JobListingView } from "@/components/jobs/job-listing-view";
 import { AIApplicationPitch } from "@/components/ai/ai-application-pitch";
 import { Icon } from "@/components/ui/icon";
-import { getJobListing, matchSkills } from "@/lib/jobs";
+import { applyJob, getJobListing, matchSkills } from "@/lib/jobs";
 import { candidateProfileFromMeta } from "@/lib/profile";
+import { signResume } from "@/lib/resumes";
 
 export default async function CandidateJobPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
@@ -50,6 +51,7 @@ export default async function CandidateJobPage({ params }: { params: Promise<{ i
   }
 
   const profile = candidateProfileFromMeta(user.user_metadata);
+  const resumeViewUrl = application ? null : await signResume(supabase, profile.resumeUrl);
   const matched = matchSkills(job, profile.skills);
 
   return (
@@ -62,7 +64,7 @@ export default async function CandidateJobPage({ params }: { params: Promise<{ i
           matchedSkills={matched}
           action={
             <div className="flex flex-wrap items-center gap-2.5">
-              <ApplyButton jobId={job.id} hasApplied={Boolean(application)} />
+              <ApplyButton job={applyJob(job)} applicant={{ ...profile, email: user.email ?? "", resumeViewUrl }} hasApplied={Boolean(application)} />
               <AIApplicationPitch
                 jobTitle={job.title}
                 companyName={job.company?.name || undefined}

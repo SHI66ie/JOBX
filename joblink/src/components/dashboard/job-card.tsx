@@ -1,26 +1,29 @@
 "use client";
 
+import { richTextExcerpt } from "@/lib/rich-text";
 import Link from "next/link";
-import { useState, useTransition } from "react";
+import { useState } from "react";
 import { Building03Icon, Tick02Icon } from "@hugeicons/core-free-icons";
 import { Icon } from "@/components/ui/icon";
-import { applyForJob } from "@/app/dashboard/actions";
-import { isNew, jobTypeLabel, jobTypeOf, postedAgo, type JobListing } from "@/lib/jobs";
+import { ApplySheet, type Applicant } from "@/components/dashboard/apply-sheet";
+import { applyJob, isNew, jobTypeLabel, jobTypeOf, postedAgo, type ApplyJob, type JobListing } from "@/lib/jobs";
 import { cn } from "@/lib/utils";
 
 /** One job in the feed: Upwork-style full-width row. */
 export function JobRow({
   job,
+  applicant,
   hasApplied,
   matchedSkills,
 }: {
   job: JobListing;
+  applicant: Applicant;
   hasApplied: boolean;
   matchedSkills: string[];
 }) {
   const [expanded, setExpanded] = useState(false);
   const type = jobTypeLabel(jobTypeOf(job));
-  const description = job.description ?? "";
+  const description = richTextExcerpt(job.description ?? "");
   const isLong = description.length > 280;
 
   return (
@@ -38,7 +41,7 @@ export function JobRow({
             {job.title}
           </Link>
         </h3>
-        <ApplyButton jobId={job.id} hasApplied={hasApplied} />
+        <ApplyButton job={applyJob(job)} applicant={applicant} hasApplied={hasApplied} />
       </div>
 
       <p className="mt-1.5 text-[13px] text-neutral-500">
@@ -81,42 +84,27 @@ export function JobRow({
   );
 }
 
-export function ApplyButton({ jobId, hasApplied }: { jobId: string; hasApplied: boolean }) {
+export function ApplyButton({ job, applicant, hasApplied }: { job: ApplyJob; applicant: Applicant; hasApplied: boolean }) {
   const [applied, setApplied] = useState(hasApplied);
-  const [error, setError] = useState("");
-  const [isPending, startTransition] = useTransition();
-
-  if (applied) {
-    return (
-      <span className="auth-pop inline-flex h-9 shrink-0 items-center gap-1.5 rounded-full bg-emerald-50 px-3.5 text-[13px] font-medium text-emerald-700">
-        <Icon icon={Tick02Icon} size={15} strokeWidth={2.2} />
-        Applied
-      </span>
-    );
-  }
+  const [open, setOpen] = useState(false);
 
   return (
-    <div className="flex shrink-0 flex-col items-end">
-      <button
-        type="button"
-        disabled={isPending}
-        onClick={() =>
-          startTransition(async () => {
-            setError("");
-            const result = await applyForJob(jobId);
-            if (result?.error) setError(result.error);
-            else setApplied(true);
-          })
-        }
-        className="inline-flex h-9 items-center rounded-full bg-brand px-4 text-[13px] font-medium text-brand-fg transition-[background-color,transform] hover:bg-brand-hover focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand focus-visible:ring-offset-2 active:scale-95 disabled:opacity-70"
-      >
-        {isPending ? "Applying…" : "Apply now"}
-      </button>
-      {error ? (
-        <p role="alert" className="auth-shake mt-1.5 max-w-[200px] text-right text-[11px] leading-4 text-red-600">
-          {error}
-        </p>
-      ) : null}
-    </div>
+    <>
+      {applied ? (
+        <span className="auth-pop inline-flex h-9 shrink-0 items-center gap-1.5 rounded-full bg-neutral-100 px-3.5 text-[13px] font-medium text-neutral-700">
+          <Icon icon={Tick02Icon} size={15} strokeWidth={2.2} className="text-neutral-500" />
+          Applied
+        </span>
+      ) : (
+        <button
+          type="button"
+          onClick={() => setOpen(true)}
+          className="inline-flex h-9 shrink-0 items-center rounded-full bg-brand px-4 text-[13px] font-medium text-brand-fg transition-[background-color,transform] hover:bg-brand-hover focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand focus-visible:ring-offset-2 active:scale-95"
+        >
+          Apply now
+        </button>
+      )}
+      <ApplySheet open={open} onClose={() => setOpen(false)} job={job} applicant={applicant} onApplied={() => setApplied(true)} />
+    </>
   );
 }

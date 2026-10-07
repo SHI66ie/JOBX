@@ -53,14 +53,14 @@ export default async function EmployerApplicantsPage({ searchParams }: { searchP
                 return (
                   <li key={app.id}>
                     <Link
-                      href={app.job ? `/employer/jobs/${app.job.id}#${app.id}` : "/employer/applicants"}
+                      href={app.job ? `/employer/jobs/${app.job.id}?review=${app.id}#${app.id}` : "/employer/applicants"}
                       className="group grid gap-3 py-4 transition-colors sm:px-3 sm:hover:bg-neutral-50/70 md:grid-cols-[minmax(0,1.2fr)_minmax(0,1fr)_120px_100px] md:items-center md:gap-8"
                     >
                       <div className="flex min-w-0 items-center gap-3">
                         <UserAvatar seed={app.candidate?.email || name} size={40} />
                         <div className="min-w-0">
                           <p className="truncate text-[15px] font-medium text-neutral-900 group-hover:text-brand">{name}</p>
-                          <p className="truncate text-[13px] text-neutral-500">{app.candidate?.email}</p>
+                          <p className="truncate text-[13px] text-neutral-500">{app.candidate_title || app.candidate?.email}</p>
                         </div>
                       </div>
                       <p className="truncate pl-[52px] text-[13px] text-neutral-600 md:pl-0">{app.job?.title ?? "—"}</p>

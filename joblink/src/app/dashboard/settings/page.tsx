@@ -4,6 +4,7 @@ import { createClient } from "@/utils/supabase/server";
 import { addRole } from "@/app/login/actions";
 import { getUserRoles } from "@/utils/auth";
 import { candidateProfileFromMeta } from "@/lib/profile";
+import { signResume } from "@/lib/resumes";
 import { ProfileForm, SettingsRow } from "@/components/dashboard/profile-form";
 import { UserAvatar } from "@/components/ui/user-avatar";
 import { cn } from "@/lib/utils";
@@ -22,6 +23,7 @@ export default async function SettingsPage({ searchParams }: { searchParams: Pro
   const tab = tabParam === "account" ? "account" : "profile";
   const meta = user.user_metadata ?? {};
   const profile = candidateProfileFromMeta(meta);
+  const cvLink = { path: profile.resumeUrl, url: await signResume(supabase, profile.resumeUrl) };
   const roles = getUserRoles(user);
   const hasEmployer = roles.includes("employer");
   const fullName = [profile.firstName, profile.lastName].filter(Boolean).join(" ") || "Your profile";
@@ -49,7 +51,7 @@ export default async function SettingsPage({ searchParams }: { searchParams: Pro
 
       <div key={tab}>
         {tab === "profile" ? (
-          <ProfileForm initial={profile} />
+          <ProfileForm initial={profile} cvLink={cvLink} />
         ) : (
           <div className="divide-y divide-neutral-100">
             <SettingsRow label="Email" hint="Where we send updates about your applications.">

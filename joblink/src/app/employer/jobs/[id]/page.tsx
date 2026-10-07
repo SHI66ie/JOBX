@@ -1,12 +1,12 @@
+import { RichDescription } from "@/components/jobs/rich-description";
 import Link from "next/link";
 import type { ReactNode } from "react";
-import { ArrowLeft01Icon, PencilEdit02Icon } from "@hugeicons/core-free-icons";
+import { ArrowLeft01Icon, ArrowRight01Icon, PencilEdit02Icon } from "@hugeicons/core-free-icons";
 import { EmptyApplicationsArt } from "@/components/dashboard/empty-applications-art";
 import { EmptyState, LinkTabs, Pill } from "@/components/employer/bits";
 import { JobMenu } from "@/components/employer/job-menu";
 import { StageActions } from "@/components/employer/pipeline-actions";
-import { CvViewer } from "@/components/employer/cv-viewer";
-import { CandidateProfileTrigger } from "@/components/employer/candidate-profile-sheet";
+import { ApplicationReview } from "@/components/employer/candidate-profile-sheet";
 import type { CandidateProfileData } from "@/lib/candidate-profile";
 import type { MOCK_CANDIDATE_EXTRAS } from "@/lib/mock-data";
 
@@ -24,12 +24,15 @@ import {
   type CandidateSummary,
 } from "@/lib/employer";
 import { jobStatusMeta, jobTypeLabel, postedAgo } from "@/lib/jobs";
+import { signResumes } from "@/lib/resumes";
 
 type ApplicationRow = {
   id: string;
   status: string;
   cover_letter: string | null;
   resume_url: string | null;
+  candidate_title?: string | null;
+  candidate_skills?: string[] | null;
   created_at: string;
   candidate: CandidateSummary | CandidateSummary[] | null;
 };
@@ -39,9 +42,9 @@ export default async function JobDetailsPage({
   searchParams,
 }: {
   params: Promise<{ id: string }>;
-  searchParams: Promise<{ tab?: string }>;
+  searchParams: Promise<{ tab?: string; review?: string }>;
 }) {
-  const [{ id }, { tab: tabParam }] = await Promise.all([params, searchParams]);
+  const [{ id }, { tab: tabParam, review }] = await Promise.all([params, searchParams]);
   const tab = tabParam === "details" ? "details" : "applicants";
   const { supabase, company } = await requireCompany();
 
@@ -66,18 +69,25 @@ export default async function JobDetailsPage({
     );
   }
 
-  const data = isMockId(job.id)
-    ? getMockJobApplications(job.id)
-    : (
-        await supabase
-          .from("applications")
-          .select("id, status, cover_letter, resume_url, created_at, candidate:users (id, first_name, last_name, email, bio, title, skills, resume_url, rating_avg, rating_count, jobs_completed)")
-          .eq("job_id", job.id)
-          .order("created_at", { ascending: false })
-      ).data;
+  let data: unknown[] | null = null;
+  if (isMockId(job.id)) data = getMockJobApplications(job.id);
+  else {
+    const result = await supabase
+      .from("applications")
+      .select("*, candidate:users (id, first_name, last_name, email, bio, title, skills, resume_url, rating_avg, rating_count, jobs_completed)")
+      .eq("job_id", job.id)
+      .order("created_at", { ascending: false });
+    // Surface failures (e.g. schema drift) instead of silently rendering "no applicants".
+    if (result.error) console.error("[job applicants] Supabase error:", result.error.message);
+    data = result.data;
+  }
 
-  const apps = ((data ?? []) as (ApplicationRow & { extras?: MockExtras | null })[]).map((app) => ({
+  const rows = (data ?? []) as (ApplicationRow & { extras?: MockExtras | null })[];
+  // CVs are private: swap each stored path for a short-lived signed link this employer may open.
+  const cvLinks = await signResumes(supabase, rows.map((app) => app.resume_url));
+  const apps = rows.map((app) => ({
     ...app,
+    resume_url: app.resume_url ? (cvLinks.get(app.resume_url) ?? null) : null,
     candidate: Array.isArray(app.candidate) ? (app.candidate[0] ?? null) : app.candidate,
   }));
 
@@ -139,10 +149,10 @@ export default async function JobDetailsPage({
                   const candidate = app.candidate as CandidateSummary | null;
                   const profile: CandidateProfileData = {
                     name,
-                    email: candidate?.email ?? null,
-                    bio: candidate?.bio ?? null,
-                    title: candidate?.title ?? app.extras?.title ?? null,
-                    skills: candidate?.skills ?? app.extras?.skills ?? [],
+                    email: app.candidate?.email ?? candidate?.email ?? null,
+                    bio: app.candidate?.bio ?? candidate?.bio ?? null,
+                    title: app.candidate_title ?? candidate?.title ?? app.extras?.title ?? null,
+                    skills: app.candidate_skills?.length ? app.candidate_skills : (candidate?.skills ?? app.extras?.skills ?? []),
                     memberSince: app.extras?.memberSince ?? null,
                     rating: candidate?.rating_avg
                       ? { average: Number(candidate.rating_avg), count: candidate.rating_count ?? 1 }
@@ -158,40 +168,32 @@ export default async function JobDetailsPage({
                   return (
                     <li key={app.id} id={app.id} className="scroll-mt-24 py-5 target:-mx-3 target:rounded-xl target:bg-brand/[0.05] target:px-3">
                       <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
-                        <div className="min-w-0">
-                          <div className="flex flex-wrap items-center gap-x-3 gap-y-1">
-                            <CandidateProfileTrigger profile={profile}>
-                              <UserAvatar seed={app.candidate?.email || name} size={40} />
-                              <span className="min-w-0 pt-0.5">
-                                <span className="block text-[15px] font-semibold text-neutral-900 decoration-neutral-300 underline-offset-4 group-hover/profile:text-brand group-hover/profile:underline">
-                                  {name}
-                                </span>
-                                {profile.title ? <span className="block text-[12.5px] text-neutral-500">{profile.title}</span> : null}
-                              </span>
-                            </CandidateProfileTrigger>
-                            <Pill className={STATUS_TONES[status.tone]}>{EMPLOYER_STATUS_LABELS[status.value]}</Pill>
-                          </div>
-                          <div className="pl-[52px]">
-                            <p className="mt-1 text-[13px] text-neutral-500">
-                              {app.candidate?.email ? (
-                                <a href={`mailto:${app.candidate.email}`} className="hover:text-neutral-900 hover:underline">
-                                  {app.candidate.email}
-                                </a>
-                              ) : null}
-                              {app.candidate?.email ? " · " : ""}
-                              Applied {postedAgo(app.created_at).toLowerCase()}
-                            </p>
-                            {app.candidate?.bio ? <p className="mt-2 line-clamp-2 max-w-2xl text-[13.5px] leading-6 text-neutral-600">{app.candidate.bio}</p> : null}
+                        <ApplicationReview
+                          profile={profile}
+                          applicationId={app.id}
+                          jobId={job.id}
+                          jobTitle={job.title}
+                          defaultOpen={review === app.id}
+                          className="group/review flex min-w-0 flex-1 items-start gap-3 rounded-lg"
+                        >
+                          <UserAvatar seed={app.candidate?.email || name} size={40} />
+                          <span className="min-w-0 flex-1 pt-0.5">
+                            <span className="flex flex-wrap items-center gap-x-2.5 gap-y-1">
+                              <span className="text-[15px] font-semibold text-neutral-900 transition-colors group-hover/review:text-brand">{name}</span>
+                              <Pill className={STATUS_TONES[status.tone]}>{EMPLOYER_STATUS_LABELS[status.value]}</Pill>
+                            </span>
+                            <span className="mt-0.5 block truncate text-[13px] text-neutral-500">
+                              {[profile.title, app.candidate?.email, `Applied ${postedAgo(app.created_at).toLowerCase()}`].filter(Boolean).join("  ·  ")}
+                            </span>
                             {app.cover_letter ? (
-                              <p className="mt-2 line-clamp-3 max-w-2xl whitespace-pre-line rounded-lg bg-neutral-50 px-3 py-2 text-[13px] leading-6 text-neutral-700">
-                                {app.cover_letter}
-                              </p>
+                              <span className="mt-2 line-clamp-2 block max-w-2xl whitespace-pre-line text-[13.5px] leading-6 text-neutral-600">{app.cover_letter}</span>
                             ) : null}
-                            {app.resume_url ? (
-                              <CvViewer url={app.resume_url} candidateName={name} candidateEmail={app.candidate?.email} />
-                            ) : null}
-                          </div>
-                        </div>
+                            <span className="mt-2 inline-flex items-center gap-1 text-[13px] font-medium text-neutral-500 transition-colors group-hover/review:text-neutral-900">
+                              Review application
+                              <Icon icon={ArrowRight01Icon} size={15} className="transition-transform duration-200 group-hover/review:translate-x-0.5" />
+                            </span>
+                          </span>
+                        </ApplicationReview>
                         <div className="pl-[52px] sm:pl-0">
                           <StageActions applicationId={app.id} jobId={job.id} status={status.value} />
                         </div>
@@ -215,7 +217,7 @@ export default async function JobDetailsPage({
         <div className="mt-8 grid gap-12 lg:grid-cols-[minmax(0,1fr)_320px]">
           <article className="min-w-0 max-w-2xl">
             <h2 className="text-[17px] font-semibold tracking-[-0.015em] text-neutral-900">About the role</h2>
-            <div className="mt-3 whitespace-pre-line text-[15px] leading-7 text-neutral-700">{job.description}</div>
+            <RichDescription value={job.description} />
 
             <h2 className="mt-10 text-[17px] font-semibold tracking-[-0.015em] text-neutral-900">Requirements</h2>
             {job.requirements ? (

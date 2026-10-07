@@ -4,8 +4,10 @@ import { createClient } from "@/utils/supabase/server";
 import { ApplicationToolbar } from "@/components/dashboard/application-toolbar";
 import { EmptyApplicationsArt } from "@/components/dashboard/empty-applications-art";
 import { EmptyJobsArt } from "@/components/dashboard/empty-jobs-art";
-import { APPLICATION_STAGES, STATUS_TONES, applicationStatus } from "@/lib/applications";
-import { companyMonogram, jobTypeLabel, jobTypeOf, postedAgo } from "@/lib/jobs";
+import { ArrowRight01Icon } from "@hugeicons/core-free-icons";
+import { Icon } from "@/components/ui/icon";
+import { APPLICATION_STAGES, applicationStatus, type ApplicationStatus } from "@/lib/applications";
+import { jobTypeLabel, jobTypeOf, postedAgo } from "@/lib/jobs";
 import { cn } from "@/lib/utils";
 
 type Filter = "all" | "active" | "interviewing" | "closed";
@@ -139,7 +141,7 @@ export default async function MyApplicationsPage({ searchParams }: { searchParam
           </div>
 
           {visible.length ? (
-            <ul key={`${filter}-${q}-${type}-${oldestFirst}`} className="divide-y divide-neutral-100 border-t border-neutral-100">
+            <ul key={`${filter}-${q}-${type}-${oldestFirst}`} className="mt-2 divide-y divide-neutral-100">
               {visible.map((row) => (
                 <li key={row.id}>
                   <ApplicationRow row={row} />
@@ -184,59 +186,64 @@ export default async function MyApplicationsPage({ searchParams }: { searchParam
   );
 }
 
+/** Label colour and progress fill per status. The final stage reads as the outcome. */
+const STATUS_STYLE: Record<ApplicationStatus, { text: string; fill: string }> = {
+  pending: { text: "text-neutral-900", fill: "bg-brand" },
+  reviewed: { text: "text-neutral-900", fill: "bg-brand" },
+  interviewing: { text: "text-neutral-900", fill: "bg-brand" },
+  accepted: { text: "text-emerald-700", fill: "bg-emerald-500" },
+  rejected: { text: "text-neutral-500", fill: "bg-neutral-300" },
+};
+
 function ApplicationRow({ row }: { row: Row }) {
   const status = applicationStatus(row.status);
+  const style = STATUS_STYLE[status.value];
   const job = row.job;
-  const companyName = job?.company?.name || "Company";
-  const monogram = companyMonogram(companyName);
   const type = jobTypeLabel(job ? jobTypeOf(job) : null);
-  const closedListing = job?.status && job.status !== "published";
-  const rejected = status.value === "rejected";
-  const accepted = status.value === "accepted";
+  const closedListing = Boolean(job?.status && job.status !== "published");
+  const meta = [job?.company?.name || "Company", type, job?.salary_range, `Applied ${postedAgo(row.created_at).toLowerCase()}`].filter(Boolean);
 
-  return (
-    <article className="grid gap-4 py-5 transition-colors sm:px-3 sm:hover:bg-neutral-50/70 md:grid-cols-[minmax(0,1fr)_180px_300px] md:items-center md:gap-8">
-      <div className="flex min-w-0 gap-3.5">
-        <span className={cn("flex size-11 shrink-0 items-center justify-center rounded-xl text-[14px] font-semibold", monogram.tone)}>
-          {monogram.initials}
-        </span>
-        <div className="min-w-0">
-          <h2 className="truncate text-[16px] font-semibold tracking-[-0.01em] text-neutral-900">{job?.title || "Job no longer available"}</h2>
-          <p className="mt-1 truncate text-[13px] text-neutral-500">{[companyName, type, "Remote"].filter(Boolean).join("  ·  ")}</p>
-        </div>
-      </div>
-
-      <div className="flex items-center gap-2 md:block">
-        <span className={cn("inline-flex rounded-full px-2.5 py-1 text-[12px] font-medium", STATUS_TONES[status.tone])}>{status.label}</span>
-        <p className="text-[12px] text-neutral-400 md:mt-1.5">
-          Applied {postedAgo(row.created_at).toLowerCase()}
-          {closedListing ? " · Listing closed" : ""}
+  const body = (
+    <>
+      <div className="min-w-0">
+        <h2 className="truncate text-[15.5px] font-semibold tracking-[-0.015em] text-neutral-900 transition-colors group-hover/app:text-brand">
+          {job?.title || "Job no longer available"}
+        </h2>
+        <p className="mt-1 truncate text-[13px] text-neutral-500">
+          {meta.join("  ·  ")}
+          {closedListing ? <span className="text-neutral-400">{"  ·  "}Listing closed</span> : null}
         </p>
       </div>
 
-      <div aria-label={`Progress: ${status.label}`}>
-        <div className="flex items-center">
-          {APPLICATION_STAGES.map((stage, index) => {
-            const reached = index <= status.stage;
-            const isLast = index === APPLICATION_STAGES.length - 1;
-            const dotTone =
-              isLast && reached ? (accepted ? "bg-emerald-500" : rejected ? "bg-neutral-400" : "bg-brand") : reached ? "bg-brand" : "bg-neutral-200";
-            return (
-              <div key={stage} className={cn("flex items-center", !isLast && "flex-1")}>
-                <span className={cn("size-2.5 shrink-0 rounded-full", dotTone, index === status.stage && !isLast && "ring-4 ring-brand/10")} />
-                {!isLast ? <span className={cn("h-0.5 flex-1", index < status.stage ? "bg-brand" : "bg-neutral-200")} /> : null}
-              </div>
-            );
-          })}
+      <div className="flex items-center gap-4">
+        <div className="w-full sm:w-36" aria-label={`Stage ${status.stage + 1} of ${APPLICATION_STAGES.length}: ${status.label}`}>
+          <p className={cn("text-[13px] font-medium", style.text)}>{status.label}</p>
+          <div className="mt-2 flex gap-1" aria-hidden>
+            {APPLICATION_STAGES.map((stage, index) => (
+              <span key={stage} className={cn("h-1 flex-1 rounded-full", index <= status.stage ? style.fill : "bg-neutral-200/80")} />
+            ))}
+          </div>
         </div>
-        <div className="mt-2 flex justify-between text-[11px] text-neutral-400">
-          {APPLICATION_STAGES.map((stage, index) => (
-            <span key={stage} className={cn(index === status.stage && "font-medium text-neutral-700")}>
-              {index === APPLICATION_STAGES.length - 1 && status.stage === index ? status.label : stage}
-            </span>
-          ))}
-        </div>
+        {job ? (
+          <Icon
+            icon={ArrowRight01Icon}
+            size={16}
+            className="hidden shrink-0 -translate-x-1 text-neutral-400 opacity-0 transition-[opacity,transform] duration-200 group-hover/app:translate-x-0 group-hover/app:opacity-100 sm:block"
+          />
+        ) : null}
       </div>
-    </article>
+    </>
+  );
+
+  const className = "group/app -mx-3 grid gap-3 rounded-xl px-3 py-4 sm:grid-cols-[minmax(0,1fr)_auto] sm:items-center sm:gap-10";
+  return job ? (
+    <Link
+      href={`/dashboard/jobs/${job.id}`}
+      className={cn(className, "transition-colors hover:bg-neutral-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand")}
+    >
+      {body}
+    </Link>
+  ) : (
+    <div className={className}>{body}</div>
   );
 }

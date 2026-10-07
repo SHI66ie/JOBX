@@ -142,26 +142,7 @@ $$;
 -- RLS for public.users
 ALTER TABLE public.users ENABLE ROW LEVEL SECURITY;
 
-DROP POLICY IF EXISTS "Users can view own profile" ON public.users;
-DROP POLICY IF EXISTS "Users and employers can view profiles" ON public.users;
-CREATE POLICY "Users and employers can view profiles"
-  ON public.users FOR SELECT
-  USING (
-    auth.uid() = id
-    OR EXISTS (
-      SELECT 1 FROM public.applications a
-      JOIN public.jobs j ON j.id = a.job_id
-      LEFT JOIN public.companies c ON c.id = j.company_id
-      WHERE a.candidate_id = public.users.id
-        AND (j.employer_id = auth.uid() OR c.created_by = auth.uid())
-    )
-    OR public.is_admin()
-  );
-
-DROP POLICY IF EXISTS "Users can update own profile" ON public.users;
-CREATE POLICY "Users can update own profile"
-  ON public.users FOR UPDATE USING (auth.uid() = id);
-
+-- The employer profile-read policy is installed after jobs and applications exist.
 DROP POLICY IF EXISTS "Users can insert own profile" ON public.users;
 CREATE POLICY "Users can insert own profile"
   ON public.users FOR INSERT WITH CHECK (auth.uid() = id);
@@ -236,11 +217,40 @@ CREATE TABLE IF NOT EXISTS public.jobs (
   updated_at TIMESTAMPTZ DEFAULT timezone('utc'::text, now()) NOT NULL
 );
 
+-- Safely add missing columns if an older version of the table exists
+ALTER TABLE public.jobs ADD COLUMN IF NOT EXISTS job_type TEXT;
+ALTER TABLE public.jobs ADD COLUMN IF NOT EXISTS requirements TEXT;
+
+DO $$
+BEGIN
+  IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_schema = 'public' AND table_name = 'jobs' AND column_name = 'company_id') THEN
+    ALTER TABLE public.jobs ADD COLUMN company_id UUID REFERENCES public.companies(id) ON DELETE CASCADE;
+  END IF;
+  IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_schema = 'public' AND table_name = 'jobs' AND column_name = 'type') THEN
+    ALTER TABLE public.jobs ADD COLUMN type TEXT;
+  END IF;
+  IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_schema = 'public' AND table_name = 'jobs' AND column_name = 'salary_range') THEN
+    ALTER TABLE public.jobs ADD COLUMN salary_range TEXT;
+  END IF;
+  IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_schema = 'public' AND table_name = 'jobs' AND column_name = 'employer_id') THEN
+    ALTER TABLE public.jobs ADD COLUMN employer_id UUID REFERENCES public.users(id) ON DELETE CASCADE;
+  END IF;
+END $$;
+
 -- Performance & foreign key indexes
 CREATE INDEX IF NOT EXISTS idx_jobs_company_id ON public.jobs(company_id);
 CREATE INDEX IF NOT EXISTS idx_jobs_employer_id ON public.jobs(employer_id);
 CREATE INDEX IF NOT EXISTS idx_jobs_status ON public.jobs(status);
 CREATE INDEX IF NOT EXISTS idx_jobs_created_at ON public.jobs(created_at DESC);
+
+-- Upgrade legacy checks to match the posting form, preserving the legacy active status.
+ALTER TABLE public.jobs DROP CONSTRAINT IF EXISTS jobs_status_check;
+ALTER TABLE public.jobs ADD CONSTRAINT jobs_status_check
+  CHECK (status IN ('published', 'active', 'closed', 'draft'));
+ALTER TABLE public.jobs ALTER COLUMN status SET DEFAULT 'published';
+ALTER TABLE public.jobs DROP CONSTRAINT IF EXISTS jobs_job_type_check;
+ALTER TABLE public.jobs ADD CONSTRAINT jobs_job_type_check
+  CHECK (job_type IN ('full-time', 'part-time', 'contract', 'internship', 'temporary'));
 
 DROP TRIGGER IF EXISTS update_jobs_updated_at ON public.jobs;
 CREATE TRIGGER update_jobs_updated_at
@@ -297,6 +307,14 @@ CREATE TABLE IF NOT EXISTS public.applications (
   updated_at TIMESTAMPTZ DEFAULT timezone('utc'::text, now()) NOT NULL,
   UNIQUE(job_id, candidate_id)
 );
+
+-- Snapshot of what the candidate sent (see migrations/20260930130000_apply_flow.sql).
+ALTER TABLE public.applications ADD COLUMN IF NOT EXISTS candidate_title TEXT;
+ALTER TABLE public.applications ADD COLUMN IF NOT EXISTS candidate_skills TEXT[] NOT NULL DEFAULT '{}';
+
+ALTER TABLE public.applications DROP CONSTRAINT IF EXISTS applications_status_check;
+ALTER TABLE public.applications ADD CONSTRAINT applications_status_check
+  CHECK (status IN ('pending', 'reviewed', 'interviewing', 'accepted', 'rejected'));
 
 CREATE INDEX IF NOT EXISTS idx_applications_job_id ON public.applications(job_id);
 CREATE INDEX IF NOT EXISTS idx_applications_candidate_id ON public.applications(candidate_id);
@@ -418,3 +436,27 @@ CREATE POLICY "Public can view resumes"
 -- ============================================================
 -- Done
 -- ============================================================
+
+-- Install cross-table user policy only after its dependencies exist.
+DROP POLICY IF EXISTS "Users can view own profile" ON public.users;
+DROP POLICY IF EXISTS "Users and employers can view profiles" ON public.users;
+CREATE POLICY "Users and employers can view profiles"
+  ON public.users FOR SELECT
+  USING (
+    auth.uid() = id
+    OR EXISTS (
+      SELECT 1 FROM public.applications a
+      JOIN public.jobs j ON j.id = a.job_id
+      LEFT JOIN public.companies c ON c.id = j.company_id
+      WHERE a.candidate_id = public.users.id
+        AND (j.employer_id = auth.uid() OR c.created_by = auth.uid())
+    )
+    OR public.is_admin()
+  );
+
+DROP POLICY IF EXISTS "Users can update own profile" ON public.users;
+CREATE POLICY "Users can update own profile"
+  ON public.users FOR UPDATE USING (auth.uid() = id);
+
+
+NOTIFY pgrst, 'reload schema';

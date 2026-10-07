@@ -147,6 +147,7 @@ export type CompanyApplication = {
   id: string;
   status: string;
   created_at: string;
+  candidate_title?: string | null;
   job: { id: string; title: string } | null;
   candidate: CandidateSummary | null;
 };
@@ -187,7 +188,7 @@ export async function getCompanyApplications(
 
   let query = supabase
     .from("applications")
-    .select("id, status, created_at, job:jobs (id, title), candidate:users (id, first_name, last_name, email, bio, title, skills, resume_url)")
+    .select("*, job:jobs (id, title), candidate:users (id, first_name, last_name, email, bio, title, skills, resume_url)")
     .in("job_id", jobIds)
     .order("created_at", { ascending: false });
   if (limit) query = query.limit(limit);

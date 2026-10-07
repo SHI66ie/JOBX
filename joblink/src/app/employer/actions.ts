@@ -3,12 +3,22 @@
 import { createClient } from "@/utils/supabase/server";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
+import { sanitizeRichText } from "@/lib/sanitize-rich-text";
+import { richTextExcerpt } from "@/lib/rich-text";
+import { JOB_TYPES } from "@/lib/jobs";
 import { createNotification } from "@/lib/notifications";
 
 import { getUserRoles } from "@/utils/auth";
 import type { User } from "@supabase/supabase-js";
 
 type ActionResult = { error?: string };
+
+function jobSaveError(error: { code?: string } | null, fallback: string) {
+  if (error?.code === "PGRST204" || error?.code === "42703") {
+    return "Job posting needs a database update. Your details are still here. Please contact support before retrying.";
+  }
+  return fallback;
+}
 
 function publicErrorMessage(error: { message?: string; code?: string } | null | undefined, fallback: string) {
   const message = String(error?.message || "");
@@ -200,15 +210,33 @@ export async function upsertCompanyProfile(formData: FormData): Promise<ActionRe
 
 function jobPayload(formData: FormData, companyId: string, employerId: string) {
   const title = String(formData.get("title") || "").trim();
-  const description = String(formData.get("description") || "").trim();
+  const rawDescription = String(formData.get("description") || "").trim();
+  if (rawDescription.length > 200000) throw new Error("Description is too large. Remove some formatting or shorten the text.");
+  const description = sanitizeRichText(rawDescription);
+  const descriptionText = richTextExcerpt(description).replace(/[\s\u200b-\u200d\ufeff]/g, "");
   const requirements = String(formData.get("requirements") || "").trim();
-  const location = String(formData.get("location") || "").trim();
+  const location = "Remote";
   const type = String(formData.get("type") || "full-time").trim();
   const salary_range = String(formData.get("salary_range") || "").trim();
   const status = String(formData.get("status") || "published").trim();
 
-  if (!title || !description || !location) {
+  if (!title || !descriptionText || !location) {
     throw new Error("Title, location, and description are required.");
+  }
+
+  for (const [label, value, limit] of [
+    ["Job title", title, 120],
+    ["Pay", salary_range, 80],
+    ["Description", richTextExcerpt(description), 20000],
+    ["Requirements", requirements, 10000],
+  ] as const) {
+    if (value.length > limit) throw new Error(`${label} must be ${limit.toLocaleString()} characters or fewer.`);
+  }
+  if (!JOB_TYPES.some((item) => item.value === type)) {
+    throw new Error("Choose a valid job type.");
+  }
+  if (!["published", "draft", "closed", "active"].includes(status)) {
+    throw new Error("Choose a valid job status.");
   }
 
   return {
@@ -247,47 +275,59 @@ export async function postJob(_prevState: unknown, formData: FormData): Promise<
     return { error: err instanceof Error ? err.message : "Please check the job details and try again." };
   }
 
-  const { error } = await supabase.from("jobs").insert(payload);
+  const { data: job, error } = await supabase.from("jobs").insert(payload).select("id").single();
 
   if (error) {
     console.error("Error posting job:", error);
-    return { error: error.message };
+    return { error: jobSaveError(error, "Could not post this job. Your details are still here; please try again.") };
   }
 
   revalidatePath("/employer/dashboard");
   revalidatePath("/employer/jobs");
-  redirect("/employer/dashboard");
+  revalidatePath("/dashboard");
+  redirect(`/employer/jobs/${job.id}`);
 }
 
-export async function updateJob(jobId: string, formData: FormData) {
+export async function updateJob(jobId: string, formData: FormData): Promise<ActionResult> {
   const supabase = await createClient();
   const {
     data: { user },
   } = await supabase.auth.getUser();
 
   if (!user) {
-    throw new Error("Unauthorized");
+    return { error: "Please sign in again to save this job." };
   }
 
   const company = await getOwnedCompany(supabase, user.id);
   if (!company) {
-    throw new Error("You must create a company profile first.");
+    return { error: "Finish your hiring profile in Settings first." };
   }
 
-  const { error } = await supabase
-    .from("jobs")
-    .update(jobPayload(formData, company.id, user.id))
-    .eq("id", jobId)
-    .eq("company_id", company.id);
+  let payload;
+  try {
+    payload = jobPayload(formData, company.id, user.id);
+  } catch (error) {
+    return { error: error instanceof Error ? error.message : "Check the job details and try again." };
+  }
 
-  if (error) {
+  const { data: job, error } = await supabase
+    .from("jobs")
+    .update(payload)
+    .eq("id", jobId)
+    .eq("company_id", company.id)
+    .select("id")
+    .maybeSingle();
+
+  if (error || !job) {
     console.error("Error updating job:", error);
-    throw new Error(error.message);
+    return { error: jobSaveError(error, "Could not save this job. It may have been removed. Your details are still here; please try again.") };
   }
 
   revalidatePath("/employer/dashboard");
   revalidatePath("/employer/jobs");
   revalidatePath(`/employer/jobs/${jobId}`);
+  revalidatePath("/dashboard");
+  revalidatePath(`/dashboard/jobs/${jobId}`);
   redirect(`/employer/jobs/${jobId}`);
 }
 

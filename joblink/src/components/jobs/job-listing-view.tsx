@@ -1,5 +1,8 @@
+import { RichDescription } from "@/components/jobs/rich-description";
 import type { ReactNode } from "react";
-import { companyMonogram, isNew, jobTypeLabel, postedAgo } from "@/lib/jobs";
+import { Tick02Icon } from "@hugeicons/core-free-icons";
+import { Icon } from "@/components/ui/icon";
+import { jobTypeLabel, postedAgo } from "@/lib/jobs";
 import { cn } from "@/lib/utils";
 
 export type ListingJob = {
@@ -42,7 +45,6 @@ export function JobListingView({
   matchedSkills?: string[];
 }) {
   const companyName = company?.name || "Company";
-  const monogram = companyMonogram(companyName);
   const type = jobTypeLabel(job.type || job.job_type || null);
   const website = company?.website?.trim();
 
@@ -50,37 +52,25 @@ export function JobListingView({
     <div className="grid gap-12 lg:grid-cols-[minmax(0,1fr)_320px]">
       <article className="min-w-0">
         <header>
-          <span className={cn("flex size-14 items-center justify-center rounded-2xl text-[18px] font-semibold", monogram.tone)}>{monogram.initials}</span>
-          <h1 className="mt-5 text-balance text-[28px] font-semibold leading-tight tracking-[-0.03em] text-neutral-900 sm:text-[32px]">{job.title}</h1>
+          <h1 className="text-balance text-[28px] font-semibold leading-tight tracking-[-0.03em] text-neutral-900 sm:text-[32px]">{job.title}</h1>
           <p className="mt-2 text-[15px] text-neutral-500">
-            {companyName} · Posted {postedAgo(job.created_at).toLowerCase()}
+            {[companyName, type, "Remote", `Posted ${postedAgo(job.created_at).toLowerCase()}`].filter(Boolean).join("  ·  ")}
           </p>
-          <div className="mt-4 flex flex-wrap gap-1.5">
-            {isNew(job.created_at) ? <Tag className="bg-violet-50 text-violet-700">New</Tag> : null}
-            {type ? <Tag className="bg-emerald-50 text-emerald-700">{type}</Tag> : null}
-            <Tag className="bg-orange-50 text-orange-700">Remote</Tag>
-          </div>
           {action ? <div className="mt-6 lg:hidden">{action}</div> : null}
         </header>
 
         {matchedSkills.length ? (
-          <div className="mt-8 rounded-xl bg-brand/[0.05] px-4 py-3">
-            <p className="text-[13px] font-medium text-neutral-800">
-              {matchedSkills.length} of your skills match this job
-            </p>
-            <div className="mt-2 flex flex-wrap gap-1.5">
-              {matchedSkills.map((skill) => (
-                <span key={skill} className="rounded-full bg-surface px-2.5 py-1 text-[12.5px] font-medium text-neutral-700">
-                  {skill}
-                </span>
-              ))}
-            </div>
-          </div>
+          <p className="mt-5 flex items-start gap-2 text-[13.5px] leading-6 text-neutral-600">
+            <Icon icon={Tick02Icon} size={16} strokeWidth={2} className="mt-1 shrink-0 text-neutral-400" />
+            <span>
+              Matches your skills: <span className="font-medium text-neutral-900">{matchedSkills.join(", ")}</span>
+            </span>
+          </p>
         ) : null}
 
         <section className="mt-10">
           <h2 className="text-[17px] font-semibold tracking-[-0.015em] text-neutral-900">About the role</h2>
-          <div className="mt-3 whitespace-pre-line text-[15px] leading-7 text-neutral-700">{job.description || "No description yet."}</div>
+          <RichDescription value={job.description} />
         </section>
 
         {job.requirements ? (
@@ -107,17 +97,12 @@ export function JobListingView({
           <Fact label="Posted">{postedAgo(job.created_at)}</Fact>
         </dl>
 
-        <div className="mt-8">
-          <p className="text-[13px] font-medium text-neutral-500">Company</p>
-          <div className="mt-3 flex items-center gap-3">
-            <span className={cn("flex size-10 items-center justify-center rounded-xl text-[13px] font-semibold", monogram.tone)}>{monogram.initials}</span>
-            <div className="min-w-0">
-              <p className="truncate text-[14px] font-semibold text-neutral-900">{companyName}</p>
-              <p className="truncate text-[13px] text-neutral-500">
-                {[company?.team_size ? TEAM_SIZE_LABELS[company.team_size] ?? company.team_size : null, "Hiring remotely"].filter(Boolean).join(" · ")}
-              </p>
-            </div>
-          </div>
+        <div className="mt-6 border-t border-neutral-100 pt-6">
+          <p className="text-[13px] text-neutral-500">Company</p>
+          <p className="mt-2 truncate text-[14px] font-semibold text-neutral-900">{companyName}</p>
+          <p className="mt-0.5 truncate text-[13px] text-neutral-500">
+            {[company?.team_size ? TEAM_SIZE_LABELS[company.team_size] ?? company.team_size : null, "Hiring remotely"].filter(Boolean).join(" · ")}
+          </p>
           {website ? (
             <a
               href={website.startsWith("http") ? website : `https://${website}`}
@@ -132,10 +117,6 @@ export function JobListingView({
       </aside>
     </div>
   );
-}
-
-function Tag({ className, children }: { className: string; children: ReactNode }) {
-  return <span className={cn("inline-flex h-6 items-center rounded-md px-2 text-[12px] font-medium", className)}>{children}</span>;
 }
 
 function Fact({ label, children }: { label: string; children: ReactNode }) {

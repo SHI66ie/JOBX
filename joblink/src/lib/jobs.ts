@@ -1,3 +1,5 @@
+import { richTextExcerpt } from "@/lib/rich-text";
+
 export const JOB_TYPES = [
   { value: "full-time", label: "Full-time" },
   { value: "part-time", label: "Part-time" },
@@ -20,6 +22,18 @@ export type JobListing = {
   created_at: string;
   company: { name: string } | null;
 };
+
+/** The job summary shown at the top of the apply sheet. Plain data, so server pages can build it. */
+export type ApplyJob = { id: string; title: string; company: string; meta: string };
+
+export function applyJob(job: Pick<JobListing, "id" | "title" | "type" | "job_type" | "salary_range"> & { company: { name: string | null } | null }): ApplyJob {
+  return {
+    id: job.id,
+    title: job.title,
+    company: job.company?.name ?? "",
+    meta: [jobTypeLabel(jobTypeOf(job)), "Remote", job.salary_range].filter(Boolean).join(" · "),
+  };
+}
 
 export function jobTypeOf(job: Pick<JobListing, "type" | "job_type">) {
   return job.type || job.job_type || null;
@@ -82,7 +96,7 @@ export function matchSkills(
   job: Pick<JobListing, "title" | "description" | "requirements">,
   skills: string[],
 ) {
-  const text = `${job.title} ${job.description ?? ""} ${job.requirements ?? ""}`;
+  const text = `${job.title} ${richTextExcerpt(job.description ?? "")} ${job.requirements ?? ""}`;
   return skills.filter((skill) => {
     const term = skill.trim();
     if (term.length < 2) return false;

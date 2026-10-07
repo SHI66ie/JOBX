@@ -9,6 +9,7 @@ import { EmptyJobsArt } from "@/components/dashboard/empty-jobs-art";
 import { UserAvatar } from "@/components/ui/user-avatar";
 import { JOB_TYPES, jobTypeOf, matchSkills, sanitizeSearch, type JobListing } from "@/lib/jobs";
 import { candidateProfileFromMeta, profileStrength } from "@/lib/profile";
+import { signResume } from "@/lib/resumes";
 import { cn } from "@/lib/utils";
 
 type SearchParams = { q?: string; type?: string | string[]; tab?: string; hide?: string };
@@ -25,6 +26,7 @@ export default async function JobBoardPage({ searchParams }: { searchParams: Pro
 
   const meta = user.user_metadata ?? {};
   const profile = candidateProfileFromMeta(meta);
+  const applicant = { ...profile, email: user.email ?? "", resumeViewUrl: await signResume(supabase, profile.resumeUrl) };
   const skills = profile.skills;
 
   const params = await searchParams;
@@ -132,7 +134,7 @@ export default async function JobBoardPage({ searchParams }: { searchParams: Pro
           <div className="mt-2 divide-y divide-neutral-200/80">
             {feed.map(({ job, matched }) => (
               <div key={job.id}>
-                <JobRow job={job} hasApplied={appliedJobIds.has(job.id)} matchedSkills={matched} />
+                <JobRow job={job} applicant={applicant} hasApplied={appliedJobIds.has(job.id)} matchedSkills={matched} />
               </div>
             ))}
           </div>
