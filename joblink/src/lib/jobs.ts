@@ -127,7 +127,7 @@ type SupabaseLike = Awaited<ReturnType<typeof import("@/utils/supabase/server").
 
 /** Loads a job with its company for the listing view. Falls back if newer company columns are missing. */
 export async function getJobListing(supabase: SupabaseLike, jobId: string, filter: { companyId?: string; publishedOnly?: boolean } = {}) {
-  const baseCols = "id, title, description, requirements, type, job_type, salary_range, status, created_at, company_id";
+  const baseCols = "id, title, description, requirements, location, type, job_type, salary_range, status, created_at, company_id";
   const attempts = [`${baseCols}, company:companies (name, description, website, team_size)`, `${baseCols}, company:companies (name, description, website)`];
 
   for (const select of attempts) {
@@ -144,6 +144,7 @@ export async function getJobListing(supabase: SupabaseLike, jobId: string, filte
         title: string;
         description: string | null;
         requirements: string | null;
+        location: string | null;
         type: string | null;
         job_type: string | null;
         salary_range: string | null;

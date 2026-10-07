@@ -1,6 +1,8 @@
+import type { Metadata } from "next";
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import { ArrowLeft01Icon } from "@hugeicons/core-free-icons";
+import { createClient as createAnonClient } from "@supabase/supabase-js";
 import { createClient } from "@/utils/supabase/server";
 import { ApplyButton } from "@/components/dashboard/job-card";
 import { EmptyJobsArt } from "@/components/dashboard/empty-jobs-art";
@@ -10,6 +12,51 @@ import { Icon } from "@/components/ui/icon";
 import { applyJob, getJobListing, matchSkills } from "@/lib/jobs";
 import { candidateProfileFromMeta } from "@/lib/profile";
 import { signResume } from "@/lib/resumes";
+import { JobPostingSchema } from "@/components/jobs/job-posting-schema";
+
+// ---------------------------------------------------------------------------
+// Per-job dynamic metadata — unique <title> + <meta description> for Google
+// ---------------------------------------------------------------------------
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ id: string }>;
+}): Promise<Metadata> {
+  const { id } = await params;
+
+  // Use the anon client so metadata generation stays cookie-free (static-friendly)
+  const supabaseUrl =
+    process.env.NEXT_PUBLIC_SUPABASE_URL ?? "";
+  const supabaseKey =
+    process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY ??
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY ??
+    "";
+  const anon = createAnonClient(supabaseUrl, supabaseKey);
+
+  const job = await getJobListing(anon as Parameters<typeof getJobListing>[0], id, {
+    publishedOnly: true,
+  });
+
+  if (!job) {
+    return { title: "Job not found" };
+  }
+
+  const company = (job.company as { name?: string } | null)?.name;
+  const title = company ? `${job.title} at ${company}` : job.title;
+  const description = job.description
+    ? job.description.replace(/\s+/g, " ").trim().slice(0, 155)
+    : `Apply for ${title} on JOMP`;
+
+  return {
+    title,
+    description,
+    openGraph: {
+      title,
+      description,
+      type: "website",
+    },
+  };
+}
 
 export default async function CandidateJobPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
@@ -56,6 +103,7 @@ export default async function CandidateJobPage({ params }: { params: Promise<{ i
 
   return (
     <div className="mx-auto max-w-7xl px-4 pb-24 pt-6 sm:px-6 lg:px-8 lg:pt-8">
+      <JobPostingSchema job={job} />
       {back}
       <div className="mt-6">
         <JobListingView
