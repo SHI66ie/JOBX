@@ -27,7 +27,7 @@ export default function CookiesPage() {
         <li>website functionality;</li>
         <li>performance monitoring;</li>
         <li>analytics; and</li>
-        <li>improving JOMP's services.</li>
+        <li>improving JOMP&apos;s services.</li>
       </ul>
 
       <h2>3. Necessary Cookies</h2>
@@ -48,7 +48,7 @@ export default function CookiesPage() {
         Where JOMP uses optional analytics or similar technologies that require consent, JOMP will provide an appropriate consent mechanism.
       </p>
       <p>
-        Users may be able to accept or reject optional cookies through JOMP's cookie settings.
+        Users may be able to accept or reject optional cookies through JOMP&apos;s cookie settings.
       </p>
 
       <h2>5. Cookie Consent</h2>
@@ -56,7 +56,7 @@ export default function CookiesPage() {
         JOMP will seek consent where applicable law requires consent for the use of cookies or similar technologies.
       </p>
       <p>
-        The NDPC's current guidance materials state that consent requirements can apply to cookies and that consent should be freely given, informed and specific.
+        The NDPC&apos;s current guidance materials state that consent requirements can apply to cookies and that consent should be freely given, informed and specific.
       </p>
 
       <h2>6. Third-Party Cookies</h2>
@@ -70,7 +70,7 @@ export default function CookiesPage() {
       <h2>7. Managing Cookies</h2>
       <p>Users may control cookies through:</p>
       <ul>
-        <li>JOMP's cookie settings where available;</li>
+        <li>JOMP&apos;s cookie settings where available;</li>
         <li>browser settings; or</li>
         <li>device settings.</li>
       </ul>

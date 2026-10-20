@@ -28,7 +28,13 @@ export const metadata: Metadata = {
   creator: "JOMP",
   publisher: "JOMP",
   icons: {
-    icon: "/brand/JOMP_Monogram_Navy.svg",
+    icon: [
+      { url: "/brand/JOMP_Monogram_Navy.svg", type: "image/svg+xml" },
+      { url: "/icon.svg", type: "image/svg+xml" },
+      { url: "/favicon.svg", type: "image/svg+xml" },
+    ],
+    shortcut: "/brand/JOMP_Monogram_Navy.svg",
+    apple: "/brand/JOMP_Monogram_Navy.svg",
   },
   openGraph: {
     type: "website",

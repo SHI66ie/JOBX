@@ -103,7 +103,7 @@ export default function PrivacyPage() {
         When a candidate applies for a vacancy, relevant application information may be made available to the employer responsible for that vacancy.
       </p>
       <p>
-        JOMP does not make a candidate's application information generally available to unrelated employers merely because the candidate created an account.
+        JOMP does not make a candidate&apos;s application information generally available to unrelated employers merely because the candidate created an account.
       </p>
       <p>
         Candidate profile visibility settings may determine how information is presented within JOMP, but candidate application information is intended to be accessible to the employer to whom the candidate submits an application.
@@ -125,7 +125,7 @@ export default function PrivacyPage() {
 
       <h2>6. Employer Verification</h2>
       <p>
-        JOMP may process company and representative information to determine whether an employer satisfies JOMP's verification requirements.
+        JOMP may process company and representative information to determine whether an employer satisfies JOMP&apos;s verification requirements.
       </p>
       <p>
         JOMP may use available information from official or other reliable sources to verify information submitted by an employer.
@@ -152,7 +152,7 @@ export default function PrivacyPage() {
         JOMP may process assessment information to administer skill tests and issue certificates.
       </p>
       <p>
-        Assessment results may be associated with the candidate's profile and applications where the candidate chooses or JOMP's service requires this.
+        Assessment results may be associated with the candidate&apos;s profile and applications where the candidate chooses or JOMP&apos;s service requires this.
       </p>
 
       <h2>9. Payments</h2>
@@ -160,7 +160,7 @@ export default function PrivacyPage() {
         Where users pay for JOMP services, payment information may be processed by payment providers engaged by JOMP.
       </p>
       <p>
-        JOMP will not unnecessarily store complete payment-card information where the payment provider can process the transaction securely on JOMP's behalf.
+        JOMP will not unnecessarily store complete payment-card information where the payment provider can process the transaction securely on JOMP&apos;s behalf.
       </p>
 
       <h2>10. Information Sharing</h2>
@@ -239,7 +239,7 @@ export default function PrivacyPage() {
         If JOMP transfers personal information outside Nigeria, it will do so in accordance with applicable Nigerian data-protection requirements.
       </p>
 
-      <h2>16. Children's Data</h2>
+      <h2>16. Children&apos;s Data</h2>
       <p>
         JOMP is intended for persons aged 18 and above.
       </p>

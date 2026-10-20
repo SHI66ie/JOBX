@@ -14,7 +14,7 @@ export default function EmployerTermsPage() {
         JOMP is intended for legitimate employers and organisations seeking candidates in Nigeria.
       </p>
       <p>
-        An employer must provide accurate information and complete JOMP's verification process before accessing employer features requiring verification.
+        An employer must provide accurate information and complete JOMP&apos;s verification process before accessing employer features requiring verification.
       </p>
 
       <h2>2. Employer Verification</h2>
@@ -121,7 +121,7 @@ export default function EmployerTermsPage() {
 
       <h2>9. Live Video Interviews</h2>
       <p>
-        Verified employers may use JOMP's live video interview facility.
+        Verified employers may use JOMP&apos;s live video interview facility.
       </p>
       <p>
         JOMP provides the technology but does not ordinarily record or store interview sessions.
@@ -187,7 +187,7 @@ export default function EmployerTermsPage() {
         <li>harass candidates;</li>
         <li>misrepresent compensation;</li>
         <li>use JOMP to recruit for unlawful activity; or</li>
-        <li>circumvent JOMP's security or verification systems.</li>
+        <li>circumvent JOMP&apos;s security or verification systems.</li>
       </ul>
 
       <h2>14. Verification Suspension</h2>

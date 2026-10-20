@@ -3,7 +3,7 @@ import { createAdminClient } from "@/utils/supabase/admin";
 import { redirect } from "next/navigation";
 import Link from "next/link";
 import { buttonVariants } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
+import { Card, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { actionSetUserRole } from "@/app/actions/admin";
 
 const PAGE_SIZE = 25;

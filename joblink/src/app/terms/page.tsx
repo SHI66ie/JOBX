@@ -58,7 +58,7 @@ export default function TermsPage() {
       </p>
       <p>You must not:</p>
       <ul>
-        <li>create an account using another person's identity;</li>
+        <li>create an account using another person&apos;s identity;</li>
         <li>provide false information;</li>
         <li>create multiple fraudulent accounts;</li>
         <li>impersonate another person or organisation; or</li>
@@ -68,7 +68,7 @@ export default function TermsPage() {
         JOMP may require additional verification where reasonably necessary.
       </p>
 
-      <h2>5. JOMP's Role</h2>
+      <h2>5. JOMP&apos;s Role</h2>
       <p>
         JOMP provides a technology platform through which:
       </p>
@@ -105,7 +105,7 @@ export default function TermsPage() {
 
       <h2>7. Employer Verification</h2>
       <p>
-        Employers must complete JOMP's verification process before they may access employer features designated by JOMP, including vacancy posting and live video interview functionality.
+        Employers must complete JOMP&apos;s verification process before they may access employer features designated by JOMP, including vacancy posting and live video interview functionality.
       </p>
       <p>
         The current employer verification fee is ₦15,000 per year, subject to any updated fee displayed by JOMP.
@@ -173,7 +173,7 @@ export default function TermsPage() {
 
       <h2>11. Application Status</h2>
       <p>
-        Where an employer makes a hiring decision through JOMP, the candidate's application record may display statuses such as:
+        Where an employer makes a hiring decision through JOMP, the candidate&apos;s application record may display statuses such as:
       </p>
       <ul>
         <li>Application submitted;</li>
@@ -183,7 +183,7 @@ export default function TermsPage() {
         <li>Declined.</li>
       </ul>
       <p>
-        Where an employer provides a proposed resumption date, time, location or other relevant information, JOMP may display that information in the candidate's account or notifications.
+        Where an employer provides a proposed resumption date, time, location or other relevant information, JOMP may display that information in the candidate&apos;s account or notifications.
       </p>
 
       <h2>12. Candidate Services</h2>
@@ -191,10 +191,10 @@ export default function TermsPage() {
         JOMP may provide CV-preparation assistance and skill assessments.
       </p>
       <p>
-        A skill assessment may result in a certificate being issued and associated with the candidate's JOMP profile.
+        A skill assessment may result in a certificate being issued and associated with the candidate&apos;s JOMP profile.
       </p>
       <p>
-        A JOMP skill certificate confirms completion or achievement under JOMP's assessment system. It does not constitute a government qualification, professional licence or guarantee of employment unless expressly stated otherwise.
+        A JOMP skill certificate confirms completion or achievement under JOMP&apos;s assessment system. It does not constitute a government qualification, professional licence or guarantee of employment unless expressly stated otherwise.
       </p>
 
       <h2>13. Free and Premium Features</h2>
@@ -215,13 +215,13 @@ export default function TermsPage() {
 
       <h2>15. Intellectual Property</h2>
       <p>
-        JOMP and its licensors retain rights in JOMP's software, branding, logos, designs, databases, interfaces, content and other proprietary materials.
+        JOMP and its licensors retain rights in JOMP&apos;s software, branding, logos, designs, databases, interfaces, content and other proprietary materials.
       </p>
       <p>
         Users retain ownership of content they lawfully own and upload to JOMP, subject to the licences reasonably necessary for JOMP to provide its services.
       </p>
       <p>
-        Users must not copy, reproduce, reverse engineer, distribute, sell or commercially exploit JOMP's proprietary technology without permission.
+        Users must not copy, reproduce, reverse engineer, distribute, sell or commercially exploit JOMP&apos;s proprietary technology without permission.
       </p>
 
       <h2>16. Prohibited Conduct</h2>
@@ -273,8 +273,8 @@ export default function TermsPage() {
         <li>decisions made independently by employers or candidates;</li>
         <li>inaccurate information submitted by users;</li>
         <li>employment relationships entered into between users;</li>
-        <li>conduct occurring outside JOMP's reasonable control; or</li>
-        <li>interruptions caused by circumstances beyond JOMP's reasonable control.</li>
+        <li>conduct occurring outside JOMP&apos;s reasonable control; or</li>
+        <li>interruptions caused by circumstances beyond JOMP&apos;s reasonable control.</li>
       </ul>
       <p>
         Nothing in these Terms excludes liability that cannot lawfully be excluded.
@@ -285,7 +285,7 @@ export default function TermsPage() {
         JOMP may modify its services, features, fees and policies.
       </p>
       <p>
-        Where a material change affects users' rights or obligations, JOMP will provide reasonable notice through the platform or another appropriate method.
+        Where a material change affects users&apos; rights or obligations, JOMP will provide reasonable notice through the platform or another appropriate method.
       </p>
 
       <h2>21. Governing Law</h2>

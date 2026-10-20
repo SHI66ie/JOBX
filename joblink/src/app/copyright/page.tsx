@@ -14,7 +14,7 @@ export default function CopyrightPage() {
         This Copyright & Intellectual Property Policy explains how JOMP respects intellectual-property rights and how users may upload, use, report and manage copyrighted materials on the JOMP platform.
       </p>
       <p>
-        JOMP does not permit users to upload or use copyrighted material in a manner that infringes another person's or organisation's rights.
+        JOMP does not permit users to upload or use copyrighted material in a manner that infringes another person&apos;s or organisation&apos;s rights.
       </p>
 
       <h2>2. What Is Copyright?</h2>
@@ -59,18 +59,18 @@ export default function CopyrightPage() {
 
       <h2>4. Candidate Content</h2>
       <p>
-        Candidates remain responsible for ensuring that materials they upload do not unlawfully infringe another person's intellectual-property rights.
+        Candidates remain responsible for ensuring that materials they upload do not unlawfully infringe another person&apos;s intellectual-property rights.
       </p>
       <p>A candidate should not upload:</p>
       <ul>
-        <li>another person's CV as their own;</li>
+        <li>another person&apos;s CV as their own;</li>
         <li>copyrighted portfolio work they have no right to use;</li>
         <li>stolen photographs;</li>
         <li>unauthorised company materials; or</li>
         <li>other protected materials without permission.</li>
       </ul>
       <p>
-        Where a candidate's portfolio contains work created while employed by another organisation, the candidate should ensure that they have the necessary rights or permission to display the work.
+        Where a candidate&apos;s portfolio contains work created while employed by another organisation, the candidate should ensure that they have the necessary rights or permission to display the work.
       </p>
 
       <h2>5. Employer Content</h2>
@@ -86,8 +86,8 @@ export default function CopyrightPage() {
         By uploading content to JOMP, you grant JOMP a limited, non-exclusive, royalty-free licence to host, store, reproduce, display and process that content only as reasonably necessary to:
       </p>
       <ul>
-        <li>provide JOMP's services;</li>
-        <li>display a candidate's application to an employer to whom the candidate applied;</li>
+        <li>provide JOMP&apos;s services;</li>
+        <li>display a candidate&apos;s application to an employer to whom the candidate applied;</li>
         <li>display vacancies;</li>
         <li>operate candidate and employer profiles;</li>
         <li>provide CV and assessment services;</li>
@@ -96,15 +96,15 @@ export default function CopyrightPage() {
         <li>comply with legal obligations.</li>
       </ul>
       <p>
-        This licence does not transfer ownership of the user's copyright to JOMP. The licence ends when the content is deleted, except where continued retention or use is reasonably necessary for legal, security, dispute-resolution or technical purposes.
+        This licence does not transfer ownership of the user&apos;s copyright to JOMP. The licence ends when the content is deleted, except where continued retention or use is reasonably necessary for legal, security, dispute-resolution or technical purposes.
       </p>
 
-      <h2>7. JOMP's Intellectual Property</h2>
+      <h2>7. JOMP&apos;s Intellectual Property</h2>
       <p>
         Unless otherwise stated, JOMP owns or has appropriate rights in the intellectual property associated with its platform, including:
       </p>
       <ul>
-        <li>JOMP's name and branding;</li>
+        <li>JOMP&apos;s name and branding;</li>
         <li>logos created for JOMP;</li>
         <li>website and application interfaces;</li>
         <li>software and source code;</li>
@@ -117,7 +117,7 @@ export default function CopyrightPage() {
         <li>other materials created specifically for JOMP.</li>
       </ul>
       <p>
-        Users must not copy, reproduce, modify, distribute, sell, reverse engineer or commercially exploit JOMP's proprietary materials without permission.
+        Users must not copy, reproduce, modify, distribute, sell, reverse engineer or commercially exploit JOMP&apos;s proprietary materials without permission.
       </p>
 
       <h2>8. Third-Party Intellectual Property</h2>
@@ -169,7 +169,7 @@ export default function CopyrightPage() {
 
       <h2>14. Trademark Rights</h2>
       <p>
-        Copyright is separate from trademark rights. JOMP respects trademarks belonging to employers, candidates and third parties. Users must not upload or use another organisation's trademark in a misleading manner or falsely imply an affiliation with that organisation.
+        Copyright is separate from trademark rights. JOMP respects trademarks belonging to employers, candidates and third parties. Users must not upload or use another organisation&apos;s trademark in a misleading manner or falsely imply an affiliation with that organisation.
       </p>
 
       <h2>15. Reporting Other Intellectual-Property Infringement</h2>

@@ -76,7 +76,7 @@ export default function AcceptableUsePage() {
       <p>Users must not:</p>
       <ul>
         <li>attempt unauthorised access;</li>
-        <li>interfere with JOMP's infrastructure;</li>
+        <li>interfere with JOMP&apos;s infrastructure;</li>
         <li>introduce malicious software;</li>
         <li>scrape information through unauthorised methods;</li>
         <li>attack or overload JOMP systems;</li>
@@ -86,7 +86,7 @@ export default function AcceptableUsePage() {
 
       <h2>8. Privacy Abuse</h2>
       <p>
-        Users must not collect, copy, sell, publish or distribute another person's personal information obtained through JOMP except where legally authorised and necessary for the intended recruitment purpose.
+        Users must not collect, copy, sell, publish or distribute another person&apos;s personal information obtained through JOMP except where legally authorised and necessary for the intended recruitment purpose.
       </p>
 
       <h2>9. Harassment and Abuse</h2>
@@ -102,7 +102,7 @@ export default function AcceptableUsePage() {
 
       <h2>10. Unlawful Content</h2>
       <p>
-        Users must not upload or distribute material that violates Nigerian law or infringes another person's legal rights.
+        Users must not upload or distribute material that violates Nigerian law or infringes another person&apos;s legal rights.
       </p>
 
       <h2>11. Enforcement</h2>
