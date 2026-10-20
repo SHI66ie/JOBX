@@ -45,16 +45,27 @@ export function AuthShell({
           <div className="w-full max-w-[380px]">{children}</div>
         </main>
 
-        <footer className="flex flex-wrap items-center justify-between gap-2 text-xs text-neutral-400">
-          <span>© {new Date().getFullYear()} {APP_NAME}</span>
-          <a
-            href="https://www.instagram.com/jomponline"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="hover:text-neutral-700"
-          >
-            @jomponline
-          </a>
+        <footer className="flex flex-col gap-2 pt-6 text-xs text-neutral-400">
+          <div className="flex flex-wrap items-center justify-between gap-2">
+            <span>© {new Date().getFullYear()} {APP_NAME}</span>
+            <a
+              href="https://www.instagram.com/jomponline"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="hover:text-neutral-700"
+            >
+              @jomponline
+            </a>
+          </div>
+          <div className="flex flex-wrap gap-x-3 gap-y-1 text-[11.5px] text-neutral-400">
+            <Link href="/terms" className="hover:text-neutral-700 underline-offset-2 hover:underline">Terms</Link>
+            <span>•</span>
+            <Link href="/privacy" className="hover:text-neutral-700 underline-offset-2 hover:underline">Privacy</Link>
+            <span>•</span>
+            <Link href="/cookies" className="hover:text-neutral-700 underline-offset-2 hover:underline">Cookies</Link>
+            <span>•</span>
+            <Link href="/acceptable-use" className="hover:text-neutral-700 underline-offset-2 hover:underline">Acceptable Use</Link>
+          </div>
         </footer>
       </div>
 

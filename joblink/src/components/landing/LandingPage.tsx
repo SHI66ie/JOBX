@@ -283,6 +283,15 @@ export default function LandingPage() {
               <Link href="/login" className="hover:text-white">Log in</Link>
             </div>
           </div>
+          <div className="flex flex-wrap items-center gap-x-6 gap-y-2 border-b border-white/10 py-5 text-[12.5px] text-white/60">
+            <span className="font-semibold uppercase tracking-[0.14em] text-white/40 text-[11px]">Legal</span>
+            <Link href="/terms" className="hover:text-white transition">Terms of Service</Link>
+            <Link href="/privacy" className="hover:text-white transition">Privacy Policy</Link>
+            <Link href="/employer-terms" className="hover:text-white transition">Employer Terms</Link>
+            <Link href="/acceptable-use" className="hover:text-white transition">Acceptable Use</Link>
+            <Link href="/cookies" className="hover:text-white transition">Cookie Policy</Link>
+            <Link href="/copyright" className="hover:text-white transition">Copyright &amp; IP</Link>
+          </div>
           <div className="mt-6 flex flex-wrap items-center justify-between gap-4">
             <div>
               <p className="mb-3 text-[12px] font-medium uppercase tracking-[0.16em] text-white/55">Follow @jomponline</p>
