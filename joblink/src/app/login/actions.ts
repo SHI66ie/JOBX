@@ -64,6 +64,16 @@ export async function signup(formData: FormData) {
   const first_name = String(formData.get('first_name') || '').trim()
   const last_name = String(formData.get('last_name') || '').trim()
   const role = (formData.get('role') as string) === 'employer' ? 'employer' : 'candidate'
+  const acceptTerms = formData.get('accept_terms')
+
+  if (!acceptTerms) {
+    return redirect(
+      signupUrl(
+        role,
+        'You must read and agree to the Terms & Conditions and Privacy Policy to create an account.'
+      )
+    )
+  }
 
   if (password.length < 8 || !/[A-Z]/.test(password) || !/[!@#$%^&*(),.?":{}|<>]/.test(password)) {
     return redirect(
@@ -87,6 +97,9 @@ export async function signup(formData: FormData) {
         candidate_onboarded: role === 'candidate' ? false : undefined,
         employer_onboarded: role === 'employer' ? false : undefined,
         signup_method: 'email',
+        accepted_terms: true,
+        accepted_terms_at: new Date().toISOString(),
+        accepted_terms_type: role === 'employer' ? 'employer_terms' : 'candidate_terms',
       },
     },
   })

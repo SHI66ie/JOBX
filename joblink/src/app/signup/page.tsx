@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { Suspense } from "react";
+import { Suspense, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import { signup, signInWithGoogle } from "../login/actions";
 import { cn } from "@/lib/utils";
@@ -25,6 +25,7 @@ function SignupForm() {
   const message = searchParams.get("message");
   const role = searchParams.get("role") === "employer" ? "employer" : "candidate";
   const isEmployer = role === "employer";
+  const [acceptedTerms, setAcceptedTerms] = useState(false);
 
   return (
     <AuthShell
@@ -77,6 +78,27 @@ function SignupForm() {
           <input type="hidden" name="role" value={role} />
           <GoogleButton label="Sign up with Google" />
         </form>
+        <p className="mt-2 text-center text-[11px] text-neutral-500">
+          By continuing with Google, you agree to the{" "}
+          <Link
+            href={isEmployer ? "/employer-terms" : "/terms"}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="font-medium text-[#01224F] underline underline-offset-2 hover:text-[#001738]"
+          >
+            {isEmployer ? "Employer Terms & Conditions" : "Terms & Conditions"}
+          </Link>{" "}
+          and{" "}
+          <Link
+            href="/privacy"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="font-medium text-[#01224F] underline underline-offset-2 hover:text-[#001738]"
+          >
+            Privacy Policy
+          </Link>
+          .
+        </p>
       </div>
 
       <OrDivider />
@@ -109,10 +131,61 @@ function SignupForm() {
           hint="At least 8 characters, with an uppercase letter and a symbol."
         />
 
+        <div className="space-y-1.5 pt-1">
+          <div
+            className={cn(
+              "flex items-start gap-3 rounded-xl border p-3.5 transition-colors duration-150",
+              acceptedTerms
+                ? "border-emerald-300 bg-emerald-50/50 text-neutral-900"
+                : "border-neutral-200/90 bg-neutral-50/60 text-neutral-600 hover:bg-neutral-50"
+            )}
+          >
+            <input
+              id="accept_terms"
+              name="accept_terms"
+              type="checkbox"
+              required
+              checked={acceptedTerms}
+              onChange={(e) => setAcceptedTerms(e.target.checked)}
+              className="mt-0.5 h-4 w-4 rounded border-neutral-300 text-[#01224F] accent-[#01224F] focus:ring-[#01224F] cursor-pointer"
+            />
+            <label htmlFor="accept_terms" className="text-xs leading-relaxed select-none cursor-pointer">
+              I have read and agree to the{" "}
+              <Link
+                href={isEmployer ? "/employer-terms" : "/terms"}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="font-semibold text-[#01224F] underline decoration-neutral-300 underline-offset-2 hover:decoration-[#01224F]"
+              >
+                {isEmployer ? "Employer Terms & Conditions" : "Terms & Conditions"}
+              </Link>{" "}
+              and the{" "}
+              <Link
+                href="/privacy"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="font-semibold text-[#01224F] underline decoration-neutral-300 underline-offset-2 hover:decoration-[#01224F]"
+              >
+                Privacy Policy
+              </Link>
+              .
+            </label>
+          </div>
+          {!acceptedTerms && (
+            <p className="text-[11px] text-amber-700 pl-1">
+              * Reading and checking the terms &amp; conditions is required to create an account.
+            </p>
+          )}
+        </div>
+
         <FormMessage message={message} />
 
         <div className="pt-2">
-          <SubmitButton label={isEmployer ? "Create employer account" : "Create account"} pendingLabel="Creating account…" />
+          <SubmitButton
+            label={isEmployer ? "Create employer account" : "Create account"}
+            pendingLabel="Creating account…"
+            disabled={!acceptedTerms}
+          />
         </div>
       </form>
     </AuthShell>

@@ -9,6 +9,18 @@ export const metadata: Metadata = {
 export default function EmployerTermsPage() {
   return (
     <LegalLayout title="JOMP Employer Terms">
+      <div className="not-prose mb-8 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 rounded-xl border border-blue-100 bg-blue-50/60 p-4 text-xs text-neutral-700">
+        <div>
+          <span className="font-semibold text-[#01224F]">Are you a job seeker or candidate?</span>
+          <p className="text-neutral-600 mt-0.5">Please review the candidate terms of service governing job applications and assessments.</p>
+        </div>
+        <a
+          href="/terms"
+          className="whitespace-nowrap font-medium text-[#01224F] hover:underline"
+        >
+          View Candidate Terms &rarr;
+        </a>
+      </div>
       <h2>1. Employer Eligibility</h2>
       <p>
         JOMP is intended for legitimate employers and organisations seeking candidates in Nigeria.

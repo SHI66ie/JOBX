@@ -92,15 +92,23 @@ export function PasswordField(
   );
 }
 
-export function SubmitButton({ label, pendingLabel }: { label: string; pendingLabel: string }) {
+export function SubmitButton({
+  label,
+  pendingLabel,
+  disabled = false,
+}: {
+  label: string;
+  pendingLabel: string;
+  disabled?: boolean;
+}) {
   const { pending } = useFormStatus();
 
   return (
     <button
       type="submit"
-      disabled={pending}
+      disabled={disabled || pending}
       className={cn(
-        "group/btn relative flex h-11 w-full items-center justify-center gap-2 overflow-hidden rounded-xl bg-brand text-sm font-medium text-brand-fg shadow-[0_1px_2px_rgba(1,34,79,0.2),inset_0_1px_0_rgba(255,255,255,0.08)] transition-[background-color,transform] duration-200 hover:bg-brand-hover active:scale-[0.985] disabled:cursor-not-allowed disabled:opacity-80",
+        "group/btn relative flex h-11 w-full items-center justify-center gap-2 overflow-hidden rounded-xl bg-brand text-sm font-medium text-brand-fg shadow-[0_1px_2px_rgba(1,34,79,0.2),inset_0_1px_0_rgba(255,255,255,0.08)] transition-[background-color,transform] duration-200 hover:bg-brand-hover active:scale-[0.985] disabled:cursor-not-allowed disabled:opacity-50",
         FOCUS_RING,
       )}
     >

@@ -9,6 +9,18 @@ export const metadata: Metadata = {
 export default function TermsPage() {
   return (
     <LegalLayout title="JOMP Terms of Service">
+      <div className="not-prose mb-8 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 rounded-xl border border-blue-100 bg-blue-50/60 p-4 text-xs text-neutral-700">
+        <div>
+          <span className="font-semibold text-[#01224F]">Are you an employer or hiring organisation?</span>
+          <p className="text-neutral-600 mt-0.5">Please review the dedicated terms, verification criteria, and fee policies for employers.</p>
+        </div>
+        <a
+          href="/employer-terms"
+          className="whitespace-nowrap font-medium text-[#01224F] hover:underline"
+        >
+          View Employer Terms &rarr;
+        </a>
+      </div>
       <h2>1. About JOMP</h2>
       <p>
         JOMP is a Nigeria-focused digital employment and recruitment platform designed to connect candidates seeking employment with verified employers seeking qualified candidates.

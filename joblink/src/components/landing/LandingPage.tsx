@@ -283,14 +283,44 @@ export default function LandingPage() {
               <Link href="/login" className="hover:text-white">Log in</Link>
             </div>
           </div>
-          <div className="flex flex-wrap items-center gap-x-6 gap-y-2 border-b border-white/10 py-5 text-[12.5px] text-white/60">
-            <span className="font-semibold uppercase tracking-[0.14em] text-white/40 text-[11px]">Legal</span>
-            <Link href="/terms" className="hover:text-white transition">Terms of Service</Link>
-            <Link href="/privacy" className="hover:text-white transition">Privacy Policy</Link>
-            <Link href="/employer-terms" className="hover:text-white transition">Employer Terms</Link>
-            <Link href="/acceptable-use" className="hover:text-white transition">Acceptable Use</Link>
-            <Link href="/cookies" className="hover:text-white transition">Cookie Policy</Link>
-            <Link href="/copyright" className="hover:text-white transition">Copyright &amp; IP</Link>
+          <div className="border-b border-white/10 py-6 text-[12.5px] text-white/70">
+            <div className="mb-4">
+              <span className="inline-block rounded-full bg-white/10 px-3 py-1 font-semibold uppercase tracking-[0.14em] text-white/90 text-[11px]">
+                Legal
+              </span>
+            </div>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 sm:gap-12 max-w-xl">
+              <div className="space-y-2.5">
+                <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-white/45">
+                  Terms &amp; Conditions
+                </p>
+                <div className="flex flex-col gap-2">
+                  <Link href="/terms" className="hover:text-white transition flex items-center gap-2">
+                    <span className="h-1.5 w-1.5 rounded-full bg-emerald-400" />
+                    <span>Candidate Terms of Service</span>
+                  </Link>
+                  <Link href="/employer-terms" className="hover:text-white transition flex items-center gap-2">
+                    <span className="h-1.5 w-1.5 rounded-full bg-emerald-400" />
+                    <span>Employer Terms &amp; Conditions</span>
+                  </Link>
+                </div>
+              </div>
+              <div className="space-y-2.5">
+                <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-white/45">
+                  Privacy &amp; Data
+                </p>
+                <div className="flex flex-col gap-2">
+                  <Link href="/privacy" className="hover:text-white transition flex items-center gap-2">
+                    <span className="h-1.5 w-1.5 rounded-full bg-emerald-400" />
+                    <span>Privacy Policy</span>
+                  </Link>
+                  <Link href="/cookies" className="hover:text-white transition flex items-center gap-2">
+                    <span className="h-1.5 w-1.5 rounded-full bg-emerald-400" />
+                    <span>Cookie Policy &amp; Acceptable Use</span>
+                  </Link>
+                </div>
+              </div>
+            </div>
           </div>
           <div className="mt-6 flex flex-wrap items-center justify-between gap-4">
             <div>
