@@ -14,6 +14,7 @@ import {
 import { Icon } from "@/components/ui/icon";
 import { actionChatCoPilot } from "@/app/actions/ai";
 import type { CoPilotMessage } from "@/lib/ai";
+import { cn } from "@/lib/utils";
 
 export type AICoPilotBubbleProps = {
   candidateName?: string;
@@ -24,6 +25,13 @@ export type AICoPilotBubbleProps = {
 };
 
 const STORAGE_KEY = "jomp_copilot_history_v1";
+const POS_STORAGE_KEY = "jomp_copilot_position_v2";
+const BUTTON_SIZE = 56;
+const PANEL_WIDTH = 420;
+const PANEL_HEIGHT = 580;
+const PADDING = 16;
+// Default offset from bottom to ensure floater stays safely above Netlify badge (~40px tall + margin)
+const DEFAULT_BOTTOM_MARGIN = 96;
 
 export function AICoPilotBubble({
   candidateName,
@@ -37,6 +45,184 @@ export function AICoPilotBubble({
   const [loading, setLoading] = useState(false);
   const [useProfileContext, setUseProfileContext] = useState(true);
   const [copiedIndex, setCopiedIndex] = useState<number | null>(null);
+
+  // Position & Draggable state
+  const [buttonPos, setButtonPos] = useState<{ x: number; y: number } | null>(null);
+  const [panelPos, setPanelPos] = useState<{ x: number; y: number } | null>(null);
+  const [isDraggingButton, setIsDraggingButton] = useState(false);
+  const [isDraggingPanel, setIsDraggingPanel] = useState(false);
+
+  // Initialize position from localStorage or calculate safe default
+  useEffect(() => {
+    try {
+      const stored = localStorage.getItem(POS_STORAGE_KEY);
+      if (stored) {
+        const parsed = JSON.parse(stored);
+        if (typeof parsed?.x === "number" && typeof parsed?.y === "number") {
+          const clampedX = Math.max(PADDING, Math.min(parsed.x, window.innerWidth - BUTTON_SIZE - PADDING));
+          const clampedY = Math.max(PADDING, Math.min(parsed.y, window.innerHeight - BUTTON_SIZE - PADDING));
+          setButtonPos({ x: clampedX, y: clampedY });
+          return;
+        }
+      }
+    } catch {}
+
+    // Default: bottom-right, lifted 96px above screen bottom to stay clear of Netlify watermark
+    const defaultX = Math.max(PADDING, window.innerWidth - BUTTON_SIZE - 24);
+    const defaultY = Math.max(PADDING, window.innerHeight - BUTTON_SIZE - DEFAULT_BOTTOM_MARGIN);
+    setButtonPos({ x: defaultX, y: defaultY });
+  }, []);
+
+  // Keep button and panel clamped to viewport on window resize
+  useEffect(() => {
+    function handleResize() {
+      setButtonPos((prev) => {
+        if (!prev) return null;
+        return {
+          x: Math.max(PADDING, Math.min(prev.x, window.innerWidth - BUTTON_SIZE - PADDING)),
+          y: Math.max(PADDING, Math.min(prev.y, window.innerHeight - BUTTON_SIZE - PADDING)),
+        };
+      });
+      setPanelPos((prev) => {
+        if (!prev) return null;
+        const currentPanelWidth = Math.min(PANEL_WIDTH, window.innerWidth - PADDING * 2);
+        const currentPanelHeight = Math.min(PANEL_HEIGHT, window.innerHeight - PADDING * 2);
+        return {
+          x: Math.max(PADDING, Math.min(prev.x, window.innerWidth - currentPanelWidth - PADDING)),
+          y: Math.max(PADDING, Math.min(prev.y, window.innerHeight - currentPanelHeight - PADDING)),
+        };
+      });
+    }
+    window.addEventListener("resize", handleResize);
+    return () => window.removeEventListener("resize", handleResize);
+  }, []);
+
+  // Position panel intelligently near button when opened
+  useEffect(() => {
+    if (isOpen && !panelPos) {
+      const currentPanelWidth = Math.min(PANEL_WIDTH, window.innerWidth - PADDING * 2);
+      const currentPanelHeight = Math.min(PANEL_HEIGHT, window.innerHeight - PADDING * 2);
+
+      if (buttonPos) {
+        let x = buttonPos.x + BUTTON_SIZE - currentPanelWidth;
+        let y = buttonPos.y - currentPanelHeight - 12;
+
+        if (y < PADDING) {
+          y = buttonPos.y + BUTTON_SIZE + 12;
+        }
+
+        x = Math.max(PADDING, Math.min(x, window.innerWidth - currentPanelWidth - PADDING));
+        y = Math.max(PADDING, Math.min(y, window.innerHeight - currentPanelHeight - PADDING));
+        setPanelPos({ x, y });
+      } else {
+        const x = Math.max(PADDING, window.innerWidth - currentPanelWidth - 24);
+        const y = Math.max(PADDING, window.innerHeight - currentPanelHeight - DEFAULT_BOTTOM_MARGIN);
+        setPanelPos({ x, y });
+      }
+    }
+  }, [isOpen, buttonPos, panelPos]);
+
+  // Pointer drag logic for floating button
+  const dragButtonRef = useRef({
+    startX: 0,
+    startY: 0,
+    originX: 0,
+    originY: 0,
+    hasMoved: false,
+  });
+
+  const onButtonPointerDown = (e: React.PointerEvent<HTMLButtonElement>) => {
+    if (e.button !== 0 && e.pointerType === "mouse") return;
+    const rect = e.currentTarget.getBoundingClientRect();
+    dragButtonRef.current = {
+      startX: e.clientX,
+      startY: e.clientY,
+      originX: rect.left,
+      originY: rect.top,
+      hasMoved: false,
+    };
+    setIsDraggingButton(true);
+    e.currentTarget.setPointerCapture(e.pointerId);
+  };
+
+  const onButtonPointerMove = (e: React.PointerEvent<HTMLButtonElement>) => {
+    if (!isDraggingButton) return;
+    const dx = e.clientX - dragButtonRef.current.startX;
+    const dy = e.clientY - dragButtonRef.current.startY;
+    if (Math.hypot(dx, dy) > 4) {
+      dragButtonRef.current.hasMoved = true;
+    }
+    if (dragButtonRef.current.hasMoved) {
+      const nextX = Math.max(PADDING, Math.min(dragButtonRef.current.originX + dx, window.innerWidth - BUTTON_SIZE - PADDING));
+      const nextY = Math.max(PADDING, Math.min(dragButtonRef.current.originY + dy, window.innerHeight - BUTTON_SIZE - PADDING));
+      setButtonPos({ x: nextX, y: nextY });
+    }
+  };
+
+  const onButtonPointerUp = (e: React.PointerEvent<HTMLButtonElement>) => {
+    if (!isDraggingButton) return;
+    setIsDraggingButton(false);
+    try {
+      e.currentTarget.releasePointerCapture(e.pointerId);
+    } catch {}
+
+    if (dragButtonRef.current.hasMoved) {
+      const rect = e.currentTarget.getBoundingClientRect();
+      const finalPos = { x: rect.left, y: rect.top };
+      try {
+        localStorage.setItem(POS_STORAGE_KEY, JSON.stringify(finalPos));
+      } catch {}
+    } else {
+      setIsOpen(true);
+    }
+  };
+
+  // Pointer drag logic for chat panel header
+  const dragPanelRef = useRef({
+    startX: 0,
+    startY: 0,
+    originX: 0,
+    originY: 0,
+  });
+
+  const onPanelHeaderPointerDown = (e: React.PointerEvent<HTMLDivElement>) => {
+    const target = e.target as HTMLElement;
+    if (target.closest("button") || target.closest("input")) return;
+    if (e.button !== 0 && e.pointerType === "mouse") return;
+
+    const panelEl = (e.currentTarget as HTMLElement).parentElement;
+    if (!panelEl) return;
+    const rect = panelEl.getBoundingClientRect();
+
+    dragPanelRef.current = {
+      startX: e.clientX,
+      startY: e.clientY,
+      originX: rect.left,
+      originY: rect.top,
+    };
+    setIsDraggingPanel(true);
+    e.currentTarget.setPointerCapture(e.pointerId);
+  };
+
+  const onPanelHeaderPointerMove = (e: React.PointerEvent<HTMLDivElement>) => {
+    if (!isDraggingPanel) return;
+    const dx = e.clientX - dragPanelRef.current.startX;
+    const dy = e.clientY - dragPanelRef.current.startY;
+    const currentPanelWidth = Math.min(PANEL_WIDTH, window.innerWidth - PADDING * 2);
+    const currentPanelHeight = Math.min(PANEL_HEIGHT, window.innerHeight - PADDING * 2);
+
+    const nextX = Math.max(PADDING, Math.min(dragPanelRef.current.originX + dx, window.innerWidth - currentPanelWidth - PADDING));
+    const nextY = Math.max(PADDING, Math.min(dragPanelRef.current.originY + dy, window.innerHeight - currentPanelHeight - PADDING));
+    setPanelPos({ x: nextX, y: nextY });
+  };
+
+  const onPanelHeaderPointerUp = (e: React.PointerEvent<HTMLDivElement>) => {
+    if (!isDraggingPanel) return;
+    setIsDraggingPanel(false);
+    try {
+      e.currentTarget.releasePointerCapture(e.pointerId);
+    } catch {}
+  };
 
   // Build profile-tailored starter prompts
   const starterPrompts = useMemo(() => {
@@ -183,11 +369,25 @@ export function AICoPilotBubble({
       {!isOpen && (
         <button
           type="button"
-          onClick={() => setIsOpen(true)}
-          aria-label="Open Career Co-Pilot"
-          className="fixed bottom-6 right-6 z-40 flex h-14 w-14 items-center justify-center rounded-full bg-brand text-brand-fg shadow-2xl hover:scale-105 active:scale-95 transition-all duration-200 hover:bg-brand-hover focus:outline-none focus:ring-2 focus:ring-brand focus:ring-offset-2 group"
+          onPointerDown={onButtonPointerDown}
+          onPointerMove={onButtonPointerMove}
+          onPointerUp={onButtonPointerUp}
+          onPointerCancel={() => setIsDraggingButton(false)}
+          aria-label="Open Career Co-Pilot (drag to move)"
+          title="Career Co-Pilot (click to open, drag to move)"
+          style={
+            buttonPos
+              ? { left: `${buttonPos.x}px`, top: `${buttonPos.y}px`, touchAction: "none" }
+              : { bottom: `${DEFAULT_BOTTOM_MARGIN}px`, right: "24px", touchAction: "none" }
+          }
+          className={cn(
+            "fixed z-40 flex h-14 w-14 select-none items-center justify-center rounded-full bg-brand text-brand-fg shadow-2xl transition-[transform,box-shadow] duration-150 focus:outline-none focus:ring-2 focus:ring-brand focus:ring-offset-2 group",
+            isDraggingButton
+              ? "cursor-grabbing scale-110 shadow-brand/40 shadow-2xl ring-2 ring-brand ring-offset-2"
+              : "cursor-grab hover:scale-105 active:scale-95 hover:bg-brand-hover"
+          )}
         >
-          <div className="relative flex items-center justify-center">
+          <div className="relative flex items-center justify-center pointer-events-none">
             <Icon icon={AiChat02Icon} size={26} className="text-brand-fg transition-transform group-hover:scale-110" />
             <span className="absolute -top-1 -right-1 flex h-3.5 w-3.5">
               <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
@@ -199,11 +399,32 @@ export function AICoPilotBubble({
 
       {/* Floating Chat Panel */}
       {isOpen && (
-        <div className="fixed bottom-6 right-6 z-50 flex h-[580px] w-[420px] max-w-[calc(100vw-2rem)] flex-col rounded-2xl border border-neutral-200/80 bg-surface text-neutral-900 shadow-2xl overflow-hidden animate-in fade-in slide-in-from-bottom-5 duration-200">
-          {/* Header */}
-          <div className="border-b border-neutral-200/80 bg-neutral-100/70 px-4 py-3 text-neutral-900">
+        <div
+          style={
+            panelPos
+              ? { left: `${panelPos.x}px`, top: `${panelPos.y}px` }
+              : { bottom: `${DEFAULT_BOTTOM_MARGIN}px`, right: "24px" }
+          }
+          className="fixed z-50 flex h-[580px] w-[420px] max-w-[calc(100vw-2rem)] max-h-[calc(100vh-3rem)] flex-col rounded-2xl border border-neutral-200/80 bg-surface text-neutral-900 shadow-2xl overflow-hidden animate-in fade-in slide-in-from-bottom-5 duration-200"
+        >
+          {/* Header (Draggable) */}
+          <div
+            onPointerDown={onPanelHeaderPointerDown}
+            onPointerMove={onPanelHeaderPointerMove}
+            onPointerUp={onPanelHeaderPointerUp}
+            onPointerCancel={() => setIsDraggingPanel(false)}
+            style={{ touchAction: "none" }}
+            title="Drag to move panel"
+            className={cn(
+              "border-b border-neutral-200/80 bg-neutral-100/70 px-4 pt-2 pb-3 text-neutral-900 select-none transition-colors",
+              isDraggingPanel ? "cursor-grabbing bg-neutral-200/70" : "cursor-grab"
+            )}
+          >
+            {/* Subtle drag handle bar */}
+            <div className="mx-auto mb-1.5 h-1 w-8 rounded-full bg-neutral-300/80 dark:bg-neutral-600/80" />
+
             <div className="flex items-center justify-between">
-              <div className="flex items-center gap-2.5">
+              <div className="flex items-center gap-2.5 pointer-events-none">
                 <div className="flex h-8 w-8 items-center justify-center rounded-full bg-brand/15 text-brand">
                   <Icon icon={SparklesIcon} size={16} />
                 </div>
