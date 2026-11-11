@@ -13,10 +13,12 @@ import {
   Download04Icon,
   File01Icon,
   EyeIcon,
+  Edit02Icon,
 } from "@hugeicons/core-free-icons";
 import { Icon } from "@/components/ui/icon";
 import { actionArrangeCV, actionSaveAICV } from "@/app/actions/ai";
-import { generateAICVPdf } from "@/lib/cv-pdf";
+import { generateAICVPdf, type CVPdfData } from "@/lib/cv-pdf";
+import { CVFormEditor } from "./cv-form-editor";
 import type { ArrangedCVResult } from "@/lib/ai";
 import type { CandidateProfile } from "@/lib/profile";
 
@@ -35,8 +37,9 @@ export function AICVArranger({
   const [open, setOpen] = useState(false);
   const [targetNiche, setTargetNiche] = useState("");
   const [rawText, setRawText] = useState("");
-  const [activeTab, setActiveTab] = useState<"preview" | "overview" | "markdown">("preview");
+  const [activeTab, setActiveTab] = useState<"preview" | "edit" | "overview" | "markdown">("preview");
   const [result, setResult] = useState<ArrangedCVResult | null>(null);
+  const [editedPayload, setEditedPayload] = useState<CVPdfData | null>(null);
   const [error, setError] = useState("");
   const [copiedMd, setCopiedMd] = useState(false);
   const [copiedSummary, setCopiedSummary] = useState(false);
@@ -82,11 +85,12 @@ export function AICVArranger({
       }
 
       setResult(res.data);
+      setEditedPayload(getPdfPayload(res.data));
       setActiveTab("preview");
     });
   }
 
-  function getPdfPayload(cvResult: ArrangedCVResult) {
+  function getPdfPayload(cvResult: ArrangedCVResult): CVPdfData {
     const competencies = cvResult.competencies?.length
       ? cvResult.competencies
       : Object.entries(cvResult.skillsByCategory || {}).map(([pillar, items]) => ({
@@ -114,9 +118,9 @@ export function AICVArranger({
   }
 
   function handleDownloadLocalPdf() {
-    if (!result) return;
+    const payload = editedPayload || (result ? getPdfPayload(result) : null);
+    if (!payload) return;
     try {
-      const payload = getPdfPayload(result);
       const bytes = generateAICVPdf(payload);
       const blob = new Blob([bytes as unknown as BlobPart], { type: "application/pdf" });
       const url = URL.createObjectURL(blob);
@@ -134,30 +138,31 @@ export function AICVArranger({
   }
 
   function handleApplyToProfile() {
-    if (!result) return;
+    const payload = editedPayload || (result ? getPdfPayload(result) : null);
+    if (!payload) return;
     setError("");
     startApplying(async () => {
       const mergedSkills = Array.from(
-        new Set([...initialProfile.skills, ...(result.recommendedSkills || [])]),
+        new Set([...initialProfile.skills, ...(payload.recommendedSkills || [])]),
       );
 
       const nextProfile: CandidateProfile = {
         ...initialProfile,
-        title: result.suggestedTitle || initialProfile.title,
-        bio: result.executiveSummary || initialProfile.bio,
+        title: payload.suggestedTitle || initialProfile.title,
+        bio: payload.executiveSummary || initialProfile.bio,
         skills: mergedSkills,
       };
 
-      const cvData = getPdfPayload(result);
+      const cvData = payload;
 
-      // Generate a watermarked PDF, upload it and save resume_url — all in one server action.
+      // Generate a watermarked PDF, upload it, save resume_url and structured CV JSON
       const saveRes = await actionSaveAICV({
         cvData,
         profileUpdate: {
-          firstName: initialProfile.firstName,
-          lastName: initialProfile.lastName,
-          title: result.suggestedTitle || initialProfile.title,
-          bio: result.executiveSummary || initialProfile.bio,
+          firstName: payload.fullName.split(" ")[0] || initialProfile.firstName,
+          lastName: payload.fullName.split(" ").slice(1).join(" ") || initialProfile.lastName,
+          title: payload.suggestedTitle || initialProfile.title,
+          bio: payload.executiveSummary || initialProfile.bio,
           skills: mergedSkills,
         },
       });
@@ -198,9 +203,10 @@ export function AICVArranger({
     setTimeout(() => setCopiedSummary(false), 2000);
   }
 
-  const activeCompetencies = result?.competencies?.length
-    ? result.competencies
-    : Object.entries(result?.skillsByCategory || {}).map(([pillar, items]) => ({
+  const displayData = editedPayload || (result ? getPdfPayload(result) : null);
+  const activeCompetencies = displayData?.competencies?.length
+    ? displayData.competencies
+    : Object.entries(displayData?.skillsByCategory || {}).map(([pillar, items]) => ({
         pillar,
         scope: items.join(", "),
       }));
@@ -334,6 +340,18 @@ export function AICVArranger({
                       </button>
                       <button
                         type="button"
+                        onClick={() => setActiveTab("edit")}
+                        className={`inline-flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-[13px] font-medium transition-colors ${
+                          activeTab === "edit"
+                            ? "bg-brand text-brand-fg"
+                            : "text-neutral-600 hover:bg-neutral-100"
+                        }`}
+                      >
+                        <Icon icon={Edit02Icon} size={14} />
+                        Edit CV (Word Tools)
+                      </button>
+                      <button
+                        type="button"
                         onClick={() => setActiveTab("overview")}
                         className={`inline-flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-[13px] font-medium transition-colors ${
                           activeTab === "overview"
@@ -412,18 +430,18 @@ export function AICVArranger({
 
                       {/* 1. Header: Name, Multi-pillar Headline, Contact, Meta */}
                       <div className="relative">
-                        <h2 className="text-[21px] font-bold tracking-tight text-[#01224F] uppercase">{fullName}</h2>
+                        <h2 className="text-[21px] font-bold tracking-tight text-[#01224F] uppercase">{displayData?.fullName || fullName}</h2>
                         <p className="mt-1 text-[13.5px] font-bold text-neutral-800">
-                          {result.suggestedTitle}
+                          {displayData?.suggestedTitle}
                         </p>
                         <p className="mt-1 text-[12px] text-neutral-600">
-                          {[result.additionalInfo?.locationAndRelocation || "Abuja, FCT, Nigeria", "JOMP Verified Talent"].filter(Boolean).join("  ·  ")}
+                          {[displayData?.additionalInfo?.locationAndRelocation || displayData?.location || "Abuja, FCT, Nigeria", "JOMP Verified Talent"].filter(Boolean).join("  ·  ")}
                         </p>
-                        {result.additionalInfo?.workArrangement || result.additionalInfo?.languages?.length ? (
+                        {displayData?.additionalInfo?.workArrangement || displayData?.additionalInfo?.languages?.length ? (
                           <p className="mt-0.5 text-[11.5px] text-neutral-500">
                             {[
-                              result.additionalInfo?.languages?.length ? `Languages: ${result.additionalInfo.languages.join(", ")}` : null,
-                              result.additionalInfo?.workArrangement,
+                              displayData.additionalInfo?.languages?.length ? `Languages: ${displayData.additionalInfo.languages.join(", ")}` : null,
+                              displayData.additionalInfo?.workArrangement,
                             ].filter(Boolean).join("  ·  ")}
                           </p>
                         ) : null}
@@ -434,7 +452,7 @@ export function AICVArranger({
                       {/* 2. PROFILE */}
                       <div className="relative space-y-1.5">
                         <h4 className="text-[12px] font-bold tracking-wider uppercase text-[#01224F]">PROFILE</h4>
-                        <p className="text-[12.5px] leading-relaxed text-neutral-800">{result.executiveSummary}</p>
+                        <p className="text-[12.5px] leading-relaxed text-neutral-800">{displayData?.executiveSummary}</p>
                       </div>
 
                       <hr className="my-3.5 border-neutral-200" />
@@ -456,10 +474,10 @@ export function AICVArranger({
                       <hr className="my-3.5 border-neutral-200" />
 
                       {/* 4. PROFESSIONAL EXPERIENCE */}
-                      {result.structuredExperience?.length ? (
+                      {displayData?.structuredExperience?.length ? (
                         <div className="relative space-y-3.5">
                           <h4 className="text-[12px] font-bold tracking-wider uppercase text-[#01224F]">PROFESSIONAL EXPERIENCE</h4>
-                          {result.structuredExperience.map((exp, idx) => (
+                          {displayData.structuredExperience.map((exp, idx) => (
                             <div key={idx} className="space-y-1">
                               <div className="flex flex-wrap items-center justify-between text-[12.5px]">
                                 <span className="font-bold text-neutral-900">
@@ -481,13 +499,13 @@ export function AICVArranger({
                       ) : null}
 
                       {/* 5. EDUCATION & CERTIFICATIONS */}
-                      {result.education?.length ? (
+                      {displayData?.education?.length ? (
                         <>
                           <hr className="my-3.5 border-neutral-200" />
                           <div className="relative space-y-2">
                             <h4 className="text-[12px] font-bold tracking-wider uppercase text-[#01224F]">EDUCATION &amp; CERTIFICATIONS</h4>
                             <div className="space-y-1.5 text-[12px]">
-                              {result.education.map((edu, idx) => (
+                              {displayData.education.map((edu, idx) => (
                                 <div key={idx}>
                                   <div className="flex flex-wrap items-center justify-between">
                                     <span className="font-bold text-neutral-900">
@@ -506,13 +524,13 @@ export function AICVArranger({
                       ) : null}
 
                       {/* 6. SELECTED TECHNICAL WORK */}
-                      {result.selectedWork?.length ? (
+                      {displayData?.selectedWork?.length ? (
                         <>
                           <hr className="my-3.5 border-neutral-200" />
                           <div className="relative space-y-2">
                             <h4 className="text-[12px] font-bold tracking-wider uppercase text-[#01224F]">SELECTED TECHNICAL WORK &amp; INTERNAL TOOLS</h4>
                             <div className="space-y-1.5 text-[12px]">
-                              {result.selectedWork.map((work, idx) => (
+                              {displayData.selectedWork.map((work, idx) => (
                                 <div key={idx} className="leading-snug">
                                   <span className="font-bold text-neutral-900">{work.title}</span>
                                   {" — "}
@@ -525,23 +543,23 @@ export function AICVArranger({
                       ) : null}
 
                       {/* 7. ADDITIONAL INFORMATION */}
-                      {result.additionalInfo ? (
+                      {displayData?.additionalInfo ? (
                         <>
                           <hr className="my-3.5 border-neutral-200" />
                           <div className="relative space-y-1.5 text-[12px]">
                             <h4 className="text-[12px] font-bold tracking-wider uppercase text-[#01224F]">ADDITIONAL INFORMATION</h4>
                             <ul className="space-y-1 text-neutral-700">
-                              {result.additionalInfo.locationAndRelocation ? (
-                                <li>• {result.additionalInfo.locationAndRelocation}</li>
+                              {displayData.additionalInfo.locationAndRelocation ? (
+                                <li>• {displayData.additionalInfo.locationAndRelocation}</li>
                               ) : null}
-                              {result.additionalInfo.languages?.length ? (
-                                <li>• Fluent in {result.additionalInfo.languages.join(", ")}</li>
+                              {displayData.additionalInfo.languages?.length ? (
+                                <li>• Fluent in {displayData.additionalInfo.languages.join(", ")}</li>
                               ) : null}
-                              {result.additionalInfo.workArrangement ? (
-                                <li>• {result.additionalInfo.workArrangement}</li>
+                              {displayData.additionalInfo.workArrangement ? (
+                                <li>• {displayData.additionalInfo.workArrangement}</li>
                               ) : null}
-                              {result.additionalInfo.referencesNote ? (
-                                <li>• {result.additionalInfo.referencesNote}</li>
+                              {displayData.additionalInfo.referencesNote ? (
+                                <li>• {displayData.additionalInfo.referencesNote}</li>
                               ) : null}
                             </ul>
                           </div>
@@ -552,6 +570,17 @@ export function AICVArranger({
                       <div className="mt-6 border-t border-neutral-200 pt-3 text-center text-[11px] text-neutral-500">
                         Created with JOMP AI • Subscribe to remove watermark • https://jomponline.com
                       </div>
+                    </div>
+                  ) : activeTab === "edit" ? (
+                    <div>
+                      {displayData ? (
+                        <CVFormEditor
+                          initialData={displayData}
+                          onChange={(updated) => {
+                            setEditedPayload(updated);
+                          }}
+                        />
+                      ) : null}
                     </div>
                   ) : activeTab === "overview" ? (
                     <div className="space-y-5">

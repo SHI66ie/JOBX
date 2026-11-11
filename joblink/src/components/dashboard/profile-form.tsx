@@ -1,7 +1,7 @@
 "use client";
 
 import { useMemo, useState, useTransition, type ReactNode } from "react";
-import { File01Icon, Tick02Icon } from "@hugeicons/core-free-icons";
+import { File01Icon, Tick02Icon, Edit02Icon } from "@hugeicons/core-free-icons";
 import { Icon } from "@/components/ui/icon";
 import { TextField } from "@/components/auth/auth-fields";
 import { FileDrop, SkillPicker, TextArea } from "@/components/onboarding/onboarding-fields";
@@ -13,6 +13,7 @@ import { createClient } from "@/utils/supabase/client";
 import { cn } from "@/lib/utils";
 import { AIBioEnhancer } from "@/components/ai/ai-bio-enhancer";
 import { AICVArranger } from "@/components/ai/ai-cv-arranger";
+import { CVEditorModal } from "@/components/ai/cv-editor-modal";
 
 
 const SKILL_SUGGESTIONS = ["Communication", "Customer service", "Microsoft Excel", "Project management", "Sales", "React"];
@@ -47,6 +48,7 @@ export function ProfileForm({ initial, cvLink }: { initial: CandidateProfile; cv
   const [currentCvLink, setCurrentCvLink] = useState(cvLink);
   const [newFile, setNewFile] = useState<File | null>(null);
   const [replacingCv, setReplacingCv] = useState(false);
+  const [editorModalOpen, setEditorModalOpen] = useState(false);
   const [error, setError] = useState("");
   const [justSaved, setJustSaved] = useState(false);
   const [isSaving, startSaving] = useTransition();
@@ -166,25 +168,35 @@ export function ProfileForm({ initial, cvLink }: { initial: CandidateProfile; cv
         <SettingsRow id="field-resume" label="CV" hint="PDF or DOCX, up to 5MB.">
           <div className="mb-4 flex flex-wrap items-center justify-between gap-3 rounded-xl border border-brand/20 bg-brand/[0.04] p-3.5">
             <div>
-              <p className="text-[13px] font-semibold text-neutral-900">Need help arranging your CV?</p>
+              <p className="text-[13px] font-semibold text-neutral-900">Need help arranging or typing your CV?</p>
               <p className="text-[12px] text-neutral-500">
-                Let AI structure your experience bullets, extract your niche, and optimize ATS keywords.
+                Let AI arrange your CV into executive benchmark format, or type and format your own CV with Word tools.
               </p>
             </div>
-            <AICVArranger
-              initialProfile={draft}
-              onProfileUpdated={(updated, viewUrl) => {
-                setDraft(updated);
-                setSaved(updated);
-                if (viewUrl && updated.resumeUrl) {
-                  setCurrentCvLink({ path: updated.resumeUrl, url: viewUrl });
-                }
-                setReplacingCv(false);
-                setNewFile(null);
-                setJustSaved(true);
-              }}
-              label="Arrange CV with AI"
-            />
+            <div className="flex flex-wrap items-center gap-2">
+              <button
+                type="button"
+                onClick={() => setEditorModalOpen(true)}
+                className="inline-flex items-center gap-1.5 rounded-xl border border-neutral-300 bg-white px-3.5 py-2 text-[13px] font-semibold text-neutral-700 shadow-2xs hover:bg-neutral-50 hover:text-neutral-900"
+              >
+                <Icon icon={Edit02Icon} size={15} />
+                {draft.resumeUrl ? "Edit CV (Word Tools)" : "Type Your Own CV"}
+              </button>
+              <AICVArranger
+                initialProfile={draft}
+                onProfileUpdated={(updated, viewUrl) => {
+                  setDraft(updated);
+                  setSaved(updated);
+                  if (viewUrl && updated.resumeUrl) {
+                    setCurrentCvLink({ path: updated.resumeUrl, url: viewUrl });
+                  }
+                  setReplacingCv(false);
+                  setNewFile(null);
+                  setJustSaved(true);
+                }}
+                label="Arrange CV with AI"
+              />
+            </div>
           </div>
           {draft.resumeUrl && !replacingCv && !newFile ? (
             <div className="flex items-center gap-3">
@@ -196,6 +208,13 @@ export function ProfileForm({ initial, cvLink }: { initial: CandidateProfile; cv
                     View
                   </a>
                 ) : null}
+                <button
+                  type="button"
+                  onClick={() => setEditorModalOpen(true)}
+                  className="rounded-md px-2 py-1 text-brand font-semibold hover:bg-brand/10 hover:text-brand"
+                >
+                  Edit
+                </button>
                 <button type="button" onClick={() => setReplacingCv(true)} className="rounded-md px-2 py-1 text-neutral-600 hover:bg-neutral-100 hover:text-neutral-900">
                   Replace
                 </button>
@@ -220,6 +239,23 @@ export function ProfileForm({ initial, cvLink }: { initial: CandidateProfile; cv
           )}
         </SettingsRow>
       </div>
+
+      <CVEditorModal
+        profile={draft}
+        open={editorModalOpen}
+        onClose={() => setEditorModalOpen(false)}
+        onSaved={(updated, viewUrl) => {
+          setDraft(updated);
+          setSaved(updated);
+          if (viewUrl && updated.resumeUrl) {
+            setCurrentCvLink({ path: updated.resumeUrl, url: viewUrl });
+          }
+          setReplacingCv(false);
+          setNewFile(null);
+          setJustSaved(true);
+          setEditorModalOpen(false);
+        }}
+      />
 
       {error ? (
         <p role="alert" className="auth-shake mt-2 rounded-xl bg-red-50 px-3.5 py-2.5 text-[13px] text-red-700">

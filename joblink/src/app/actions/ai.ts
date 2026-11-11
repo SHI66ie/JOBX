@@ -437,7 +437,18 @@ export async function actionSaveAICV(params: {
       console.warn("Could not sync public.users profile:", profileError.message);
     }
 
-    // 4. Sign a short-lived URL for immediate preview/download
+    // 4. Also store structured CV JSON in user metadata so users can edit it anytime from profile
+    try {
+      await supabase.auth.updateUser({
+        data: {
+          saved_cv_data: params.cvData,
+        },
+      });
+    } catch (saveJsonErr) {
+      console.warn("Could not persist saved_cv_data metadata:", saveJsonErr);
+    }
+
+    // 5. Sign a short-lived URL for immediate preview/download
     const { data: signedData } = await supabase.storage
       .from(RESUME_BUCKET)
       .createSignedUrls([objectPath], 3600);
@@ -450,5 +461,28 @@ export async function actionSaveAICV(params: {
     return { error: getErrorMessage(err, "Failed to save AI-generated CV") };
   }
 }
+
+/**
+ * Loads the user's latest structured CV JSON (if any)
+ */
+export async function actionLoadSavedCV(): Promise<{ data?: CVPdfData | null; error?: string }> {
+  try {
+    const supabase = await createClient();
+    const {
+      data: { user },
+      error: authError,
+    } = await supabase.auth.getUser();
+
+    if (authError || !user) {
+      return { error: "Please sign in again." };
+    }
+
+    const saved = (user.user_metadata?.saved_cv_data as CVPdfData) || null;
+    return { data: saved };
+  } catch (err: unknown) {
+    return { error: getErrorMessage(err, "Failed to load CV data") };
+  }
+}
+
 
 
