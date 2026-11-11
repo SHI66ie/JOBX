@@ -185,13 +185,13 @@ export function AICoPilotBubble({
           type="button"
           onClick={() => setIsOpen(true)}
           aria-label="Open Career Co-Pilot"
-          className="fixed bottom-6 right-6 z-40 flex h-14 w-14 items-center justify-center rounded-full bg-neutral-900 text-white shadow-2xl hover:scale-105 active:scale-95 transition-all duration-200 hover:bg-neutral-800 focus:outline-none focus:ring-2 focus:ring-brand focus:ring-offset-2 group"
+          className="fixed bottom-6 right-6 z-40 flex h-14 w-14 items-center justify-center rounded-full bg-brand text-brand-fg shadow-2xl hover:scale-105 active:scale-95 transition-all duration-200 hover:bg-brand-hover focus:outline-none focus:ring-2 focus:ring-brand focus:ring-offset-2 group"
         >
           <div className="relative flex items-center justify-center">
-            <Icon icon={AiChat02Icon} size={26} className="text-white group-hover:text-brand transition-colors" />
+            <Icon icon={AiChat02Icon} size={26} className="text-brand-fg transition-transform group-hover:scale-110" />
             <span className="absolute -top-1 -right-1 flex h-3.5 w-3.5">
               <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
-              <span className="relative inline-flex rounded-full h-3.5 w-3.5 bg-emerald-500 border-2 border-neutral-900"></span>
+              <span className="relative inline-flex rounded-full h-3.5 w-3.5 bg-emerald-500 border-2 border-surface"></span>
             </span>
           </div>
         </button>
@@ -199,24 +199,24 @@ export function AICoPilotBubble({
 
       {/* Floating Chat Panel */}
       {isOpen && (
-        <div className="fixed bottom-6 right-6 z-50 flex h-[580px] w-[420px] max-w-[calc(100vw-2rem)] flex-col rounded-2xl border border-neutral-200/90 bg-white shadow-2xl overflow-hidden animate-in fade-in slide-in-from-bottom-5 duration-200">
+        <div className="fixed bottom-6 right-6 z-50 flex h-[580px] w-[420px] max-w-[calc(100vw-2rem)] flex-col rounded-2xl border border-neutral-200/80 bg-surface text-neutral-900 shadow-2xl overflow-hidden animate-in fade-in slide-in-from-bottom-5 duration-200">
           {/* Header */}
-          <div className="border-b border-neutral-800 bg-neutral-900 px-4 py-3 text-white">
+          <div className="border-b border-neutral-200/80 bg-neutral-100/70 px-4 py-3 text-neutral-900">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2.5">
-                <div className="flex h-8 w-8 items-center justify-center rounded-full bg-brand/20 text-brand">
+                <div className="flex h-8 w-8 items-center justify-center rounded-full bg-brand/15 text-brand">
                   <Icon icon={SparklesIcon} size={16} />
                 </div>
                 <div>
                   <div className="flex items-center gap-1.5">
-                    <h3 className="text-[13.5px] font-semibold text-white leading-tight">
+                    <h3 className="text-[13.5px] font-semibold text-neutral-900 leading-tight">
                       JOMP Career Co-Pilot
                     </h3>
-                    <span className="rounded-full bg-emerald-500/20 px-1.5 py-0.2 text-[10px] font-semibold text-emerald-300">
+                    <span className="rounded-full bg-emerald-500/15 px-1.5 py-0.5 text-[10px] font-semibold text-emerald-600 dark:text-emerald-400">
                       AI Live
                     </span>
                   </div>
-                  <p className="text-[11px] text-neutral-400">
+                  <p className="text-[11px] text-neutral-500">
                     {candidateTitle ? `Tuned for ${candidateTitle}` : "Remote Career Advisor"}
                   </p>
                 </div>
@@ -227,7 +227,7 @@ export function AICoPilotBubble({
                   type="button"
                   onClick={handleResetChat}
                   title="Clear conversation"
-                  className="rounded-lg p-1.5 text-neutral-400 hover:bg-white/10 hover:text-white transition"
+                  className="rounded-lg p-1.5 text-neutral-500 hover:bg-neutral-200/60 hover:text-neutral-900 transition"
                 >
                   <Icon icon={RefreshIcon} size={14} />
                 </button>
@@ -235,7 +235,7 @@ export function AICoPilotBubble({
                   type="button"
                   onClick={() => setIsOpen(false)}
                   title="Close chat"
-                  className="rounded-lg p-1.5 text-neutral-400 hover:bg-white/10 hover:text-white transition"
+                  className="rounded-lg p-1.5 text-neutral-500 hover:bg-neutral-200/60 hover:text-neutral-900 transition"
                 >
                   <Icon icon={Cancel01Icon} size={16} />
                 </button>
@@ -243,9 +243,9 @@ export function AICoPilotBubble({
             </div>
 
             {/* Profile Context Bar */}
-            <div className="mt-2.5 flex items-center justify-between border-t border-neutral-800/80 pt-2 text-[11px]">
-              <div className="flex items-center gap-1.5 text-neutral-300">
-                <Icon icon={Target02Icon} size={12} className={useProfileContext ? "text-emerald-400" : "text-neutral-500"} />
+            <div className="mt-2.5 flex items-center justify-between border-t border-neutral-200/80 pt-2 text-[11px]">
+              <div className="flex items-center gap-1.5 text-neutral-500">
+                <Icon icon={Target02Icon} size={12} className={useProfileContext ? "text-emerald-500" : "text-neutral-400"} />
                 <span className="truncate max-w-[210px]">
                   {useProfileContext
                     ? `${candidateTitle || "Profile"} · ${candidateSkills?.length || 0} skills`
@@ -256,7 +256,7 @@ export function AICoPilotBubble({
                 type="button"
                 onClick={() => setUseProfileContext(!useProfileContext)}
                 className={`font-medium transition ${
-                  useProfileContext ? "text-emerald-400 hover:text-emerald-300" : "text-neutral-400 hover:text-neutral-300"
+                  useProfileContext ? "text-emerald-600 hover:text-emerald-700 dark:text-emerald-400 dark:hover:text-emerald-300" : "text-neutral-500 hover:text-neutral-700"
                 }`}
               >
                 {useProfileContext ? "Profile active ✓" : "Enable profile"}
@@ -267,7 +267,7 @@ export function AICoPilotBubble({
           {/* Messages Stream */}
           <div
             ref={scrollRef}
-            className="flex-1 overflow-y-auto p-4 space-y-4 bg-neutral-50/60"
+            className="flex-1 overflow-y-auto p-4 space-y-4 bg-neutral-50/40"
           >
             {messages.map((m, idx) => (
               <div
@@ -279,8 +279,8 @@ export function AICoPilotBubble({
                 <div
                   className={`group relative max-w-[88%] rounded-2xl px-4 py-3 text-[13px] leading-relaxed ${
                     m.role === "user"
-                      ? "bg-neutral-900 text-white rounded-br-xs shadow-xs"
-                      : "bg-white text-neutral-800 border border-neutral-200/80 shadow-xs rounded-bl-xs"
+                      ? "bg-brand text-brand-fg rounded-br-xs shadow-xs"
+                      : "bg-neutral-100 text-neutral-900 border border-neutral-200/80 shadow-xs rounded-bl-xs"
                   }`}
                 >
                   {m.role === "assistant" ? (
@@ -295,7 +295,7 @@ export function AICoPilotBubble({
                       type="button"
                       onClick={() => handleCopy(m.content, idx)}
                       title="Copy response"
-                      className="absolute -bottom-2.5 right-2 rounded-full border border-neutral-200 bg-white px-2 py-0.5 text-[10px] font-medium text-neutral-500 shadow-2xs opacity-0 group-hover:opacity-100 transition hover:bg-neutral-50 hover:text-neutral-800 flex items-center gap-1"
+                      className="absolute -bottom-2.5 right-2 rounded-full border border-neutral-200/80 bg-surface px-2 py-0.5 text-[10px] font-medium text-neutral-500 shadow-2xs opacity-0 group-hover:opacity-100 transition hover:bg-neutral-100 hover:text-neutral-900 flex items-center gap-1"
                     >
                       <Icon icon={copiedIndex === idx ? CheckIcon : Copy01Icon} size={11} />
                       <span>{copiedIndex === idx ? "Copied" : "Copy"}</span>
@@ -306,13 +306,13 @@ export function AICoPilotBubble({
             ))}
 
             {loading && (
-              <div className="flex items-center gap-2 rounded-2xl rounded-bl-xs bg-white px-4 py-3 text-neutral-500 border border-neutral-200/80 shadow-xs w-fit">
+              <div className="flex items-center gap-2 rounded-2xl rounded-bl-xs bg-neutral-100 px-4 py-3 text-neutral-500 border border-neutral-200/80 shadow-xs w-fit">
                 <div className="flex items-center gap-1.5">
                   <div className="h-1.5 w-1.5 animate-bounce rounded-full bg-brand" />
                   <div className="h-1.5 w-1.5 animate-bounce rounded-full bg-brand [animation-delay:0.2s]" />
                   <div className="h-1.5 w-1.5 animate-bounce rounded-full bg-brand [animation-delay:0.4s]" />
                 </div>
-                <span className="text-[12px] text-neutral-400">Analyzing your profile &amp; market data...</span>
+                <span className="text-[12px] text-neutral-500">Analyzing your profile &amp; market data...</span>
               </div>
             )}
 
@@ -328,7 +328,7 @@ export function AICoPilotBubble({
                       key={i}
                       type="button"
                       onClick={() => handleSend(action)}
-                      className="group flex items-start justify-between text-left text-[12.5px] text-neutral-700 bg-white hover:bg-neutral-100/90 hover:text-neutral-900 border border-neutral-200/80 rounded-xl px-3 py-2 transition shadow-2xs hover:border-brand/40"
+                      className="group flex items-start justify-between text-left text-[12.5px] text-neutral-700 bg-neutral-100/70 hover:bg-neutral-100 hover:text-neutral-900 border border-neutral-200/80 rounded-xl px-3 py-2 transition shadow-2xs hover:border-brand/40"
                     >
                       <span className="pr-2">{action}</span>
                       <span className="text-neutral-400 group-hover:text-brand text-[11px] transition">
@@ -342,7 +342,7 @@ export function AICoPilotBubble({
           </div>
 
           {/* Input Form */}
-          <div className="border-t border-neutral-200/80 bg-white p-3">
+          <div className="border-t border-neutral-200/80 bg-surface p-3">
             <form
               onSubmit={(e) => {
                 e.preventDefault();
@@ -361,13 +361,13 @@ export function AICoPilotBubble({
                     : "Ask Career Co-Pilot anything..."
                 }
                 disabled={loading}
-                className="flex-1 rounded-full border border-neutral-200 bg-neutral-50 px-4 py-2 text-[13px] text-neutral-900 placeholder-neutral-400 focus:border-brand focus:bg-white focus:outline-none transition shadow-2xs"
+                className="flex-1 rounded-full border border-neutral-200/80 bg-neutral-100 px-4 py-2 text-[13px] text-neutral-900 placeholder-neutral-400 focus:border-brand focus:bg-surface focus:outline-none transition shadow-2xs"
               />
               <button
                 type="submit"
                 disabled={!input.trim() || loading}
                 aria-label="Send message"
-                className="flex h-9 w-9 items-center justify-center rounded-full bg-neutral-900 text-white disabled:opacity-30 hover:bg-neutral-800 transition shrink-0 shadow-xs"
+                className="flex h-9 w-9 items-center justify-center rounded-full bg-brand text-brand-fg disabled:opacity-30 hover:bg-brand-hover transition shrink-0 shadow-xs"
               >
                 <Icon icon={SendIcon} size={15} />
               </button>
@@ -397,7 +397,7 @@ function FormattedMarkdown({ text }: { text: string }) {
           return (
             <h4
               key={pIdx}
-              className="text-[13.5px] font-bold text-neutral-900 mt-1 mb-0.5 border-b border-neutral-100 pb-1"
+              className="text-[13.5px] font-bold text-neutral-900 mt-1 mb-0.5 border-b border-neutral-200/60 pb-1"
             >
               {renderInlineSpans(trimmed.replace(/^###\s+/, ""))}
             </h4>
@@ -434,7 +434,7 @@ function FormattedMarkdown({ text }: { text: string }) {
                     <span
                       className={`shrink-0 mt-0.5 ${
                         isNumber
-                          ? "flex h-4 w-4 items-center justify-center rounded-full bg-brand/10 text-[10px] font-bold text-brand"
+                          ? "flex h-4 w-4 items-center justify-center rounded-full bg-brand/15 text-[10px] font-bold text-brand"
                           : "text-brand font-bold"
                       }`}
                     >
@@ -485,7 +485,7 @@ function renderInlineSpans(text: string): ReactNode {
       return (
         <code
           key={i}
-          className="rounded bg-neutral-100 px-1 py-0.5 text-[11.5px] font-mono text-neutral-800 border border-neutral-200"
+          className="rounded bg-neutral-200/50 px-1 py-0.5 text-[11.5px] font-mono text-neutral-900 border border-neutral-300/60"
         >
           {token.slice(1, -1)}
         </code>
