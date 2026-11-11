@@ -8,6 +8,7 @@ import { ThemeSwitch } from "@/components/dashboard/theme-switch";
 
 import { NotificationBell } from "@/components/notifications/notification-bell";
 import { AICoPilotBubble } from "@/components/ai/ai-copilot-bubble";
+import { candidateProfileFromMeta } from "@/lib/profile";
 
 export default async function DashboardLayout({
   children,
@@ -42,6 +43,8 @@ export default async function DashboardLayout({
     { href: "/dashboard/settings", label: "Settings" },
     ...(isAdmin ? [{ href: "/admin", label: "Admin" }] : []),
   ];
+
+  const profile = candidateProfileFromMeta(user.user_metadata);
 
   return (
     <div className="app-theme flex min-h-screen flex-col bg-surface text-neutral-900">
@@ -80,12 +83,11 @@ export default async function DashboardLayout({
 
       <main className="flex-1">{children}</main>
       <AICoPilotBubble
-        candidateTitle={String(user.user_metadata?.title || "")}
-        candidateSkills={
-          Array.isArray(user.user_metadata?.skills)
-            ? user.user_metadata.skills
-            : []
-        }
+        candidateName={name}
+        candidateTitle={profile.title}
+        candidateBio={profile.bio}
+        candidateSkills={profile.skills}
+        hasResume={Boolean(profile.resumeUrl)}
       />
     </div>
   );

@@ -437,106 +437,217 @@ export type ArrangeCVParams = {
   targetNiche?: string;
 };
 
+export type CoreCompetencyItem = {
+  pillar: string;
+  scope: string;
+};
+
 export type StructuredExperienceItem = {
   role: string;
   company?: string;
   period?: string;
+  context?: string;
   highlights: string[];
+};
+
+export type EducationItem = {
+  degree: string;
+  institution: string;
+  year?: string;
+  details?: string;
+};
+
+export type TechnicalWorkItem = {
+  title: string;
+  description: string;
+};
+
+export type AdditionalInfoItem = {
+  locationAndRelocation?: string;
+  languages?: string[];
+  workArrangement?: string;
+  referencesNote?: string;
 };
 
 export type ArrangedCVResult = {
   targetNiche: string;
   suggestedTitle: string;
+  headlinePillars?: string[];
   executiveSummary: string;
+  competencies?: CoreCompetencyItem[];
   skillsByCategory: Record<string, string[]>;
   recommendedSkills: string[];
   structuredExperience: StructuredExperienceItem[];
+  education?: EducationItem[];
+  selectedWork?: TechnicalWorkItem[];
+  additionalInfo?: AdditionalInfoItem;
   nicheStrengths: string[];
   atsKeywords: string[];
   formattedMarkdown: string;
 };
 
 export async function arrangeAndOptimizeCV(params: ArrangeCVParams): Promise<ArrangedCVResult> {
-  const fallbackTitle = params.currentTitle?.trim() || "Full-Stack Software Specialist";
-  const prompt = `You are an elite executive CV strategist and remote career architect.
-Analyze the user's background and arrange their CV into a clean, modern, high-impact structure tailored to their niche.
+  const fallbackTitle = params.currentTitle?.trim() || "ICT Officer · End-User Support · Digital Records & Asset Control";
+  const prompt = `You are an elite executive CV strategist, senior technical recruiter, and career architect.
+Analyze the user's background and produce an executive, fine-tuned, high-impact CV structured strictly in the following professional standard:
 
-INPUT:
-Target Niche / Focus hint: "${params.targetNiche || "Software & Technology"}"
+STANDARD BENCHMARK STRUCTURE:
+1. HEADLINE: A multi-pillar headline: Primary Title · Core Focus 1 · Core Focus 2 (e.g. "IT / ICT Officer · End-User Support · Digital Records & Asset Control").
+2. PROFILE (EXECUTIVE SUMMARY): A dense, authoritative 4-6 sentence narrative stating candidate background, operating contexts (ministries, NGOs, tech firms), dual technical & operational discipline (e.g. standard operating procedures, data protection, compliance), tangible systems or tools built/deployed (with metrics, e.g. "offline staff-directory tool covering 400+ officers"), and clear target value proposition.
+3. CORE COMPETENCIES: 5-8 bulleted competency pillars, formatted as: "Pillar Name — detailed scope, software/tools, scale (e.g. 60+ users), protocols, and concrete routine responsibilities".
+4. PROFESSIONAL EXPERIENCE:
+   - For each role: Role Title, Company/Ministry/Organization, Location, Date range.
+   - Optional contextual statement (e.g. "Contract staff. Followed the Principal from FMWA to FMYD.")
+   - 3-6 high-impact action bullets with active verbs, system/software names, protocols, and quantifiable outcomes.
+5. EDUCATION & CERTIFICATIONS: Degrees, professional certificates, training academies, and capstone projects.
+6. SELECTED TECHNICAL WORK / PROJECTS (if software, internal tools, or key deliverables exist): Title — stack, architecture, and live operational impact.
+7. ADDITIONAL INFORMATION: Languages, location/remote availability, work arrangement clarity, and reference notice.
+
+INPUT DATA:
+Target Niche / Focus hint: "${params.targetNiche || "Information Technology & Operations"}"
 Current Title: "${params.currentTitle || ""}"
 Current Summary / Bio: "${params.currentBio || ""}"
 Current Skills: "${(params.skills || []).join(", ")}"
 Raw CV Content / Notes:
 ${params.rawCVText || "Extract and arrange standard roles and skills based on the title and bio."}
 
-INSTRUCTIONS:
-1. Identify the candidate's exact high-converting niche (e.g. "Full-Stack Web Architect", "B2B SaaS Growth Lead", "Mobile iOS Specialist").
-2. Rewrite the summary into a compelling 3-4 sentence Executive Summary optimized for remote recruiters.
-3. Categorize their skills into 3-4 logical buckets (e.g. "Core Languages", "Frameworks & Architecture", "DevOps & Tools", "Leadership & Async").
-4. Rewrite key experience highlights using high-impact CAR/STAR action bullets (Action verb + Context + Quantifiable outcome).
-5. Extract top ATS keywords to include.
-6. Provide a complete, beautifully structured Markdown representation of the CV ready to export.
-
-Respond ONLY with a valid JSON object:
+Respond ONLY with a strictly valid JSON object matching this schema:
 {
-  "targetNiche": "2-4 word niche name",
-  "suggestedTitle": "Crisp professional title",
-  "executiveSummary": "Punchy 3-4 sentence professional summary",
+  "targetNiche": "2-4 word primary niche name",
+  "suggestedTitle": "Multi-pillar headline (e.g. IT / ICT Officer · End-User Support · Digital Records & Asset Control)",
+  "headlinePillars": ["Pillar 1", "Pillar 2", "Pillar 3"],
+  "executiveSummary": "Dense, authoritative 4-6 sentence narrative profile",
+  "competencies": [
+    {
+      "pillar": "Pillar Name (e.g. End-user support)",
+      "scope": "software installation, email and account setup, password resets, first-line troubleshooting for 60+ users"
+    }
+  ],
   "skillsByCategory": {
     "Category Name": ["Skill 1", "Skill 2"]
   },
-  "recommendedSkills": ["Flat array of 8-12 top skills for profile"],
+  "recommendedSkills": ["Flat array of 8-15 core skills for candidate profile"],
   "structuredExperience": [
     {
       "role": "Role Title",
-      "company": "Company or Project Name",
-      "period": "e.g. 2023 - Present",
+      "company": "Organization / Ministry — Location",
+      "period": "e.g. June 2025 – Present",
+      "context": "Brief context or engagement type (optional)",
       "highlights": [
-        "Built and scaled...",
-        "Spearheaded..."
+        "Action verb + concrete responsibility + quantifiable result",
+        "Action verb + tools/protocols deployed + organizational impact"
       ]
     }
   ],
-  "nicheStrengths": ["Key positioning strength 1", "Key positioning strength 2"],
+  "education": [
+    {
+      "degree": "Degree or Certificate title",
+      "institution": "University / Academy, Location",
+      "year": "e.g. 2025",
+      "details": "Capstone project, honors, or key coursework (optional)"
+    }
+  ],
+  "selectedWork": [
+    {
+      "title": "Tool or Project Name",
+      "description": "Tech stack, purpose, and production use summary"
+    }
+  ],
+  "additionalInfo": {
+    "locationAndRelocation": "e.g. Resident in Abuja, FCT, Nigeria",
+    "languages": ["English", "Hausa"],
+    "workArrangement": "e.g. Available part-time or full-time with remote support capability",
+    "referencesNote": "References available on request"
+  },
+  "nicheStrengths": ["Positioning strength 1", "Positioning strength 2"],
   "atsKeywords": ["Keyword 1", "Keyword 2", "Keyword 3"],
-  "formattedMarkdown": "# Full Name / Title\\n\\n## Executive Summary... (Full markdown string)"
+  "formattedMarkdown": "# Full Name\\n**Headline**... (Full formatted markdown CV matching benchmark standard)"
 }`;
 
   return askAIJson<ArrangedCVResult>({
-    systemPrompt: "You are a world-class CV arranger and remote hiring expert. Return strictly valid JSON.",
+    systemPrompt: "You are a world-class executive CV strategist and senior recruiter. Return strictly valid JSON following the benchmark structure.",
     userPrompt: prompt,
-    temperature: 0.5,
+    temperature: 0.4,
     fallback: () => ({
-      targetNiche: params.targetNiche?.trim() || "Modern Web & Software Engineering",
+      targetNiche: params.targetNiche?.trim() || "IT & Technical Operations",
       suggestedTitle: fallbackTitle,
+      headlinePillars: ["IT / ICT Officer", "End-User Support", "Digital Records & Asset Control"],
       executiveSummary: params.currentBio?.trim()
         ? params.currentBio.trim()
-        : `Experienced ${fallbackTitle} specializing in high-performance web applications and remote async delivery. Proven track record of taking complex features from concept to production with modern architectures and clean code.`,
+        : `Experienced ICT and technical operations officer with a strong foundation in end-user support, digital archiving, and asset control across structured public-sector and humanitarian environments. Combines day-to-day hardware/software troubleshooting, productivity suites, and account provisioning with rigorous operational discipline: data protection compliance, need-to-know access control, and systematic reporting to leadership. Builds reliable internal digital tools that eliminate paper-based bottlenecks and streamline daily organizational workflows.`,
+      competencies: [
+        {
+          pillar: "End-user support",
+          scope: "Software installation (Microsoft Office, antivirus, line-of-business tools), email and account provisioning, password resets, and first-line hardware troubleshooting.",
+        },
+        {
+          pillar: "Cloud documents & records",
+          scope: "Shared document libraries, cloud file synchronization, backup routines, digital archiving, folder-structure standards, and user guidance.",
+        },
+        {
+          pillar: "IT assets & inventory",
+          scope: "Device issuance logs, asset tagging, specification of replacements, coordination of laptop and printer maintenance, and consumable supplies.",
+        },
+        {
+          pillar: "Connectivity & networking",
+          scope: "ISP liaison and service-quality follow-up, router and network troubleshooting, keeping distributed teams reachable on official channels.",
+        },
+        {
+          pillar: "Data protection & governance",
+          scope: "Access control, license accountability, and staff cyber-hygiene briefings aligned with data protection standards and confidentiality protocols.",
+        },
+        {
+          pillar: "Reporting & handovers",
+          scope: "Incident logs, weekly and monthly activity notes for supervisors, controlled credential registers, and formal written handover documentation.",
+        },
+      ],
       skillsByCategory: {
-        "Core Technologies": ["TypeScript", "JavaScript", "HTML5", "CSS3"],
-        "Frameworks & Libraries": ["React", "Next.js", "Node.js", "Tailwind CSS"],
-        "Tools & Cloud": ["Git", "GitHub", "Supabase", "REST APIs", "Docker"],
-        "Practices": ["Async Collaboration", "Code Reviews", "Performance Tuning"],
+        "Technical Support": ["Hardware Diagnostics", "OS Deployment", "Printer Configuration", "Network Troubleshooting"],
+        "Cloud & Administration": ["Google Workspace", "Microsoft 365", "SharePoint", "User Provisioning"],
+        "Data & Governance": ["Data Protection (NDPA)", "Access Control", "Asset Management", "Incident Reporting"],
+        "Development & Tools": ["Internal Tooling", "Git", "API Integrations", "Process Automation"],
       },
-      recommendedSkills: Array.from(new Set([...(params.skills || []), "TypeScript", "React", "Next.js", "Node.js", "Git"])),
+      recommendedSkills: Array.from(new Set([...(params.skills || []), "End-User Support", "Asset Management", "Cloud Documents", "Troubleshooting", "Data Protection", "Network Administration"])),
       structuredExperience: [
         {
-          role: fallbackTitle,
-          company: "Key Technical Projects & Roles",
-          period: "Recent",
+          role: fallbackTitle.split("·")[0].trim() || "ICT / Operations Support",
+          company: "Executive Office & Operations — Abuja",
+          period: "2024 – Present",
+          context: "Contract technical operations support.",
           highlights: [
-            "Designed and delivered full-stack web features serving global users with high reliability.",
-            "Architected performant frontend interfaces and scalable backend API endpoints.",
-            "Collaborated across distributed teams using modern asynchronous workflows and CI/CD.",
+            "Install, configure, and maintain productivity software and operational systems across workstations, resolving daily user tickets with high satisfaction.",
+            "Designed and deployed lightweight internal tools for staff directories and asset tracking, cutting repeated registry inquiries by over 50%.",
+            "Maintain hardware inventory records, track device issuance, coordinate vendor repairs, and enforce scheduled backup protocols.",
+            "Briefed operational personnel on secure computing practices and confidential data handling in compliance with regulatory standards.",
           ],
         },
       ],
-      nicheStrengths: [
-        "Strong full-stack foundations with modern TypeScript ecosystem",
-        "Self-directed remote worker with clear written documentation habits",
+      education: [
+        {
+          degree: "Bachelor of Science",
+          institution: "Accredited University",
+          year: "2024",
+          details: "Focused on information systems, quantitative analysis, and project planning.",
+        },
       ],
-      atsKeywords: ["Full-Stack", "TypeScript", "React", "Next.js", "API Design", "Remote"],
-      formattedMarkdown: `# ${fallbackTitle}\n\n## Executive Summary\nExperienced specialist with expertise in modern web technologies and remote collaboration.\n\n## Key Skills\n• TypeScript, React, Next.js, Node.js, Git, Supabase\n\n## Experience Highlights\n• Delivered scalable web applications with responsive design and fast load times.\n• Built secure API integrations and optimized database interactions.`,
+      selectedWork: [
+        {
+          title: "Internal Staff Directory Tool",
+          description: "Offline-capable directory and asset record application supporting quick personnel verification without physical paperwork.",
+        },
+      ],
+      additionalInfo: {
+        locationAndRelocation: "Abuja, FCT, Nigeria",
+        languages: ["English", "Hausa"],
+        workArrangement: "Available for on-site or hybrid roles with remote support capability",
+        referencesNote: "Professional references available on request",
+      },
+      nicheStrengths: [
+        "Proven ability to bridge hands-on end-user support with institutional data discipline",
+        "Experience building practical internal tools that eliminate paper-based processes",
+      ],
+      atsKeywords: ["ICT Support", "End-User Troubleshooting", "Asset Management", "Data Protection", "SharePoint", "Network Support", "Remote Operations"],
+      formattedMarkdown: `# Candidate Name\n**${fallbackTitle}**\n\n## PROFILE\nExperienced specialist combining technical support with operational discipline.\n\n## CORE COMPETENCIES\n- **End-user support** — Software install, account setup, troubleshooting.\n- **Asset management** — Device issuance, maintenance, inventory control.\n\n## PROFESSIONAL EXPERIENCE\n### ${fallbackTitle}\n*2024 – Present*\n- Supported operational systems and end users with high reliability.\n- Automated paper workflows using internal tools.`,
     }),
   });
 }
@@ -1189,8 +1300,12 @@ export type CoPilotMessage = {
 
 export type CoPilotParams = {
   messages: CoPilotMessage[];
+  candidateName?: string;
   candidateTitle?: string;
+  candidateBio?: string;
   candidateSkills?: string[];
+  hasResume?: boolean;
+  ignoreProfile?: boolean;
 };
 
 export type CoPilotResponse = {
@@ -1199,35 +1314,69 @@ export type CoPilotResponse = {
 };
 
 export async function chatWithCoPilot(params: CoPilotParams): Promise<CoPilotResponse> {
-  const conversation = params.messages.slice(-6).map((m) => `${m.role.toUpperCase()}: ${m.content}`).join("\n\n");
-  const prompt = `You are the JOMP Career Co-Pilot, an intelligent, empathetic, and pragmatic remote career advisor.
-User Title: ${params.candidateTitle || "Professional"}
-User Skills: ${(params.candidateSkills || []).join(", ") || "General tech skills"}
+  const conversation = params.messages
+    .slice(-8)
+    .map((m) => `${m.role.toUpperCase()}: ${m.content}`)
+    .join("\n\n");
+
+  const skillsList = (params.candidateSkills || []).filter(Boolean);
+  const profileAnchor = params.ignoreProfile
+    ? "User explicitly requested general career advice (profile anchoring disabled for this prompt)."
+    : `
+CANDIDATE PROFILE (MANDATORY POINT OF REFERENCE):
+- Candidate Name: ${params.candidateName || "Candidate"}
+- Professional Title: ${params.candidateTitle || "Professional / Job Seeker"}
+- Bio / Experience Summary: ${params.candidateBio || "Not provided"}
+- Listed Skills (${skillsList.length}): ${skillsList.join(", ") || "General tech stack"}
+- CV / Resume Status: ${params.hasResume ? "Uploaded and active on JOMP" : "No CV uploaded yet"}
+`.trim();
+
+  const prompt = `You are the JOMP Career Co-Pilot, an elite career mentor, technical talent strategist, and remote employment advisor for the JOMP platform.
+
+${profileAnchor}
 
 CONVERSATION HISTORY:
 ${conversation}
 
-INSTRUCTIONS:
-Provide a concise, direct, and actionable response (under 160 words). Be encouraging, practical, and tailored to modern remote work.
-Offer 2-3 clickable quick follow-up action prompts the user might want to explore next.
+INSTRUCTIONS & CORE BEHAVIOR:
+1. PROFILE-ANCHORED ADVICE (MANDATORY UNLESS EXPLICITLY STATED OTHERWISE):
+   - You MUST treat the user's specific profile above as your foundational point of reference for EVERY response.
+   - When the user asks ANY question — including suggested questions or general prompts like "What niche matches my skills?", "How do I optimize my profile?", "Salary expectations", "Interview tips", "ATS resume keywords" — NEVER give generic boilerplate!
+   - Directly analyze their exact role (${params.candidateTitle || "their field"}), their specific listed skills (${skillsList.slice(0, 5).join(", ") || "their technologies"}), and their background.
+   - Proactively highlight how their skills combine to give them an edge in remote roles.
+   - If they ask about salary, provide benchmarks tailored to their title and stack.
+   - If they ask about interview prep, give role-specific and technical questions targeting their skills.
+   - Only disregard their profile if the user explicitly says "ignore my profile" or asks about a completely different person or topic.
+
+2. STRUCTURE & DEPTH:
+   - Deliver rich, actionable answers using clean markdown formatting (bullet points, bold text for emphasis, short sections).
+   - Be thorough, specific, and practical (around 160-260 words).
+   - If they lack a CV or skills on their profile, gently suggest adding them to unlock personalized job recommendations.
+
+3. DYNAMIC NEXT STEPS:
+   - Provide 2-3 hyper-relevant follow-up actions or questions tailored specifically to what was just discussed and their career stage.
 
 Respond ONLY with a valid JSON object:
 {
-  "reply": "Your conversational answer in markdown format",
-  "suggestedActions": ["Follow-up question or action 1", "Follow-up 2"]
+  "reply": "Your rich, formatted markdown answer",
+  "suggestedActions": ["Actionable follow-up prompt 1", "Follow-up prompt 2", "Follow-up prompt 3"]
 }`;
 
   return askAIJson<CoPilotResponse>({
-    systemPrompt: "You are JOMP Career Co-Pilot, a helpful remote career advisor that outputs strictly valid JSON.",
+    systemPrompt: "You are JOMP Career Co-Pilot, an elite remote career advisor that anchors answers to the user's profile and returns strictly valid JSON.",
     userPrompt: prompt,
-    temperature: 0.6,
-    fallback: () => ({
-      reply: "I am here to help you navigate your remote career journey! Whether you need advice on structuring your CV, negotiating compensation, preparing for async interviews, or finding your niche, feel free to ask.",
-      suggestedActions: [
-        "How do I optimize my CV for ATS?",
-        "What are typical salary bands for my role?",
-        "Tips for remote async interviews",
-      ],
-    }),
+    temperature: 0.5,
+    fallback: () => {
+      const title = params.candidateTitle || "your field";
+      const topSkills = skillsList.slice(0, 3).join(", ") || "your core skills";
+      return {
+        reply: `### Personalized Guidance for ${title}\n\nBased on your profile specializing in **${topSkills}**, here is strategic advice tailored to your background:\n\n• **Niche Positioning**: Target remote companies looking for high async velocity and clean execution in ${title}.\n• **ATS & Resume Optimization**: Quantify achievements with ${topSkills} (e.g. "built features scaling to 10k users" or "improved response times by 30%").\n• **Interview Focus**: Prepare STAR stories demonstrating how you take ownership from concept to deployment across distributed teams.\n\nWhat specific area would you like to explore next?`,
+        suggestedActions: [
+          `Top ATS keywords for ${title}`,
+          `Estimated salary range for ${topSkills}`,
+          `Practice interview questions for ${title}`,
+        ],
+      };
+    },
   });
 }

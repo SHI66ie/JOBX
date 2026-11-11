@@ -350,13 +350,17 @@ export async function actionChatCoPilot(params: CoPilotParams): Promise<{ data?:
   try {
     await requireAuthUser();
     const cleanMessages = (params.messages || []).slice(-10).map((m) => ({
-      role: m.role === "assistant" ? "assistant" as const : "user" as const,
-      content: String(m.content || "").slice(0, 1200),
+      role: m.role === "assistant" ? ("assistant" as const) : ("user" as const),
+      content: String(m.content || "").slice(0, 1500),
     }));
     const cleanParams: CoPilotParams = {
       messages: cleanMessages,
+      candidateName: params.candidateName?.trim().slice(0, 100),
       candidateTitle: params.candidateTitle?.trim().slice(0, 100),
-      candidateSkills: params.candidateSkills?.slice(0, 20).map((s) => s.trim().slice(0, 50)),
+      candidateBio: params.candidateBio?.slice(0, 2000),
+      candidateSkills: params.candidateSkills?.slice(0, 25).map((s) => s.trim().slice(0, 50)),
+      hasResume: Boolean(params.hasResume),
+      ignoreProfile: Boolean(params.ignoreProfile),
     };
     const data = await chatWithCoPilot(cleanParams);
     return { data };

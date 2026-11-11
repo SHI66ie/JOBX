@@ -2,22 +2,69 @@
  * Standalone PDF generator for AI-crafted CVs with JOMP branding and watermark.
  * Produces standard PDF 1.4 documents using core Type-1 fonts (Helvetica)
  * with zero external binary or npm dependencies.
+ *
+ * Implements high-converting executive structure:
+ * - Headline (multi-pillar)
+ * - Profile / Executive Summary narrative
+ * - Core Competencies (Pillar — scope)
+ * - Professional Experience (Context + STAR bullets)
+ * - Education & Certifications
+ * - Selected Technical Work / Projects
+ * - Additional Information (Availability, Languages, References)
+ * - Embedded JOMP watermark
  */
+
+export type CoreCompetencyItem = {
+  pillar: string;
+  scope: string;
+};
+
+export type StructuredExperienceItem = {
+  role: string;
+  company?: string;
+  period?: string;
+  context?: string;
+  highlights: string[];
+};
+
+export type EducationItem = {
+  degree: string;
+  institution: string;
+  year?: string;
+  details?: string;
+};
+
+export type TechnicalWorkItem = {
+  title: string;
+  description: string;
+};
+
+export type AdditionalInfoItem = {
+  locationAndRelocation?: string;
+  languages?: string[];
+  workArrangement?: string;
+  referencesNote?: string;
+};
 
 export type CVPdfData = {
   fullName: string;
+  headline?: string;
+  location?: string;
+  phone?: string;
   email?: string;
+  links?: string[];
+  languages?: string[];
+  availability?: string;
   targetNiche?: string;
   suggestedTitle: string;
   executiveSummary: string;
-  skillsByCategory: Record<string, string[]>;
+  competencies?: CoreCompetencyItem[];
+  skillsByCategory?: Record<string, string[]>;
   recommendedSkills?: string[];
-  structuredExperience: {
-    role: string;
-    company?: string;
-    period?: string;
-    highlights: string[];
-  }[];
+  structuredExperience: StructuredExperienceItem[];
+  education?: EducationItem[];
+  selectedWork?: TechnicalWorkItem[];
+  additionalInfo?: AdditionalInfoItem;
   atsKeywords?: string[];
   nicheStrengths?: string[];
   watermark?: boolean; // defaults to true
@@ -82,10 +129,10 @@ function wrapText(text: string, fontSize: number, maxWidth: number): string[] {
 export function generateAICVPdf(data: CVPdfData): Uint8Array {
   const pageWidth = 595.28; // A4 width
   const pageHeight = 841.89; // A4 height
-  const marginX = 42;
-  const contentWidth = pageWidth - marginX * 2; // ~511pt
-  const topMargin = 50;
-  const bottomMargin = 52;
+  const marginX = 40;
+  const contentWidth = pageWidth - marginX * 2; // ~515pt
+  const topMargin = 48;
+  const bottomMargin = 50;
 
   type PageStream = {
     commands: string[];
@@ -123,7 +170,7 @@ export function generateAICVPdf(data: CVPdfData): Uint8Array {
         "BT",
         "/F1 7.5 Tf",
         "0.48 0.55 0.65 rg",
-        `${marginX} ${pageHeight - 28} Td`,
+        `${marginX} ${pageHeight - 24} Td`,
         `(${escapePdfText("JOMP AI RESUME BUILDER  •  FREE VERSION (WATERMARKED)")}) Tj`,
         "ET",
       );
@@ -133,28 +180,33 @@ export function generateAICVPdf(data: CVPdfData): Uint8Array {
         "q",
         "0.85 0.88 0.92 RG",
         "0.5 w",
-        `${marginX} 38 m ${pageWidth - marginX} 38 l S`,
+        `${marginX} 36 m ${pageWidth - marginX} 36 l S`,
         "Q",
         "BT",
         "/F1 8 Tf",
         "0.42 0.48 0.58 rg",
-        `${marginX} 24 Td`,
+        `${marginX} 22 Td`,
         `(${escapePdfText("Created with JOMP AI  •  Subscribe to remove watermark  •  https://jomponline.com")}) Tj`,
         "ET",
         "BT",
         "/F1 8 Tf",
         "0.55 0.60 0.68 rg",
-        `${pageWidth - marginX - 50} 24 Td`,
+        `${pageWidth - marginX - 50} 22 Td`,
         `(${escapePdfText(`Page ${pageNum}`)}) Tj`,
         "ET",
       );
     } else {
-      // Footer page number only
+      // Clean footer for subscribed tier
       page.commands.push(
+        "q",
+        "0.90 0.90 0.90 RG",
+        "0.5 w",
+        `${marginX} 36 m ${pageWidth - marginX} 36 l S`,
+        "Q",
         "BT",
         "/F1 8 Tf",
         "0.55 0.60 0.68 rg",
-        `${pageWidth - marginX - 50} 24 Td`,
+        `${pageWidth - marginX - 50} 22 Td`,
         `(${escapePdfText(`Page ${pageNum}`)}) Tj`,
         "ET",
       );
@@ -167,84 +219,111 @@ export function generateAICVPdf(data: CVPdfData): Uint8Array {
     }
   }
 
+  // Helper for section headings matching the benchmark
+  function renderSectionHeading(title: string) {
+    ensureSpace(32);
+    currentPage.commands.push(
+      "BT",
+      "/F2 10.5 Tf",
+      "0.004 0.133 0.31 rg", // JOMP Primary Navy (#01224F)
+      `${marginX} ${currentY} Td`,
+      `(${escapePdfText(title.toUpperCase())}) Tj`,
+      "ET",
+      "q",
+      "0.004 0.133 0.31 RG",
+      "1 w",
+      `${marginX} ${currentY - 3} m ${pageWidth - marginX} ${currentY - 3} l S`,
+      "Q",
+    );
+    currentY -= 16;
+  }
+
   // Initialize first page
   pushPage();
 
   // -------------------------------------------------------------
-  // HEADER SECTION (Page 1)
+  // HEADER SECTION
   // -------------------------------------------------------------
-  const name = data.fullName.trim() || "Professional Candidate";
+  const name = (data.fullName.trim() || "CANDIDATE").toUpperCase();
   currentPage.commands.push(
     "BT",
-    "/F2 22 Tf",
+    "/F2 19 Tf",
     "0.004 0.133 0.31 rg", // JOMP Primary Navy (#01224F)
     `${marginX} ${currentY} Td`,
     `(${escapePdfText(name)}) Tj`,
     "ET",
   );
-  currentY -= 20;
+  currentY -= 18;
 
-  // Title & Target Niche
-  const title = data.suggestedTitle.trim() || "Remote Specialist";
-  const niche = data.targetNiche ? `  •  Target Niche: ${data.targetNiche}` : "";
+  // Multi-pillar Headline (e.g. IT / ICT Officer · End-User Support · Digital Records & Asset Control)
+  const headline = data.headline || data.suggestedTitle.trim() || "Professional Specialist";
   currentPage.commands.push(
     "BT",
     "/F2 11 Tf",
-    "0.15 0.35 0.65 rg", // Accent Blue
+    "0.10 0.25 0.50 rg", // Navy accent
     `${marginX} ${currentY} Td`,
-    `(${escapePdfText(`${title}${niche}`)}) Tj`,
-    "ET",
-  );
-  currentY -= 15;
-
-  // Contact info line
-  const contactParts: string[] = [];
-  if (data.email) contactParts.push(data.email);
-  contactParts.push("JOMP Verified Talent Network");
-  currentPage.commands.push(
-    "BT",
-    "/F1 9 Tf",
-    "0.45 0.50 0.58 rg",
-    `${marginX} ${currentY} Td`,
-    `(${escapePdfText(contactParts.join("   |   "))}) Tj`,
+    `(${escapePdfText(headline)}) Tj`,
     "ET",
   );
   currentY -= 14;
 
-  // Divider line under header
+  // Contact line (Location · Phone · Email)
+  const contactItems: string[] = [];
+  if (data.location) contactItems.push(data.location);
+  if (data.phone) contactItems.push(data.phone);
+  if (data.email) contactItems.push(data.email);
+  if (!contactItems.length) {
+    contactItems.push("JOMP Verified Talent");
+    if (data.email) contactItems.push(data.email);
+  }
+  currentPage.commands.push(
+    "BT",
+    "/F1 8.5 Tf",
+    "0.35 0.40 0.48 rg",
+    `${marginX} ${currentY} Td`,
+    `(${escapePdfText(contactItems.join("  ·  "))}) Tj`,
+    "ET",
+  );
+  currentY -= 12;
+
+  // Secondary meta line (Links / Languages / Availability)
+  const secondaryMeta: string[] = [];
+  if (data.links?.length) secondaryMeta.push(...data.links);
+  if (data.languages?.length) secondaryMeta.push(data.languages.join(" · "));
+  if (data.availability) secondaryMeta.push(data.availability);
+  else if (data.additionalInfo?.workArrangement) secondaryMeta.push(data.additionalInfo.workArrangement);
+
+  if (secondaryMeta.length > 0) {
+    const metaStr = secondaryMeta.join("  ·  ");
+    const wrappedMeta = wrapText(metaStr, 8.5, contentWidth);
+    for (const mLine of wrappedMeta) {
+      currentPage.commands.push(
+        "BT",
+        "/F1 8.5 Tf",
+        "0.40 0.45 0.55 rg",
+        `${marginX} ${currentY} Td`,
+        `(${escapePdfText(mLine)}) Tj`,
+        "ET",
+      );
+      currentY -= 11.5;
+    }
+  }
+
+  // Header separator
   currentPage.commands.push(
     "q",
-    "0.004 0.133 0.31 RG",
+    "0.82 0.86 0.92 RG",
     "1.5 w",
     `${marginX} ${currentY} m ${pageWidth - marginX} ${currentY} l S`,
     "Q",
   );
-  currentY -= 18;
-
-  // Helper for section headings
-  function renderSectionHeading(title: string) {
-    ensureSpace(34);
-    currentPage.commands.push(
-      "BT",
-      "/F2 10.5 Tf",
-      "0.004 0.133 0.31 rg",
-      `${marginX} ${currentY} Td`,
-      `(${escapePdfText(title.toUpperCase())}) Tj`,
-      "ET",
-      "q",
-      "0.82 0.86 0.90 RG",
-      "0.75 w",
-      `${marginX} ${currentY - 4} m ${pageWidth - marginX} ${currentY - 4} l S`,
-      "Q",
-    );
-    currentY -= 18;
-  }
+  currentY -= 16;
 
   // -------------------------------------------------------------
-  // 1. EXECUTIVE SUMMARY
+  // 1. PROFILE (EXECUTIVE SUMMARY)
   // -------------------------------------------------------------
   if (data.executiveSummary) {
-    renderSectionHeading("Executive Summary");
+    renderSectionHeading("Profile");
     const summaryLines = wrapText(data.executiveSummary, 9.5, contentWidth);
     for (const line of summaryLines) {
       ensureSpace(14);
@@ -258,22 +337,24 @@ export function generateAICVPdf(data: CVPdfData): Uint8Array {
       );
       currentY -= 13.5;
     }
-    currentY -= 8;
+    currentY -= 6;
   }
 
   // -------------------------------------------------------------
-  // 2. CORE SKILLS MATRIX
+  // 2. CORE COMPETENCIES (Pillar — Scope format)
   // -------------------------------------------------------------
-  const categories = Object.entries(data.skillsByCategory || {});
-  if (categories.length > 0) {
-    renderSectionHeading("Core Skills & Technical Proficiencies");
-    for (const [category, skills] of categories) {
-      if (!skills?.length) continue;
-      ensureSpace(20);
-      const prefix = `${category}: `;
-      const skillsStr = skills.join(", ");
-      const combined = `${prefix}${skillsStr}`;
-      const wrapped = wrapText(combined, 9, contentWidth - 10);
+  const competencies = data.competencies && data.competencies.length > 0
+    ? data.competencies
+    : Object.entries(data.skillsByCategory || {}).map(([pillar, items]) => ({
+        pillar,
+        scope: items.join(", "),
+      }));
+
+  if (competencies.length > 0) {
+    renderSectionHeading("Core Competencies");
+    for (const comp of competencies) {
+      const fullText = `${comp.pillar} — ${comp.scope}`;
+      const wrapped = wrapText(fullText, 9, contentWidth - 8);
 
       for (let i = 0; i < wrapped.length; i++) {
         ensureSpace(13);
@@ -282,54 +363,77 @@ export function generateAICVPdf(data: CVPdfData): Uint8Array {
           "BT",
           i === 0 ? "/F2 9 Tf" : "/F1 9 Tf",
           "0.15 0.20 0.28 rg",
-          `${marginX + 8} ${currentY} Td`,
+          `${marginX + 6} ${currentY} Td`,
           `(${escapePdfText(line)}) Tj`,
           "ET",
         );
         currentY -= 12.5;
       }
-      currentY -= 2;
+      currentY -= 1.5;
     }
     currentY -= 6;
   }
 
   // -------------------------------------------------------------
-  // 3. PROFESSIONAL EXPERIENCE (STAR BULLETS)
+  // 3. PROFESSIONAL EXPERIENCE
   // -------------------------------------------------------------
   if (data.structuredExperience?.length) {
-    renderSectionHeading("Professional Experience & Key Achievements");
-    for (const item of data.structuredExperience) {
-      ensureSpace(36);
-      // Role & period/company header
-      const roleText = item.role || "Specialist";
-      const meta = [item.company, item.period].filter(Boolean).join("  •  ");
+    renderSectionHeading("Professional Experience");
+    for (const exp of data.structuredExperience) {
+      ensureSpace(38);
 
+      // Role | Company — Location header
+      const roleText = exp.role || "Professional";
+      const companyLocation = exp.company ? ` | ${exp.company}` : "";
+      const headerTitle = `${roleText}${companyLocation}`;
+      const dateText = exp.period || "";
+
+      // Print Title
       currentPage.commands.push(
         "BT",
-        "/F2 10 Tf",
-        "0.08 0.12 0.20 rg",
+        "/F2 9.5 Tf",
+        "0.08 0.12 0.22 rg",
         `${marginX} ${currentY} Td`,
-        `(${escapePdfText(roleText)}) Tj`,
+        `(${escapePdfText(headerTitle)}) Tj`,
         "ET",
       );
 
-      if (meta) {
-        const metaWidth = estimateTextWidth(meta, 9);
-        const metaX = Math.max(marginX + 200, pageWidth - marginX - metaWidth);
+      // Print right-aligned date
+      if (dateText) {
+        const dateWidth = estimateTextWidth(dateText, 9);
+        const dateX = Math.max(marginX + 220, pageWidth - marginX - dateWidth);
         currentPage.commands.push(
           "BT",
-          "/F3 9 Tf",
-          "0.45 0.50 0.58 rg",
-          `${metaX} ${currentY} Td`,
-          `(${escapePdfText(meta)}) Tj`,
+          "/F2 9 Tf",
+          "0.30 0.35 0.45 rg",
+          `${dateX} ${currentY} Td`,
+          `(${escapePdfText(dateText)}) Tj`,
           "ET",
         );
       }
-      currentY -= 14;
+      currentY -= 13;
 
-      // Bullets
-      for (const bullet of item.highlights || []) {
-        const bulletLines = wrapText(bullet, 9, contentWidth - 18);
+      // Optional Context Line (e.g. Contract staff. Followed the Principal...)
+      if (exp.context) {
+        ensureSpace(14);
+        const ctxLines = wrapText(exp.context, 8.5, contentWidth - 10);
+        for (const cLine of ctxLines) {
+          currentPage.commands.push(
+            "BT",
+            "/F3 8.5 Tf",
+            "0.35 0.40 0.50 rg",
+            `${marginX} ${currentY} Td`,
+            `(${escapePdfText(cLine)}) Tj`,
+            "ET",
+          );
+          currentY -= 11.5;
+        }
+        currentY -= 2;
+      }
+
+      // Highlights (STAR bullets)
+      for (const bullet of exp.highlights || []) {
+        const bulletLines = wrapText(bullet, 9, contentWidth - 16);
         for (let bIdx = 0; bIdx < bulletLines.length; bIdx++) {
           ensureSpace(13);
           const bLine = bulletLines[bIdx];
@@ -337,38 +441,127 @@ export function generateAICVPdf(data: CVPdfData): Uint8Array {
           currentPage.commands.push(
             "BT",
             "/F1 9 Tf",
-            "0.22 0.26 0.32 rg",
-            `${marginX + 8} ${currentY} Td`,
+            "0.20 0.24 0.30 rg",
+            `${marginX + 6} ${currentY} Td`,
             `(${escapePdfText(bulletPrefix + bLine)}) Tj`,
             "ET",
           );
           currentY -= 12.5;
         }
-        currentY -= 1.5;
+        currentY -= 1;
       }
       currentY -= 5;
     }
+    currentY -= 4;
   }
 
   // -------------------------------------------------------------
-  // 4. ATS KEYWORDS & NICHE POSITIONING
+  // 4. EDUCATION & CERTIFICATIONS
   // -------------------------------------------------------------
-  if (data.atsKeywords?.length) {
-    renderSectionHeading("Optimized ATS Keywords");
-    ensureSpace(24);
-    const kwText = data.atsKeywords.join("   •   ");
-    const kwLines = wrapText(kwText, 8.5, contentWidth - 10);
-    for (const kwLine of kwLines) {
-      ensureSpace(12);
+  if (data.education?.length) {
+    renderSectionHeading("Education & Certifications");
+    for (const edu of data.education) {
+      ensureSpace(24);
+      const degreeInst = [edu.degree, edu.institution].filter(Boolean).join(" | ");
+      const yr = edu.year || "";
+
       currentPage.commands.push(
         "BT",
-        "/F1 8.5 Tf",
-        "0.35 0.40 0.50 rg",
-        `${marginX + 5} ${currentY} Td`,
-        `(${escapePdfText(kwLine)}) Tj`,
+        "/F2 9.5 Tf",
+        "0.10 0.15 0.24 rg",
+        `${marginX} ${currentY} Td`,
+        `(${escapePdfText(degreeInst)}) Tj`,
         "ET",
       );
-      currentY -= 11.5;
+
+      if (yr) {
+        const yrWidth = estimateTextWidth(yr, 9);
+        const yrX = Math.max(marginX + 200, pageWidth - marginX - yrWidth);
+        currentPage.commands.push(
+          "BT",
+          "/F2 9 Tf",
+          "0.35 0.40 0.50 rg",
+          `${yrX} ${currentY} Td`,
+          `(${escapePdfText(yr)}) Tj`,
+          "ET",
+        );
+      }
+      currentY -= 12.5;
+
+      if (edu.details) {
+        ensureSpace(13);
+        const dLines = wrapText(edu.details, 8.5, contentWidth - 10);
+        for (const dLine of dLines) {
+          currentPage.commands.push(
+            "BT",
+            "/F3 8.5 Tf",
+            "0.35 0.40 0.50 rg",
+            `${marginX + 6} ${currentY} Td`,
+            `(${escapePdfText(dLine)}) Tj`,
+            "ET",
+          );
+          currentY -= 11.5;
+        }
+      }
+      currentY -= 3;
+    }
+    currentY -= 4;
+  }
+
+  // -------------------------------------------------------------
+  // 5. SELECTED TECHNICAL WORK / PROJECTS
+  // -------------------------------------------------------------
+  if (data.selectedWork?.length) {
+    renderSectionHeading("Selected Technical Work & Internal Tools");
+    for (const work of data.selectedWork) {
+      ensureSpace(22);
+      const fullWork = `${work.title} — ${work.description}`;
+      const wLines = wrapText(fullWork, 9, contentWidth - 8);
+
+      for (let i = 0; i < wLines.length; i++) {
+        ensureSpace(13);
+        currentPage.commands.push(
+          "BT",
+          i === 0 ? "/F2 9 Tf" : "/F1 9 Tf",
+          "0.18 0.22 0.28 rg",
+          `${marginX + 6} ${currentY} Td`,
+          `(${escapePdfText(wLines[i])}) Tj`,
+          "ET",
+        );
+        currentY -= 12;
+      }
+      currentY -= 2;
+    }
+    currentY -= 4;
+  }
+
+  // -------------------------------------------------------------
+  // 6. ADDITIONAL INFORMATION
+  // -------------------------------------------------------------
+  const addl = data.additionalInfo;
+  if (addl && (addl.locationAndRelocation || addl.languages?.length || addl.workArrangement || addl.referencesNote)) {
+    renderSectionHeading("Additional Information");
+    const points: string[] = [];
+    if (addl.locationAndRelocation) points.push(addl.locationAndRelocation);
+    if (addl.languages?.length) points.push(`Fluent in ${addl.languages.join(", ")}`);
+    if (addl.workArrangement) points.push(addl.workArrangement);
+    if (addl.referencesNote) points.push(addl.referencesNote);
+
+    for (const pt of points) {
+      ensureSpace(14);
+      const ptLines = wrapText(pt, 8.5, contentWidth - 10);
+      for (const line of ptLines) {
+        currentPage.commands.push(
+          "BT",
+          "/F1 8.5 Tf",
+          "0.30 0.35 0.45 rg",
+          `${marginX + 6} ${currentY} Td`,
+          `(${escapePdfText(`•  ${line}`)}) Tj`,
+          "ET",
+        );
+        currentY -= 11.5;
+      }
+      currentY -= 1.5;
     }
   }
 
@@ -380,25 +573,19 @@ export function generateAICVPdf(data: CVPdfData): Uint8Array {
   // Obj 1: Catalog
   objects.push(`<<\n  /Type /Catalog\n  /Pages 2 0 R\n>>`);
 
-  // Obj 2: Pages container (kids updated below)
-  // Font Objects:
-  // Obj 3: Font F1 (Helvetica)
-  // Obj 4: Font F2 (Helvetica-Bold)
-  // Obj 5: Font F3 (Helvetica-Oblique)
-  // Obj 6: ExtGState GS1 for watermark transparency
-
+  // Font and ExtGState indices
   const fontF1Index = 3;
   const fontF2Index = 4;
   const fontF3Index = 5;
   const gs1Index = 6;
 
-  // Obj 3
+  // Obj 3: Font F1 (Helvetica regular)
   objects.push(`<<\n  /Type /Font\n  /Subtype /Type1\n  /BaseFont /Helvetica\n  /Encoding /WinAnsiEncoding\n>>`);
-  // Obj 4
+  // Obj 4: Font F2 (Helvetica-Bold)
   objects.push(`<<\n  /Type /Font\n  /Subtype /Type1\n  /BaseFont /Helvetica-Bold\n  /Encoding /WinAnsiEncoding\n>>`);
-  // Obj 5
+  // Obj 5: Font F3 (Helvetica-Oblique)
   objects.push(`<<\n  /Type /Font\n  /Subtype /Type1\n  /BaseFont /Helvetica-Oblique\n  /Encoding /WinAnsiEncoding\n>>`);
-  // Obj 6: GS1 for 10% opacity watermark
+  // Obj 6: ExtGState GS1 for 12% opacity watermark
   objects.push(`<<\n  /Type /ExtGState\n  /ca 0.12\n  /CA 0.12\n>>`);
 
   // Next objects will be Page and Contents streams
@@ -424,7 +611,7 @@ export function generateAICVPdf(data: CVPdfData): Uint8Array {
     objects.push(streamObj);
   }
 
-  // Now create Obj 2 with correct Kids
+  // Obj 2 with correct Kids
   const kidsStr = pageObjectIndices.map((idx) => `${idx} 0 R`).join(" ");
   const pagesObj = `<<\n  /Type /Pages\n  /Kids [${kidsStr}]\n  /Count ${pages.length}\n>>`;
   // Insert pagesObj as index 1 (0-based in objects array)

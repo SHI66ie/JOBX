@@ -86,21 +86,38 @@ export function AICVArranger({
     });
   }
 
+  function getPdfPayload(cvResult: ArrangedCVResult) {
+    const competencies = cvResult.competencies?.length
+      ? cvResult.competencies
+      : Object.entries(cvResult.skillsByCategory || {}).map(([pillar, items]) => ({
+          pillar,
+          scope: items.join(", "),
+        }));
+
+    return {
+      fullName,
+      headline: cvResult.suggestedTitle,
+      suggestedTitle: cvResult.suggestedTitle,
+      executiveSummary: cvResult.executiveSummary,
+      targetNiche: cvResult.targetNiche,
+      competencies,
+      skillsByCategory: cvResult.skillsByCategory || {},
+      recommendedSkills: cvResult.recommendedSkills || [],
+      structuredExperience: cvResult.structuredExperience || [],
+      education: cvResult.education || [],
+      selectedWork: cvResult.selectedWork || [],
+      additionalInfo: cvResult.additionalInfo,
+      atsKeywords: cvResult.atsKeywords || [],
+      nicheStrengths: cvResult.nicheStrengths || [],
+      watermark: true,
+    };
+  }
+
   function handleDownloadLocalPdf() {
     if (!result) return;
     try {
-      const bytes = generateAICVPdf({
-        fullName,
-        targetNiche: result.targetNiche,
-        suggestedTitle: result.suggestedTitle,
-        executiveSummary: result.executiveSummary,
-        skillsByCategory: result.skillsByCategory || {},
-        recommendedSkills: result.recommendedSkills,
-        structuredExperience: result.structuredExperience || [],
-        atsKeywords: result.atsKeywords,
-        nicheStrengths: result.nicheStrengths,
-        watermark: true,
-      });
+      const payload = getPdfPayload(result);
+      const bytes = generateAICVPdf(payload);
       const blob = new Blob([bytes as unknown as BlobPart], { type: "application/pdf" });
       const url = URL.createObjectURL(blob);
       const a = document.createElement("a");
@@ -131,20 +148,11 @@ export function AICVArranger({
         skills: mergedSkills,
       };
 
+      const cvData = getPdfPayload(result);
+
       // Generate a watermarked PDF, upload it and save resume_url — all in one server action.
       const saveRes = await actionSaveAICV({
-        cvData: {
-          fullName,
-          targetNiche: result.targetNiche,
-          suggestedTitle: result.suggestedTitle,
-          executiveSummary: result.executiveSummary,
-          skillsByCategory: result.skillsByCategory || {},
-          recommendedSkills: result.recommendedSkills,
-          structuredExperience: result.structuredExperience || [],
-          atsKeywords: result.atsKeywords,
-          nicheStrengths: result.nicheStrengths,
-          watermark: true,
-        },
+        cvData,
         profileUpdate: {
           firstName: initialProfile.firstName,
           lastName: initialProfile.lastName,
@@ -190,6 +198,13 @@ export function AICVArranger({
     setTimeout(() => setCopiedSummary(false), 2000);
   }
 
+  const activeCompetencies = result?.competencies?.length
+    ? result.competencies
+    : Object.entries(result?.skillsByCategory || {}).map(([pillar, items]) => ({
+        pillar,
+        scope: items.join(", "),
+      }));
+
   return (
     <>
       <button
@@ -216,7 +231,7 @@ export function AICVArranger({
                 <div>
                   <h3 className="text-[17px] font-semibold text-neutral-900">AI CV Arranger &amp; Niche Optimizer</h3>
                   <p className="text-[13px] text-neutral-500">
-                    Structure your CV, extract key niche skills, and add a professionally formatted CV to your profile.
+                    Fine-tune your CV into high-impact executive format, extract key competencies, and attach to your profile.
                   </p>
                 </div>
               </div>
@@ -246,7 +261,7 @@ export function AICVArranger({
                       type="text"
                       value={targetNiche}
                       onChange={(e) => setTargetNiche(e.target.value)}
-                      placeholder="e.g. Next.js Full-Stack, B2B SaaS Growth, Mobile React Native"
+                      placeholder="e.g. IT / ICT Officer, Cloud & Asset Control, Full-Stack"
                       className="mt-1 h-9.5 w-full rounded-lg border border-neutral-300 bg-white px-3 text-[13px] text-neutral-900 placeholder:text-neutral-400 focus:border-brand focus:outline-none focus:ring-1 focus:ring-brand"
                     />
                   </div>
@@ -255,7 +270,7 @@ export function AICVArranger({
                     <input
                       type="text"
                       defaultValue={initialProfile.title}
-                      placeholder="e.g. Software Engineer"
+                      placeholder="e.g. ICT Officer · End-User Support"
                       className="mt-1 h-9.5 w-full rounded-lg border border-neutral-300 bg-white px-3 text-[13px] text-neutral-900 placeholder:text-neutral-400 focus:border-brand focus:outline-none focus:ring-1 focus:ring-brand"
                     />
                   </div>
@@ -269,14 +284,14 @@ export function AICVArranger({
                     rows={4}
                     value={rawText}
                     onChange={(e) => setRawText(e.target.value)}
-                    placeholder="Paste your resume draft, past responsibilities, projects, or rough notes here..."
+                    placeholder="Paste your resume draft, past responsibilities, projects, certifications, or rough notes here..."
                     className="mt-1 w-full rounded-lg border border-neutral-300 bg-white p-3 text-[13px] leading-5 text-neutral-900 placeholder:text-neutral-400 focus:border-brand focus:outline-none focus:ring-1 focus:ring-brand"
                   />
                 </div>
 
                 <div className="flex items-center justify-between">
                   <p className="text-[12px] text-neutral-500">
-                    AI will re-structure sections into action-oriented STAR bullets, format a PDF with JOMP watermark, and attach it to your profile.
+                    AI will structure multi-pillar headlines, scoped core competencies, context notes, and STAR bullets.
                   </p>
                   <button
                     type="button"
@@ -287,12 +302,12 @@ export function AICVArranger({
                     {isArranging ? (
                       <>
                         <span className="h-4 w-4 animate-spin rounded-full border-2 border-brand-fg border-t-transparent" />
-                        Arranging CV…
+                        Fine-Tuning CV…
                       </>
                     ) : (
                       <>
                         <Icon icon={SparklesIcon} size={15} />
-                        Arrange &amp; Structure
+                        Fine-Tune &amp; Arrange
                       </>
                     )}
                   </button>
@@ -371,12 +386,12 @@ export function AICVArranger({
                     <div>
                       <span className="font-semibold">JOMP Watermark Applied (Free Tier)</span>
                       <p className="mt-0.5 text-amber-800">
-                        A JOMP watermark is included across AI-generated CVs. Subscriptions to export clean, watermark-free CVs will be available in an upcoming update.
+                        A JOMP watermark is embedded in AI-generated CVs. Subscriptions to export clean, watermark-free CVs will be available in an upcoming update.
                       </p>
                     </div>
                   </div>
 
-                  {/* TAB 1: CV DOCUMENT PREVIEW (WITH LIVE WATERMARK) */}
+                  {/* TAB 1: CV DOCUMENT PREVIEW (FINE-TUNED BENCHMARK LAYOUT) */}
                   {activeTab === "preview" ? (
                     <div className="relative overflow-hidden rounded-xl border border-neutral-200 bg-white p-6 sm:p-8 shadow-sm">
                       {/* Diagonal Watermark Overlay */}
@@ -389,63 +404,75 @@ export function AICVArranger({
                         </span>
                       </div>
 
-                      {/* Header Watermark Badge */}
+                      {/* Header Watermark Banner */}
                       <div className="mb-4 flex items-center justify-between border-b border-neutral-100 pb-2 text-[10.5px] uppercase tracking-wider text-neutral-400">
                         <span>JOMP AI RESUME BUILDER</span>
                         <span className="rounded-full bg-amber-100/70 px-2 py-0.5 font-medium text-amber-800">Free Tier Watermark</span>
                       </div>
 
-                      {/* CV Header */}
+                      {/* 1. Header: Name, Multi-pillar Headline, Contact, Meta */}
                       <div className="relative">
-                        <h2 className="text-[22px] font-bold tracking-tight text-[#01224F]">{fullName}</h2>
-                        <div className="mt-1 flex flex-wrap items-center gap-2 text-[13px] text-neutral-700">
-                          <span className="font-medium text-neutral-900">{result.suggestedTitle}</span>
-                          <span className="text-neutral-300">·</span>
-                          <span className="rounded-md bg-brand/10 px-2 py-0.5 text-[11px] font-semibold text-brand">
-                            {result.targetNiche}
-                          </span>
-                        </div>
-                        <p className="mt-1 text-[11.5px] text-neutral-400">JOMP Verified Talent Network</p>
+                        <h2 className="text-[21px] font-bold tracking-tight text-[#01224F] uppercase">{fullName}</h2>
+                        <p className="mt-1 text-[13.5px] font-bold text-neutral-800">
+                          {result.suggestedTitle}
+                        </p>
+                        <p className="mt-1 text-[12px] text-neutral-600">
+                          {[result.additionalInfo?.locationAndRelocation || "Abuja, FCT, Nigeria", "JOMP Verified Talent"].filter(Boolean).join("  ·  ")}
+                        </p>
+                        {result.additionalInfo?.workArrangement || result.additionalInfo?.languages?.length ? (
+                          <p className="mt-0.5 text-[11.5px] text-neutral-500">
+                            {[
+                              result.additionalInfo?.languages?.length ? `Languages: ${result.additionalInfo.languages.join(", ")}` : null,
+                              result.additionalInfo?.workArrangement,
+                            ].filter(Boolean).join("  ·  ")}
+                          </p>
+                        ) : null}
                       </div>
 
-                      <hr className="my-4 border-t-2 border-[#01224F]" />
+                      <hr className="my-3.5 border-t-2 border-[#01224F]" />
 
-                      {/* Executive Summary */}
+                      {/* 2. PROFILE */}
                       <div className="relative space-y-1.5">
-                        <h4 className="text-[12px] font-bold tracking-wider uppercase text-[#01224F]">Executive Summary</h4>
-                        <p className="text-[13px] leading-relaxed text-neutral-700">{result.executiveSummary}</p>
+                        <h4 className="text-[12px] font-bold tracking-wider uppercase text-[#01224F]">PROFILE</h4>
+                        <p className="text-[12.5px] leading-relaxed text-neutral-800">{result.executiveSummary}</p>
                       </div>
 
-                      <hr className="my-4 border-neutral-200" />
+                      <hr className="my-3.5 border-neutral-200" />
 
-                      {/* Skills Matrix */}
+                      {/* 3. CORE COMPETENCIES (Pillar — Scope) */}
                       <div className="relative space-y-2">
-                        <h4 className="text-[12px] font-bold tracking-wider uppercase text-[#01224F]">Core Skills &amp; Proficiencies</h4>
-                        <div className="space-y-1.5 text-[12.5px]">
-                          {Object.entries(result.skillsByCategory || {}).map(([cat, skills]) => (
-                            <div key={cat} className="flex flex-wrap gap-1 text-neutral-700">
-                              <span className="font-semibold text-neutral-900">{cat}:</span>
-                              <span>{skills.join(", ")}</span>
+                        <h4 className="text-[12px] font-bold tracking-wider uppercase text-[#01224F]">CORE COMPETENCIES</h4>
+                        <div className="space-y-1.5 text-[12px] text-neutral-800">
+                          {activeCompetencies.map((comp, idx) => (
+                            <div key={idx} className="leading-snug">
+                              <span className="font-bold text-neutral-900">{comp.pillar}</span>
+                              {" — "}
+                              <span className="text-neutral-700">{comp.scope}</span>
                             </div>
                           ))}
                         </div>
                       </div>
 
-                      <hr className="my-4 border-neutral-200" />
+                      <hr className="my-3.5 border-neutral-200" />
 
-                      {/* Experience Highlights */}
+                      {/* 4. PROFESSIONAL EXPERIENCE */}
                       {result.structuredExperience?.length ? (
-                        <div className="relative space-y-3">
-                          <h4 className="text-[12px] font-bold tracking-wider uppercase text-[#01224F]">Professional Experience &amp; Key Achievements</h4>
+                        <div className="relative space-y-3.5">
+                          <h4 className="text-[12px] font-bold tracking-wider uppercase text-[#01224F]">PROFESSIONAL EXPERIENCE</h4>
                           {result.structuredExperience.map((exp, idx) => (
                             <div key={idx} className="space-y-1">
-                              <div className="flex flex-wrap items-center justify-between text-[13px]">
-                                <span className="font-semibold text-neutral-900">{exp.role}</span>
-                                <span className="text-[12px] text-neutral-500">{[exp.company, exp.period].filter(Boolean).join(" · ")}</span>
+                              <div className="flex flex-wrap items-center justify-between text-[12.5px]">
+                                <span className="font-bold text-neutral-900">
+                                  {exp.role} {exp.company ? `| ${exp.company}` : ""}
+                                </span>
+                                <span className="text-[12px] font-medium text-neutral-600">{exp.period}</span>
                               </div>
-                              <ul className="space-y-1 pl-4 text-[12.5px] text-neutral-700 list-disc">
+                              {exp.context ? (
+                                <p className="text-[11.5px] italic text-neutral-500">{exp.context}</p>
+                              ) : null}
+                              <ul className="space-y-1 pl-4 text-[12px] text-neutral-700 list-disc">
                                 {exp.highlights.map((h, hIdx) => (
-                                  <li key={hIdx}>{h}</li>
+                                  <li key={hIdx} className="leading-snug">{h}</li>
                                 ))}
                               </ul>
                             </div>
@@ -453,13 +480,70 @@ export function AICVArranger({
                         </div>
                       ) : null}
 
-                      {/* ATS Keywords */}
-                      {result.atsKeywords?.length ? (
+                      {/* 5. EDUCATION & CERTIFICATIONS */}
+                      {result.education?.length ? (
                         <>
-                          <hr className="my-4 border-neutral-200" />
-                          <div className="relative space-y-1.5">
-                            <h4 className="text-[12px] font-bold tracking-wider uppercase text-[#01224F]">ATS Keywords</h4>
-                            <p className="text-[12px] text-neutral-600">{result.atsKeywords.join("  •  ")}</p>
+                          <hr className="my-3.5 border-neutral-200" />
+                          <div className="relative space-y-2">
+                            <h4 className="text-[12px] font-bold tracking-wider uppercase text-[#01224F]">EDUCATION &amp; CERTIFICATIONS</h4>
+                            <div className="space-y-1.5 text-[12px]">
+                              {result.education.map((edu, idx) => (
+                                <div key={idx}>
+                                  <div className="flex flex-wrap items-center justify-between">
+                                    <span className="font-bold text-neutral-900">
+                                      {edu.degree} {edu.institution ? `| ${edu.institution}` : ""}
+                                    </span>
+                                    {edu.year ? <span className="text-[11.5px] text-neutral-500">{edu.year}</span> : null}
+                                  </div>
+                                  {edu.details ? (
+                                    <p className="text-[11.5px] italic text-neutral-600">{edu.details}</p>
+                                  ) : null}
+                                </div>
+                              ))}
+                            </div>
+                          </div>
+                        </>
+                      ) : null}
+
+                      {/* 6. SELECTED TECHNICAL WORK */}
+                      {result.selectedWork?.length ? (
+                        <>
+                          <hr className="my-3.5 border-neutral-200" />
+                          <div className="relative space-y-2">
+                            <h4 className="text-[12px] font-bold tracking-wider uppercase text-[#01224F]">SELECTED TECHNICAL WORK &amp; INTERNAL TOOLS</h4>
+                            <div className="space-y-1.5 text-[12px]">
+                              {result.selectedWork.map((work, idx) => (
+                                <div key={idx} className="leading-snug">
+                                  <span className="font-bold text-neutral-900">{work.title}</span>
+                                  {" — "}
+                                  <span className="text-neutral-700">{work.description}</span>
+                                </div>
+                              ))}
+                            </div>
+                          </div>
+                        </>
+                      ) : null}
+
+                      {/* 7. ADDITIONAL INFORMATION */}
+                      {result.additionalInfo ? (
+                        <>
+                          <hr className="my-3.5 border-neutral-200" />
+                          <div className="relative space-y-1.5 text-[12px]">
+                            <h4 className="text-[12px] font-bold tracking-wider uppercase text-[#01224F]">ADDITIONAL INFORMATION</h4>
+                            <ul className="space-y-1 text-neutral-700">
+                              {result.additionalInfo.locationAndRelocation ? (
+                                <li>• {result.additionalInfo.locationAndRelocation}</li>
+                              ) : null}
+                              {result.additionalInfo.languages?.length ? (
+                                <li>• Fluent in {result.additionalInfo.languages.join(", ")}</li>
+                              ) : null}
+                              {result.additionalInfo.workArrangement ? (
+                                <li>• {result.additionalInfo.workArrangement}</li>
+                              ) : null}
+                              {result.additionalInfo.referencesNote ? (
+                                <li>• {result.additionalInfo.referencesNote}</li>
+                              ) : null}
+                            </ul>
                           </div>
                         </>
                       ) : null}
@@ -471,7 +555,7 @@ export function AICVArranger({
                     </div>
                   ) : activeTab === "overview" ? (
                     <div className="space-y-5">
-                      {/* Niche & Title Card */}
+                      {/* Niche & Headline Card */}
                       <div className="rounded-xl border border-brand/20 bg-brand/[0.03] p-4">
                         <div className="flex flex-wrap items-center justify-between gap-2">
                           <div>
@@ -484,13 +568,13 @@ export function AICVArranger({
 
                         <div className="mt-3 border-t border-brand/15 pt-3">
                           <div className="flex items-center justify-between">
-                            <span className="text-[12px] font-medium text-neutral-500">Executive Remote Summary</span>
+                            <span className="text-[12px] font-medium text-neutral-500">Executive Narrative Profile</span>
                             <button
                               type="button"
                               onClick={handleCopySummary}
                               className="text-[11.5px] font-medium text-brand hover:underline"
                             >
-                              {copiedSummary ? "Copied!" : "Copy Summary"}
+                              {copiedSummary ? "Copied!" : "Copy Profile"}
                             </button>
                           </div>
                           <p className="mt-1 text-[13.5px] leading-relaxed text-neutral-700">
@@ -499,23 +583,14 @@ export function AICVArranger({
                         </div>
                       </div>
 
-                      {/* Categorized Skills */}
+                      {/* Scoped Core Competencies */}
                       <div>
-                        <h4 className="text-[14px] font-semibold text-neutral-900">Categorized Skills Matrix</h4>
-                        <div className="mt-2.5 grid gap-3 sm:grid-cols-2">
-                          {Object.entries(result.skillsByCategory || {}).map(([category, items]) => (
-                            <div key={category} className="rounded-xl border border-neutral-200 bg-white p-3.5 shadow-xs">
-                              <h5 className="text-[12.5px] font-semibold text-neutral-800">{category}</h5>
-                              <div className="mt-2 flex flex-wrap gap-1.5">
-                                {items.map((skill) => (
-                                  <span
-                                    key={skill}
-                                    className="rounded-md bg-neutral-100 px-2 py-0.5 text-[12px] font-medium text-neutral-700"
-                                  >
-                                    {skill}
-                                  </span>
-                                ))}
-                              </div>
+                        <h4 className="text-[14px] font-semibold text-neutral-900">Scoped Core Competencies</h4>
+                        <div className="mt-2.5 space-y-2">
+                          {activeCompetencies.map((comp, idx) => (
+                            <div key={idx} className="rounded-xl border border-neutral-200 bg-white p-3 shadow-xs">
+                              <h5 className="text-[13px] font-bold text-neutral-900">{comp.pillar}</h5>
+                              <p className="mt-1 text-[12.5px] leading-relaxed text-neutral-600">{comp.scope}</p>
                             </div>
                           ))}
                         </div>
@@ -524,7 +599,7 @@ export function AICVArranger({
                       {/* Experience Highlights */}
                       {result.structuredExperience?.length ? (
                         <div>
-                          <h4 className="text-[14px] font-semibold text-neutral-900">Experience &amp; Achievements (STAR Bullets)</h4>
+                          <h4 className="text-[14px] font-semibold text-neutral-900">Experience Highlights (STAR Bullets)</h4>
                           <div className="mt-2.5 space-y-3">
                             {result.structuredExperience.map((item, idx) => (
                               <div key={idx} className="rounded-xl border border-neutral-200 bg-white p-4 shadow-xs">
@@ -532,6 +607,9 @@ export function AICVArranger({
                                   <h5 className="text-[14px] font-semibold text-neutral-900">{item.role}</h5>
                                   <span className="text-[12px] text-neutral-400">{item.period || item.company}</span>
                                 </div>
+                                {item.context ? (
+                                  <p className="mt-1 text-[12px] italic text-neutral-500">{item.context}</p>
+                                ) : null}
                                 <ul className="mt-2 space-y-1.5 text-[13px] text-neutral-600">
                                   {item.highlights.map((bullet, bIdx) => (
                                     <li key={bIdx} className="flex items-start gap-2">
@@ -543,6 +621,39 @@ export function AICVArranger({
                               </div>
                             ))}
                           </div>
+                        </div>
+                      ) : null}
+
+                      {/* Education & Selected Work */}
+                      {result.education?.length || result.selectedWork?.length ? (
+                        <div className="grid gap-3 sm:grid-cols-2">
+                          {result.education?.length ? (
+                            <div className="rounded-xl border border-neutral-200 bg-neutral-50/60 p-3.5">
+                              <h5 className="text-[12.5px] font-semibold text-neutral-800">Education &amp; Certifications</h5>
+                              <div className="mt-2 space-y-2">
+                                {result.education.map((edu, eIdx) => (
+                                  <div key={eIdx} className="text-[12px]">
+                                    <p className="font-semibold text-neutral-900">{edu.degree}</p>
+                                    <p className="text-neutral-500">{edu.institution} {edu.year ? `(${edu.year})` : ""}</p>
+                                  </div>
+                                ))}
+                              </div>
+                            </div>
+                          ) : null}
+
+                          {result.selectedWork?.length ? (
+                            <div className="rounded-xl border border-neutral-200 bg-neutral-50/60 p-3.5">
+                              <h5 className="text-[12.5px] font-semibold text-neutral-800">Technical Work &amp; Tools</h5>
+                              <div className="mt-2 space-y-2">
+                                {result.selectedWork.map((work, wIdx) => (
+                                  <div key={wIdx} className="text-[12px]">
+                                    <p className="font-semibold text-neutral-900">{work.title}</p>
+                                    <p className="text-neutral-600">{work.description}</p>
+                                  </div>
+                                ))}
+                              </div>
+                            </div>
+                          ) : null}
                         </div>
                       ) : null}
 
@@ -605,7 +716,7 @@ export function AICVArranger({
                     ) : null}
                   </div>
                 ) : (
-                  "Ready to arrange your CV and niche focus"
+                  "Ready to fine-tune your CV in benchmark standard"
                 )}
               </div>
 
