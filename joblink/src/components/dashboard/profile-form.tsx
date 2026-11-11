@@ -12,6 +12,7 @@ import { fileNameOf } from "@/components/employer/cv-viewer";
 import { createClient } from "@/utils/supabase/client";
 import { cn } from "@/lib/utils";
 import { AIBioEnhancer } from "@/components/ai/ai-bio-enhancer";
+import { AICVArranger } from "@/components/ai/ai-cv-arranger";
 
 
 const SKILL_SUGGESTIONS = ["Communication", "Customer service", "Microsoft Excel", "Project management", "Sales", "React"];
@@ -162,6 +163,23 @@ export function ProfileForm({ initial, cvLink }: { initial: CandidateProfile; cv
         </SettingsRow>
 
         <SettingsRow id="field-resume" label="CV" hint="PDF or DOCX, up to 5MB.">
+          <div className="mb-4 flex flex-wrap items-center justify-between gap-3 rounded-xl border border-brand/20 bg-brand/[0.04] p-3.5">
+            <div>
+              <p className="text-[13px] font-semibold text-neutral-900">Need help arranging your CV?</p>
+              <p className="text-[12px] text-neutral-500">
+                Let AI structure your experience bullets, extract your niche, and optimize ATS keywords.
+              </p>
+            </div>
+            <AICVArranger
+              initialProfile={draft}
+              onProfileUpdated={(updated) => {
+                setDraft(updated);
+                setSaved(updated);
+                setJustSaved(true);
+              }}
+              label="Arrange CV with AI"
+            />
+          </div>
           {draft.resumeUrl && !replacingCv && !newFile ? (
             <div className="flex items-center gap-3">
               <Icon icon={File01Icon} size={20} className="shrink-0 text-neutral-400" />

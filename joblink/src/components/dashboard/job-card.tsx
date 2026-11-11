@@ -3,7 +3,7 @@
 import { richTextExcerpt } from "@/lib/rich-text";
 import Link from "next/link";
 import { useState } from "react";
-import { Building03Icon, Tick02Icon } from "@hugeicons/core-free-icons";
+import { Building03Icon, Tick02Icon, SparklesIcon } from "@hugeicons/core-free-icons";
 import { Icon } from "@/components/ui/icon";
 import { ApplySheet, type Applicant } from "@/components/dashboard/apply-sheet";
 import { applyJob, isNew, jobTypeLabel, jobTypeOf, postedAgo, type ApplyJob, type JobListing } from "@/lib/jobs";
@@ -65,13 +65,17 @@ export function JobRow({
 
       {matchedSkills.length ? (
         <div className="mt-4 flex flex-wrap items-center gap-1.5">
+          <span className="inline-flex items-center gap-1 rounded-full border border-brand/25 bg-brand/[0.08] px-2.5 py-0.5 text-[11px] font-semibold text-brand">
+            <Icon icon={SparklesIcon} size={12} className="text-brand" />
+            Niche Match ({matchedSkills.length})
+          </span>
           {matchedSkills.map((skill) => (
-            <span key={skill} className="rounded-full bg-neutral-100 px-2.5 py-1 text-[12.5px] font-medium text-neutral-700">
+            <span key={skill} className="rounded-full bg-neutral-100 px-2.5 py-1 text-[12px] font-medium text-neutral-700">
               {skill}
             </span>
           ))}
           <span className="ml-1 text-[12px] text-neutral-400">
-            matches your skills
+            matched on your profile
           </span>
         </div>
       ) : null}

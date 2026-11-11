@@ -6,6 +6,9 @@ import {
   generateInterviewQuestions,
   enhanceCandidateBio,
   generateApplicationPitch,
+  arrangeAndOptimizeCV,
+  matchJobsToNiche,
+  parseNicheSearch,
   type GenerateJobParams,
   type GeneratedJobResult,
   type CandidateScoreParams,
@@ -16,6 +19,11 @@ import {
   type EnhancedBioResult,
   type TailorPitchParams,
   type TailoredPitchResult,
+  type ArrangeCVParams,
+  type ArrangedCVResult,
+  type NicheMatchParams,
+  type JobNicheMatch,
+  type NicheSearchAnalysis,
 } from "@/lib/ai";
 import { createClient } from "@/utils/supabase/server";
 
@@ -129,3 +137,60 @@ export async function actionTailorPitch(params: TailorPitchParams): Promise<{ da
     return { error: getErrorMessage(err, "Failed to generate pitch") };
   }
 }
+
+export async function actionArrangeCV(params: ArrangeCVParams): Promise<{ data?: ArrangedCVResult; error?: string }> {
+  try {
+    await requireAuthUser();
+    const cleanParams: ArrangeCVParams = {
+      rawCVText: params.rawCVText?.slice(0, 10000),
+      currentTitle: params.currentTitle?.trim().slice(0, 100),
+      currentBio: params.currentBio?.trim().slice(0, 3000),
+      skills: params.skills?.slice(0, 40).map((s) => s.trim().slice(0, 50)),
+      targetNiche: params.targetNiche?.trim().slice(0, 100),
+    };
+    const data = await arrangeAndOptimizeCV(cleanParams);
+    return { data };
+  } catch (err: unknown) {
+    console.error("AI Arrange CV Error:", err);
+    return { error: getErrorMessage(err, "Failed to arrange CV") };
+  }
+}
+
+export async function actionMatchJobsToNiche(params: NicheMatchParams): Promise<{ data?: { matches: JobNicheMatch[] }; error?: string }> {
+  try {
+    await requireAuthUser();
+    const cleanParams: NicheMatchParams = {
+      candidateTitle: params.candidateTitle?.trim().slice(0, 100),
+      candidateBio: params.candidateBio?.trim().slice(0, 3000),
+      candidateSkills: params.candidateSkills?.slice(0, 30).map((s) => s.trim().slice(0, 50)),
+      targetNiche: params.targetNiche?.trim().slice(0, 100),
+      jobs: params.jobs.slice(0, 15).map((j) => ({
+        id: j.id,
+        title: j.title.slice(0, 100),
+        company: j.company?.slice(0, 100),
+        salary_range: j.salary_range?.slice(0, 50),
+        type: j.type?.slice(0, 50),
+        description: j.description?.slice(0, 1000),
+        requirements: j.requirements?.slice(0, 1000),
+      })),
+    };
+    const data = await matchJobsToNiche(cleanParams);
+    return { data };
+  } catch (err: unknown) {
+    console.error("AI Match Jobs to Niche Error:", err);
+    return { error: getErrorMessage(err, "Failed to match jobs to niche") };
+  }
+}
+
+export async function actionParseNicheSearch(prompt: string): Promise<{ data?: NicheSearchAnalysis; error?: string }> {
+  try {
+    await requireAuthUser();
+    const cleanPrompt = prompt.trim().slice(0, 300);
+    const data = await parseNicheSearch(cleanPrompt);
+    return { data };
+  } catch (err: unknown) {
+    console.error("AI Parse Niche Search Error:", err);
+    return { error: getErrorMessage(err, "Failed to analyze niche search query") };
+  }
+}
+

@@ -7,6 +7,8 @@ import { JobSearch } from "@/components/dashboard/job-search";
 import { PromoCarousel } from "@/components/dashboard/promo-carousel";
 import { EmptyJobsArt } from "@/components/dashboard/empty-jobs-art";
 import { UserAvatar } from "@/components/ui/user-avatar";
+import { AINicheSearch } from "@/components/dashboard/ai-niche-search";
+import { AICVArranger } from "@/components/ai/ai-cv-arranger";
 import { JOB_TYPES, jobTypeOf, matchSkills, sanitizeSearch, type JobListing } from "@/lib/jobs";
 import { candidateProfileFromMeta, profileStrength } from "@/lib/profile";
 import { signResume } from "@/lib/resumes";
@@ -99,11 +101,18 @@ export default async function JobBoardPage({ searchParams }: { searchParams: Pro
           <PromoCarousel strength={strength} />
         </div>
 
-        <h1 id="feed-heading" className="text-[26px] font-semibold tracking-[-0.03em] text-neutral-900">
-          {firstName ? `Jobs for you, ${firstName}` : "Jobs for you"}
-        </h1>
+        <div className="flex flex-wrap items-center justify-between gap-4">
+          <h1 id="feed-heading" className="text-[26px] font-semibold tracking-[-0.03em] text-neutral-900">
+            {firstName ? `Jobs for you, ${firstName}` : "Jobs for you"}
+          </h1>
+          <AICVArranger initialProfile={profile} label="Arrange CV with AI" />
+        </div>
 
         <div className="mt-5">
+          <AINicheSearch candidateSkills={skills} />
+        </div>
+
+        <div className="mt-4">
           <JobSearch q={q} hidden={hidden} />
         </div>
 
@@ -192,6 +201,19 @@ export default async function JobBoardPage({ searchParams }: { searchParams: Pro
             <Link href="/dashboard/settings" className="flex flex-col items-center justify-center rounded-xl px-2 py-2 text-[13px] font-medium text-brand transition-colors hover:bg-neutral-50">
               Edit profile
             </Link>
+          </div>
+        </div>
+
+        <div className="rounded-2xl border border-brand/20 bg-brand/[0.04] p-4 text-center">
+          <p className="text-[13px] font-semibold text-neutral-900">AI CV Arranger</p>
+          <p className="mt-1 text-[12px] text-neutral-600">
+            Structure your CV into STAR achievements and lock in your niche.
+          </p>
+          <div className="mt-3 flex justify-center">
+            <AICVArranger
+              initialProfile={profile}
+              triggerClassName="inline-flex w-full justify-center items-center gap-1.5 rounded-xl bg-brand px-3 py-2 text-[12.5px] font-medium text-brand-fg hover:bg-brand-hover shadow-xs transition-colors"
+            />
           </div>
         </div>
 
