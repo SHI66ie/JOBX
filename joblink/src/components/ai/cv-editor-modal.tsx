@@ -176,10 +176,10 @@ export function CVEditorModal({
   if (!open) return null;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center overflow-y-auto bg-neutral-900/50 p-4 backdrop-blur-xs">
-      <div className="relative my-8 flex max-h-[92vh] w-full max-w-4xl flex-col rounded-2xl bg-white shadow-2xl ring-1 ring-black/10">
+    <div className="app-theme fixed inset-0 z-50 flex items-center justify-center overflow-y-auto bg-neutral-950/60 p-4 backdrop-blur-xs">
+      <div className="relative my-8 flex max-h-[92vh] w-full max-w-4xl flex-col rounded-2xl border border-neutral-200/80 bg-surface text-neutral-900 shadow-2xl ring-1 ring-black/10">
         {/* Header */}
-        <div className="flex shrink-0 items-center justify-between border-b border-neutral-100 px-6 py-4">
+        <div className="flex shrink-0 items-center justify-between border-b border-neutral-200/80 px-6 py-4">
           <div className="flex items-center gap-3">
             <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-brand/10 text-brand">
               <Icon icon={Edit02Icon} size={22} />
@@ -196,7 +196,7 @@ export function CVEditorModal({
           <button
             type="button"
             onClick={onClose}
-            className="rounded-full p-1.5 text-neutral-400 hover:bg-neutral-100 hover:text-neutral-700"
+            className="rounded-full p-1.5 text-neutral-400 hover:bg-neutral-100 hover:text-neutral-900"
           >
             <Icon icon={Cancel01Icon} size={18} />
           </button>
@@ -218,7 +218,7 @@ export function CVEditorModal({
           )}
 
           {/* Subtabs */}
-          <div className="mb-4 flex flex-wrap items-center justify-between gap-2 border-b border-neutral-200 pb-2">
+          <div className="mb-4 flex flex-wrap items-center justify-between gap-2 border-b border-neutral-200/80 pb-2">
             <div className="flex items-center gap-1.5">
               <button
                 type="button"
@@ -226,7 +226,7 @@ export function CVEditorModal({
                 className={`inline-flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-[13px] font-medium transition-colors ${
                   activeTab === "edit"
                     ? "bg-brand text-brand-fg"
-                    : "text-neutral-600 hover:bg-neutral-100"
+                    : "text-neutral-600 hover:bg-neutral-100 hover:text-neutral-900"
                 }`}
               >
                 <Icon icon={Edit02Icon} size={14} />
@@ -238,7 +238,7 @@ export function CVEditorModal({
                 className={`inline-flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-[13px] font-medium transition-colors ${
                   activeTab === "preview"
                     ? "bg-brand text-brand-fg"
-                    : "text-neutral-600 hover:bg-neutral-100"
+                    : "text-neutral-600 hover:bg-neutral-100 hover:text-neutral-900"
                 }`}
               >
                 <Icon icon={EyeIcon} size={14} />
@@ -249,7 +249,7 @@ export function CVEditorModal({
             <button
               type="button"
               onClick={handleDownload}
-              className="inline-flex items-center gap-1 rounded-md border border-neutral-200 bg-white px-2.5 py-1 text-[12px] font-medium text-neutral-700 hover:bg-neutral-50 shadow-xs"
+              className="inline-flex items-center gap-1 rounded-md border border-neutral-200/80 bg-surface px-2.5 py-1 text-[12px] font-medium text-neutral-700 hover:bg-neutral-100 hover:text-neutral-900 shadow-xs"
             >
               <Icon icon={Download04Icon} size={13} /> Download PDF
             </button>
@@ -268,7 +268,7 @@ export function CVEditorModal({
                 />
               ) : (
                 /* PDF PREVIEW */
-                <div className="relative overflow-hidden rounded-xl border border-neutral-200 bg-white p-6 sm:p-8 shadow-sm">
+                <div className="relative overflow-hidden rounded-xl border border-neutral-200/80 bg-surface p-6 sm:p-8 shadow-sm text-neutral-900">
                   {/* Diagonal Watermark */}
                   <div
                     aria-hidden="true"
@@ -280,7 +280,7 @@ export function CVEditorModal({
                   </div>
 
                   <div className="relative">
-                    <h2 className="text-[21px] font-bold tracking-tight text-[#01224F] uppercase">
+                    <h2 className="text-[21px] font-bold tracking-tight text-brand uppercase">
                       {cvData.fullName}
                     </h2>
                     <p className="mt-1 text-[13.5px] font-bold text-neutral-800">
@@ -291,20 +291,20 @@ export function CVEditorModal({
                     </p>
                   </div>
 
-                  <hr className="my-3.5 border-t-2 border-[#01224F]" />
+                  <hr className="my-3.5 border-t-2 border-brand" />
 
                   {/* Summary */}
                   <div className="relative space-y-1.5">
-                    <h4 className="text-[12px] font-bold tracking-wider uppercase text-[#01224F]">PROFILE</h4>
+                    <h4 className="text-[12px] font-bold tracking-wider uppercase text-brand">PROFILE</h4>
                     <p className="text-[12.5px] leading-relaxed text-neutral-800">{cvData.executiveSummary}</p>
                   </div>
 
-                  <hr className="my-3.5 border-neutral-200" />
+                  <hr className="my-3.5 border-neutral-200/80" />
 
                   {/* Competencies */}
                   {cvData.competencies?.length ? (
                     <div className="relative space-y-2">
-                      <h4 className="text-[12px] font-bold tracking-wider uppercase text-[#01224F]">CORE COMPETENCIES</h4>
+                      <h4 className="text-[12px] font-bold tracking-wider uppercase text-brand">CORE COMPETENCIES</h4>
                       <div className="space-y-1.5 text-[12px] text-neutral-800">
                         {cvData.competencies.map((comp, idx) => (
                           <div key={idx} className="leading-snug">
@@ -320,9 +320,9 @@ export function CVEditorModal({
                   {/* Experience */}
                   {cvData.structuredExperience?.length ? (
                     <>
-                      <hr className="my-3.5 border-neutral-200" />
+                      <hr className="my-3.5 border-neutral-200/80" />
                       <div className="relative space-y-3.5">
-                        <h4 className="text-[12px] font-bold tracking-wider uppercase text-[#01224F]">PROFESSIONAL EXPERIENCE</h4>
+                        <h4 className="text-[12px] font-bold tracking-wider uppercase text-brand">PROFESSIONAL EXPERIENCE</h4>
                         {cvData.structuredExperience.map((exp, idx) => (
                           <div key={idx} className="space-y-1">
                             <div className="flex flex-wrap items-center justify-between text-[12.5px]">
@@ -346,9 +346,9 @@ export function CVEditorModal({
                   {/* Education */}
                   {cvData.education?.length ? (
                     <>
-                      <hr className="my-3.5 border-neutral-200" />
+                      <hr className="my-3.5 border-neutral-200/80" />
                       <div className="relative space-y-2">
-                        <h4 className="text-[12px] font-bold tracking-wider uppercase text-[#01224F]">EDUCATION &amp; CERTIFICATIONS</h4>
+                        <h4 className="text-[12px] font-bold tracking-wider uppercase text-brand">EDUCATION &amp; CERTIFICATIONS</h4>
                         <div className="space-y-1.5 text-[12px]">
                           {cvData.education.map((edu, idx) => (
                             <div key={idx}>
@@ -369,9 +369,9 @@ export function CVEditorModal({
                   {/* Selected Work */}
                   {cvData.selectedWork?.length ? (
                     <>
-                      <hr className="my-3.5 border-neutral-200" />
+                      <hr className="my-3.5 border-neutral-200/80" />
                       <div className="relative space-y-2">
-                        <h4 className="text-[12px] font-bold tracking-wider uppercase text-[#01224F]">SELECTED TECHNICAL WORK</h4>
+                        <h4 className="text-[12px] font-bold tracking-wider uppercase text-brand">SELECTED TECHNICAL WORK</h4>
                         <div className="space-y-1.5 text-[12px]">
                           {cvData.selectedWork.map((work, idx) => (
                             <div key={idx} className="leading-snug">
@@ -386,7 +386,7 @@ export function CVEditorModal({
                   ) : null}
 
                   {/* Footer watermark */}
-                  <div className="mt-6 border-t border-neutral-200 pt-3 text-center text-[11px] text-neutral-500">
+                  <div className="mt-6 border-t border-neutral-200/80 pt-3 text-center text-[11px] text-neutral-500">
                     Created with JOMP • Free Tier Watermarked
                   </div>
                 </div>
@@ -396,11 +396,11 @@ export function CVEditorModal({
         </div>
 
         {/* Footer */}
-        <div className="flex shrink-0 items-center justify-between border-t border-neutral-100 bg-neutral-50/70 px-6 py-3.5">
+        <div className="flex shrink-0 items-center justify-between border-t border-neutral-200/80 bg-neutral-100/50 px-6 py-3.5">
           <button
             type="button"
             onClick={onClose}
-            className="rounded-lg border border-neutral-200 bg-white px-4 py-2 text-[13px] font-medium text-neutral-700 hover:bg-neutral-50"
+            className="rounded-lg border border-neutral-200/80 bg-surface px-4 py-2 text-[13px] font-medium text-neutral-700 hover:bg-neutral-100 hover:text-neutral-900"
           >
             Close
           </button>

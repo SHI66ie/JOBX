@@ -115,7 +115,7 @@ export function AISalaryAdvisor({
   }
 
   return (
-    <div className="overflow-hidden rounded-xl border border-emerald-200/80 bg-white shadow-sm">
+    <div className="overflow-hidden rounded-xl border border-emerald-200/80 bg-surface text-neutral-900 shadow-sm">
       <div className="border-b border-emerald-100 bg-emerald-50/40 px-5 py-3.5 flex items-center justify-between">
         <div className="flex items-center gap-2.5">
           <div className="flex h-7 w-7 items-center justify-center rounded-md bg-emerald-500/15 text-emerald-700">
@@ -145,7 +145,7 @@ export function AISalaryAdvisor({
           {data && (
             <>
               {/* Estimated Range Visualizer */}
-              <div className="rounded-xl bg-neutral-50 p-4 border border-neutral-100">
+              <div className="rounded-xl bg-neutral-100/50 p-4 border border-neutral-200/80">
                 <div className="flex items-center justify-between">
                   <span className="text-[12.5px] font-medium text-neutral-500">
                     Estimated Annual Compensation (USD)
@@ -157,7 +157,7 @@ export function AISalaryAdvisor({
                 </div>
 
                 <div className="mt-3 grid grid-cols-3 gap-2 text-center">
-                  <div className="rounded-lg bg-white p-2.5 border border-neutral-200/60">
+                  <div className="rounded-lg bg-surface p-2.5 border border-neutral-200/60">
                     <div className="text-[11px] text-neutral-400">Entry / Low</div>
                     <div className="mt-0.5 text-[15px] font-bold text-neutral-800">
                       {formatSalary(data.estimatedRange.low, data.estimatedRange.currency)}
@@ -169,7 +169,7 @@ export function AISalaryAdvisor({
                       {formatSalary(data.estimatedRange.mid, data.estimatedRange.currency)}
                     </div>
                   </div>
-                  <div className="rounded-lg bg-white p-2.5 border border-neutral-200/60">
+                  <div className="rounded-lg bg-surface p-2.5 border border-neutral-200/60">
                     <div className="text-[11px] text-neutral-400">Top / High Tier</div>
                     <div className="mt-0.5 text-[15px] font-bold text-neutral-800">
                       {formatSalary(data.estimatedRange.high, data.estimatedRange.currency)}
@@ -184,7 +184,7 @@ export function AISalaryAdvisor({
                     {data.factors.map((f, i) => (
                       <span
                         key={i}
-                        className="rounded-md bg-white px-2 py-0.5 text-[11px] text-neutral-600 border border-neutral-200/60"
+                        className="rounded-md bg-surface px-2 py-0.5 text-[11px] text-neutral-600 border border-neutral-200/60"
                       >
                         {f}
                       </span>
@@ -227,7 +227,7 @@ export function AISalaryAdvisor({
                         type="button"
                         onClick={() => handleCopy(point, i)}
                         title="Copy talking point"
-                        className="absolute right-2.5 top-2.5 rounded p-1 text-neutral-400 hover:bg-white hover:text-neutral-700"
+                        className="absolute right-2.5 top-2.5 rounded p-1 text-neutral-400 hover:bg-neutral-100 hover:text-neutral-700"
                       >
                         <Icon icon={copiedIdx === i ? CheckIcon : Copy01Icon} size={14} />
                       </button>

@@ -48,7 +48,7 @@ function FormatButton({ label, shortcut, icon, active, disabled, run }: ToolItem
         "relative inline-flex size-7.5 shrink-0 items-center justify-center rounded-md border text-xs transition-all duration-150 active:scale-95 disabled:pointer-events-none disabled:opacity-30",
         active
           ? "border-brand/40 bg-brand text-brand-fg shadow-xs font-semibold"
-          : "border-neutral-200 bg-white text-neutral-600 hover:border-neutral-300 hover:bg-neutral-100 hover:text-neutral-900"
+          : "border-neutral-200/80 bg-surface text-neutral-600 hover:border-neutral-300 hover:bg-neutral-100 hover:text-neutral-900"
       )}
     >
       <Icon icon={icon} size={15} strokeWidth={active ? 2.2 : 1.7} />
@@ -57,14 +57,14 @@ function FormatButton({ label, shortcut, icon, active, disabled, run }: ToolItem
 }
 
 function Divider() {
-  return <span aria-hidden className="mx-1 h-4 w-px shrink-0 bg-neutral-200" />;
+  return <span aria-hidden className="mx-1 h-4 w-px shrink-0 bg-neutral-200/80" />;
 }
 
 export function CVRichToolbar({ editor }: { editor: Editor | null }) {
   if (!editor) return null;
 
   return (
-    <div className="flex flex-wrap items-center gap-1 rounded-t-lg border border-b-0 border-neutral-200 bg-neutral-50/90 p-1.5 backdrop-blur-xs">
+    <div className="flex flex-wrap items-center gap-1 rounded-t-lg border border-b-0 border-neutral-200/80 bg-neutral-100/70 p-1.5 backdrop-blur-xs">
       {/* Headings / Paragraph */}
       <FormatButton
         label="Paragraph"
@@ -219,7 +219,7 @@ export function CVRichTextField({
         "aria-label": placeholder || "CV editor",
         "aria-multiline": "true",
         class: cn(
-          "w-full rounded-b-lg border border-neutral-200 bg-white px-3.5 py-2.5 text-xs text-neutral-900 focus:outline-none focus:ring-1 focus:ring-brand leading-relaxed",
+          "w-full rounded-b-lg border border-neutral-200/80 bg-surface px-3.5 py-2.5 text-xs text-neutral-900 focus:outline-none focus:ring-1 focus:ring-brand leading-relaxed",
           minHeight,
           className
         ),

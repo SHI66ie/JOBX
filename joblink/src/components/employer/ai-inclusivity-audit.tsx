@@ -87,7 +87,7 @@ export function AIInclusivityAudit({
           type="button"
           onClick={handleAudit}
           disabled={loading}
-          className="inline-flex h-8 items-center gap-1.5 rounded-full border border-neutral-200/80 bg-white px-3.5 text-[12.5px] font-medium text-neutral-800 shadow-sm transition hover:bg-neutral-50 disabled:opacity-50"
+          className="inline-flex h-8 items-center gap-1.5 rounded-full border border-neutral-200/80 bg-surface px-3.5 text-[12.5px] font-medium text-neutral-800 shadow-sm transition hover:bg-neutral-100 disabled:opacity-50"
         >
           {loading ? (
             <>
@@ -106,8 +106,8 @@ export function AIInclusivityAudit({
   }
 
   return (
-    <div className="overflow-hidden rounded-xl border border-neutral-200 bg-white shadow-sm">
-      <div className="flex items-center justify-between border-b border-neutral-100 bg-neutral-50/60 px-5 py-3.5">
+    <div className="overflow-hidden rounded-xl border border-neutral-200/80 bg-surface text-neutral-900 shadow-sm">
+      <div className="flex items-center justify-between border-b border-neutral-200/80 bg-neutral-100/50 px-5 py-3.5">
         <div className="flex items-center gap-2.5">
           <div className="flex h-7 w-7 items-center justify-center rounded-md bg-indigo-500/10 text-indigo-600">
             <Icon icon={ShieldCheckIcon} size={16} />

@@ -71,9 +71,9 @@ export function AIApplicationPitch({
       </button>
 
       {open ? (
-        <div className="fixed inset-0 z-50 flex items-center justify-center overflow-y-auto bg-neutral-900/40 p-4 backdrop-blur-xs">
-          <div className="w-full max-w-lg rounded-2xl bg-white p-6 shadow-2xl ring-1 ring-black/5">
-            <div className="flex items-start justify-between gap-4 border-b border-neutral-100 pb-3">
+        <div className="app-theme fixed inset-0 z-50 flex items-center justify-center overflow-y-auto bg-neutral-950/60 p-4 backdrop-blur-xs">
+          <div className="w-full max-w-lg rounded-2xl border border-neutral-200/80 bg-surface p-6 text-neutral-900 shadow-2xl">
+            <div className="flex items-start justify-between gap-4 border-b border-neutral-200/80 pb-3">
               <div className="flex items-center gap-2">
                 <div className="flex h-8 w-8 items-center justify-center rounded-xl bg-brand/10 text-brand">
                   <Icon icon={SparklesIcon} size={18} />
@@ -86,7 +86,7 @@ export function AIApplicationPitch({
               <button
                 type="button"
                 onClick={() => setOpen(false)}
-                className="rounded-full p-1 text-neutral-400 hover:bg-neutral-100 hover:text-neutral-700"
+                className="rounded-full p-1 text-neutral-400 hover:bg-neutral-100 hover:text-neutral-900"
               >
                 <Icon icon={Cancel01Icon} size={18} />
               </button>

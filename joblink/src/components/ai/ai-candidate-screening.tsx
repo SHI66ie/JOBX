@@ -119,7 +119,7 @@ export function AICandidateScreening({
         <div className="mt-4 space-y-4 text-[13px]">
           {/* Score & recommendation badge */}
           <div className="flex flex-wrap items-center gap-3">
-            <div className="flex items-center gap-2 rounded-xl bg-white px-3 py-1.5 shadow-xs ring-1 ring-neutral-200">
+            <div className="flex items-center gap-2 rounded-xl bg-surface px-3 py-1.5 shadow-xs ring-1 ring-neutral-200/80">
               <span className="text-[12px] font-medium text-neutral-500">Match Score:</span>
               <span
                 className={cn(
@@ -140,7 +140,7 @@ export function AICandidateScreening({
             </div>
           </div>
 
-          <p className="rounded-xl bg-white/80 p-3 text-neutral-700 ring-1 ring-neutral-100">
+          <p className="rounded-xl bg-neutral-100/50 p-3 text-neutral-700 ring-1 ring-neutral-200/80">
             {screening.summary}
           </p>
 
@@ -183,7 +183,7 @@ export function AICandidateScreening({
                 type="button"
                 disabled={isGeneratingQuestions}
                 onClick={handleQuestions}
-                className="inline-flex h-8 items-center gap-1.5 rounded-full bg-white px-3.5 text-[12.5px] font-medium text-neutral-800 shadow-xs ring-1 ring-neutral-200 hover:bg-neutral-50"
+                className="inline-flex h-8 items-center gap-1.5 rounded-full bg-surface px-3.5 text-[12.5px] font-medium text-neutral-800 shadow-xs ring-1 ring-neutral-200/80 hover:bg-neutral-100"
               >
                 {isGeneratingQuestions ? (
                   <>
@@ -205,7 +205,7 @@ export function AICandidateScreening({
                 </h5>
                 <ul className="space-y-2.5">
                   {questions.map((q, idx) => (
-                    <li key={idx} className="rounded-xl bg-white p-3 shadow-xs ring-1 ring-neutral-200/80">
+                    <li key={idx} className="rounded-xl bg-surface p-3 shadow-xs ring-1 ring-neutral-200/80">
                       <div className="flex items-center gap-2">
                         <span className="rounded-full bg-brand/10 px-2 py-0.5 text-[11px] font-medium text-brand">
                           {q.category}

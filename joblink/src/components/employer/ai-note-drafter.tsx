@@ -76,17 +76,17 @@ export function AINoteDrafter({
           setIsOpen(true);
           if (!result) handleGenerate();
         }}
-        className="inline-flex h-8 items-center gap-1.5 rounded-full border border-neutral-200/80 bg-white px-3 text-[12.5px] font-medium text-neutral-700 shadow-sm transition hover:bg-neutral-50 hover:text-neutral-900"
+        className="inline-flex h-8 items-center gap-1.5 rounded-full border border-neutral-200/80 bg-surface px-3 text-[12.5px] font-medium text-neutral-700 shadow-sm transition hover:bg-neutral-100 hover:text-neutral-900"
       >
         <Icon icon={AiMail01Icon} size={14} className="text-brand" />
         <span>AI Draft Note</span>
       </button>
 
       {isOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4 backdrop-blur-sm animate-in fade-in duration-150">
-          <div className="relative w-full max-w-lg rounded-2xl bg-white p-6 shadow-xl border border-neutral-100 max-h-[90vh] flex flex-col">
+        <div className="app-theme fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4 backdrop-blur-sm animate-in fade-in duration-150">
+          <div className="relative w-full max-w-lg rounded-2xl bg-surface p-6 shadow-xl border border-neutral-200/80 text-neutral-900 max-h-[90vh] flex flex-col">
             {/* Header */}
-            <div className="flex items-start justify-between border-b border-neutral-100 pb-4">
+            <div className="flex items-start justify-between border-b border-neutral-200/80 pb-4">
               <div className="flex items-center gap-2.5">
                 <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-brand/10 text-brand">
                   <Icon icon={AiMail01Icon} size={18} />
@@ -103,7 +103,7 @@ export function AINoteDrafter({
               <button
                 type="button"
                 onClick={() => setIsOpen(false)}
-                className="rounded-lg p-1.5 text-neutral-400 hover:bg-neutral-100 hover:text-neutral-700"
+                className="rounded-lg p-1.5 text-neutral-400 hover:bg-neutral-100 hover:text-neutral-900"
               >
                 <Icon icon={Cancel01Icon} size={16} />
               </button>
@@ -121,7 +121,7 @@ export function AINoteDrafter({
                     }}
                     className={`flex items-center gap-1.5 rounded-md px-3 py-1 transition ${
                       noteType === "offer"
-                        ? "bg-white text-emerald-700 shadow-sm"
+                        ? "bg-surface text-emerald-700 shadow-sm"
                         : "text-neutral-600 hover:text-neutral-900"
                     }`}
                   >
@@ -136,7 +136,7 @@ export function AINoteDrafter({
                     }}
                     className={`flex items-center gap-1.5 rounded-md px-3 py-1 transition ${
                       noteType === "rejection"
-                        ? "bg-white text-amber-700 shadow-sm"
+                        ? "bg-surface text-amber-700 shadow-sm"
                         : "text-neutral-600 hover:text-neutral-900"
                     }`}
                   >
@@ -184,7 +184,7 @@ export function AINoteDrafter({
                     <label className="text-[11px] font-semibold uppercase tracking-wider text-neutral-400">
                       Subject
                     </label>
-                    <div className="mt-1 rounded-lg border border-neutral-200 bg-neutral-50 p-2.5 text-[13px] font-medium text-neutral-900">
+                    <div className="mt-1 rounded-lg border border-neutral-200/80 bg-neutral-100/50 p-2.5 text-[13px] font-medium text-neutral-900">
                       {result.subject}
                     </div>
                   </div>
@@ -193,7 +193,7 @@ export function AINoteDrafter({
                     <label className="text-[11px] font-semibold uppercase tracking-wider text-neutral-400">
                       Body
                     </label>
-                    <div className="mt-1 whitespace-pre-wrap rounded-lg border border-neutral-200 bg-neutral-50 p-3 text-[13px] leading-relaxed text-neutral-800 font-sans">
+                    <div className="mt-1 whitespace-pre-wrap rounded-lg border border-neutral-200/80 bg-neutral-100/50 p-3 text-[13px] leading-relaxed text-neutral-900 font-sans">
                       {result.body}
                     </div>
                   </div>

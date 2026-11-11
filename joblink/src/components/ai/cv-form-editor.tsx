@@ -170,9 +170,9 @@ export function CVFormEditor({
   ] as const;
 
   return (
-    <div className="flex flex-col gap-4 rounded-xl border border-neutral-200 bg-white p-4 sm:p-5 shadow-xs">
+    <div className="flex flex-col gap-4 rounded-xl border border-neutral-200/80 bg-surface text-neutral-900 p-4 sm:p-5 shadow-xs">
       {/* Top Section Nav Tabs */}
-      <div className="flex flex-wrap items-center gap-1.5 border-b border-neutral-100 pb-3">
+      <div className="flex flex-wrap items-center gap-1.5 border-b border-neutral-200/80 pb-3">
         {navItems.map((item) => (
           <button
             key={item.id}
@@ -200,7 +200,7 @@ export function CVFormEditor({
               type="text"
               value={data.fullName}
               onChange={(e) => updateField("fullName", e.target.value)}
-              className="w-full rounded-lg border border-neutral-300 px-3 py-2 text-sm text-neutral-900 focus:border-brand focus:outline-none focus:ring-1 focus:ring-brand"
+              className="w-full rounded-lg border border-neutral-200/80 px-3 py-2 text-sm text-neutral-900 focus:border-brand focus:outline-none focus:ring-1 focus:ring-brand focus:ring-1 focus:ring-brand"
             />
           </div>
 
@@ -213,7 +213,7 @@ export function CVFormEditor({
               value={data.suggestedTitle}
               onChange={(e) => updateField("suggestedTitle", e.target.value)}
               placeholder="e.g. Senior Full-Stack Engineer | Cloud Architect | AI Integrations"
-              className="w-full rounded-lg border border-neutral-300 px-3 py-2 text-sm text-neutral-900 focus:border-brand focus:outline-none focus:ring-1 focus:ring-brand"
+              className="w-full rounded-lg border border-neutral-200/80 px-3 py-2 text-sm text-neutral-900 focus:border-brand focus:outline-none focus:ring-1 focus:ring-brand focus:ring-1 focus:ring-brand"
             />
           </div>
 
@@ -233,7 +233,7 @@ export function CVFormEditor({
                   });
                 }}
                 placeholder="e.g. Abuja, FCT, Nigeria (Open to Relocation & Remote)"
-                className="w-full rounded-lg border border-neutral-300 px-3 py-2 text-sm text-neutral-900 focus:border-brand focus:outline-none focus:ring-1 focus:ring-brand"
+                className="w-full rounded-lg border border-neutral-200/80 px-3 py-2 text-sm text-neutral-900 focus:border-brand focus:outline-none focus:ring-1 focus:ring-brand focus:ring-1 focus:ring-brand"
               />
             </div>
 
@@ -246,7 +246,7 @@ export function CVFormEditor({
                 value={data.targetNiche || ""}
                 onChange={(e) => updateField("targetNiche", e.target.value)}
                 placeholder="e.g. Fintech, High-scale distributed systems"
-                className="w-full rounded-lg border border-neutral-300 px-3 py-2 text-sm text-neutral-900 focus:border-brand focus:outline-none focus:ring-1 focus:ring-brand"
+                className="w-full rounded-lg border border-neutral-200/80 px-3 py-2 text-sm text-neutral-900 focus:border-brand focus:outline-none focus:ring-1 focus:ring-brand focus:ring-1 focus:ring-brand"
               />
             </div>
           </div>
@@ -302,14 +302,14 @@ export function CVFormEditor({
 
           <div className="space-y-2.5">
             {(data.competencies || []).map((comp, idx) => (
-              <div key={idx} className="flex items-start gap-2 rounded-lg border border-neutral-200 bg-neutral-50/60 p-2.5">
+              <div key={idx} className="flex items-start gap-2 rounded-lg border border-neutral-200 bg-neutral-100/50 p-2.5">
                 <div className="w-1/3 shrink-0">
                   <input
                     type="text"
                     value={comp.pillar}
                     onChange={(e) => updateCompetency(idx, e.target.value, comp.scope)}
                     placeholder="Pillar (e.g. Backend Architecture)"
-                    className="w-full rounded border border-neutral-300 bg-white px-2.5 py-1.5 text-xs font-semibold text-neutral-900 focus:border-brand focus:outline-none"
+                    className="w-full rounded border border-neutral-200/80 bg-surface px-2.5 py-1.5 text-xs font-semibold text-neutral-900 focus:border-brand focus:outline-none focus:ring-1 focus:ring-brand"
                   />
                 </div>
                 <div className="flex-1">
@@ -318,7 +318,7 @@ export function CVFormEditor({
                     value={comp.scope}
                     onChange={(e) => updateCompetency(idx, comp.pillar, e.target.value)}
                     placeholder="Scope & tools (e.g. Node.js, Go, PostgreSQL, Redis, Microservices)"
-                    className="w-full rounded border border-neutral-300 bg-white px-2.5 py-1.5 text-xs text-neutral-800 focus:border-brand focus:outline-none"
+                    className="w-full rounded border border-neutral-200/80 bg-surface px-2.5 py-1.5 text-xs text-neutral-800 focus:border-brand focus:outline-none focus:ring-1 focus:ring-brand"
                   />
                 </div>
                 <button
@@ -360,7 +360,7 @@ export function CVFormEditor({
             {data.structuredExperience.map((exp, expIdx) => (
               <div
                 key={expIdx}
-                className="space-y-3 rounded-xl border border-neutral-200 bg-neutral-50/70 p-3.5"
+                className="space-y-3 rounded-xl border border-neutral-200 bg-neutral-100/50 p-3.5"
               >
                 <div className="flex items-center justify-between border-b border-neutral-200/60 pb-2">
                   <span className="text-xs font-bold text-neutral-700">Role #{expIdx + 1}</span>
@@ -381,7 +381,7 @@ export function CVFormEditor({
                       value={exp.role}
                       onChange={(e) => updateExperience(expIdx, { ...exp, role: e.target.value })}
                       placeholder="e.g. Lead Full-Stack Engineer"
-                      className="w-full rounded border border-neutral-300 bg-white px-2.5 py-1.5 text-xs text-neutral-900 focus:border-brand focus:outline-none"
+                      className="w-full rounded border border-neutral-200/80 bg-surface px-2.5 py-1.5 text-xs text-neutral-900 focus:border-brand focus:outline-none focus:ring-1 focus:ring-brand"
                     />
                   </div>
                   <div>
@@ -391,7 +391,7 @@ export function CVFormEditor({
                       value={exp.company || ""}
                       onChange={(e) => updateExperience(expIdx, { ...exp, company: e.target.value })}
                       placeholder="e.g. TechCorp Solutions"
-                      className="w-full rounded border border-neutral-300 bg-white px-2.5 py-1.5 text-xs text-neutral-900 focus:border-brand focus:outline-none"
+                      className="w-full rounded border border-neutral-200/80 bg-surface px-2.5 py-1.5 text-xs text-neutral-900 focus:border-brand focus:outline-none focus:ring-1 focus:ring-brand"
                     />
                   </div>
                   <div>
@@ -401,7 +401,7 @@ export function CVFormEditor({
                       value={exp.period || ""}
                       onChange={(e) => updateExperience(expIdx, { ...exp, period: e.target.value })}
                       placeholder="e.g. Oct 2022 — Present"
-                      className="w-full rounded border border-neutral-300 bg-white px-2.5 py-1.5 text-xs text-neutral-900 focus:border-brand focus:outline-none"
+                      className="w-full rounded border border-neutral-200/80 bg-surface px-2.5 py-1.5 text-xs text-neutral-900 focus:border-brand focus:outline-none focus:ring-1 focus:ring-brand"
                     />
                   </div>
                 </div>
@@ -413,7 +413,7 @@ export function CVFormEditor({
                     value={exp.context || ""}
                     onChange={(e) => updateExperience(expIdx, { ...exp, context: e.target.value })}
                     placeholder="Context: High-growth B2B fintech processing $10M+ monthly transactions."
-                    className="w-full rounded border border-neutral-300 bg-white px-2.5 py-1.5 text-xs text-neutral-800 focus:border-brand focus:outline-none"
+                    className="w-full rounded border border-neutral-200/80 bg-surface px-2.5 py-1.5 text-xs text-neutral-800 focus:border-brand focus:outline-none focus:ring-1 focus:ring-brand"
                   />
                 </div>
 
@@ -440,7 +440,7 @@ export function CVFormEditor({
                         value={hl}
                         onChange={(e) => updateHighlight(expIdx, hlIdx, e.target.value)}
                         placeholder="Action verb + Context + Quantifiable outcome..."
-                        className="w-full rounded border border-neutral-300 bg-white px-2.5 py-1.5 text-xs text-neutral-900 focus:border-brand focus:outline-none"
+                        className="w-full rounded border border-neutral-200/80 bg-surface px-2.5 py-1.5 text-xs text-neutral-900 focus:border-brand focus:outline-none focus:ring-1 focus:ring-brand"
                       />
                       <button
                         type="button"
@@ -480,28 +480,28 @@ export function CVFormEditor({
 
           <div className="space-y-2.5">
             {(data.education || []).map((edu, idx) => (
-              <div key={idx} className="flex items-start gap-2 rounded-lg border border-neutral-200 bg-neutral-50/60 p-2.5">
+              <div key={idx} className="flex items-start gap-2 rounded-lg border border-neutral-200 bg-neutral-100/50 p-2.5">
                 <div className="grid flex-1 gap-2 sm:grid-cols-3">
                   <input
                     type="text"
                     value={edu.degree}
                     onChange={(e) => updateEducation(idx, { ...edu, degree: e.target.value })}
                     placeholder="Degree (e.g. B.Sc. Computer Engineering)"
-                    className="w-full rounded border border-neutral-300 bg-white px-2.5 py-1.5 text-xs font-semibold text-neutral-900 focus:border-brand focus:outline-none"
+                    className="w-full rounded border border-neutral-200/80 bg-surface px-2.5 py-1.5 text-xs font-semibold text-neutral-900 focus:border-brand focus:outline-none focus:ring-1 focus:ring-brand"
                   />
                   <input
                     type="text"
                     value={edu.institution}
                     onChange={(e) => updateEducation(idx, { ...edu, institution: e.target.value })}
                     placeholder="Institution (e.g. Ahmadu Bello University)"
-                    className="w-full rounded border border-neutral-300 bg-white px-2.5 py-1.5 text-xs text-neutral-800 focus:border-brand focus:outline-none"
+                    className="w-full rounded border border-neutral-200/80 bg-surface px-2.5 py-1.5 text-xs text-neutral-800 focus:border-brand focus:outline-none focus:ring-1 focus:ring-brand"
                   />
                   <input
                     type="text"
                     value={edu.year || ""}
                     onChange={(e) => updateEducation(idx, { ...edu, year: e.target.value })}
                     placeholder="Year (e.g. 2019)"
-                    className="w-full rounded border border-neutral-300 bg-white px-2.5 py-1.5 text-xs text-neutral-800 focus:border-brand focus:outline-none"
+                    className="w-full rounded border border-neutral-200/80 bg-surface px-2.5 py-1.5 text-xs text-neutral-800 focus:border-brand focus:outline-none focus:ring-1 focus:ring-brand"
                   />
                 </div>
                 <button
@@ -539,14 +539,14 @@ export function CVFormEditor({
 
           <div className="space-y-2.5">
             {(data.selectedWork || []).map((work, idx) => (
-              <div key={idx} className="space-y-2 rounded-lg border border-neutral-200 bg-neutral-50/60 p-2.5">
+              <div key={idx} className="space-y-2 rounded-lg border border-neutral-200 bg-neutral-100/50 p-2.5">
                 <div className="flex items-center justify-between">
                   <input
                     type="text"
                     value={work.title}
                     onChange={(e) => updateWork(idx, { ...work, title: e.target.value })}
                     placeholder="Project Title (e.g. High-Throughput Payment Orchestrator)"
-                    className="w-full max-w-sm rounded border border-neutral-300 bg-white px-2.5 py-1.5 text-xs font-semibold text-neutral-900 focus:border-brand focus:outline-none"
+                    className="w-full max-w-sm rounded border border-neutral-200/80 bg-surface px-2.5 py-1.5 text-xs font-semibold text-neutral-900 focus:border-brand focus:outline-none focus:ring-1 focus:ring-brand"
                   />
                   <button
                     type="button"
@@ -561,7 +561,7 @@ export function CVFormEditor({
                   value={work.description}
                   onChange={(e) => updateWork(idx, { ...work, description: e.target.value })}
                   placeholder="Scope, technologies used, and metrics/impact..."
-                  className="w-full rounded border border-neutral-300 bg-white px-2.5 py-1.5 text-xs text-neutral-800 focus:border-brand focus:outline-none"
+                  className="w-full rounded border border-neutral-200/80 bg-surface px-2.5 py-1.5 text-xs text-neutral-800 focus:border-brand focus:outline-none focus:ring-1 focus:ring-brand"
                 />
               </div>
             ))}
@@ -586,7 +586,7 @@ export function CVFormEditor({
                 })
               }
               placeholder="e.g. Available Immediately  ·  Open to Contract or Full-time"
-              className="w-full rounded border border-neutral-300 px-3 py-2 text-xs text-neutral-900 focus:border-brand focus:outline-none"
+              className="w-full rounded border border-neutral-200/80 px-3 py-2 text-xs text-neutral-900 focus:border-brand focus:outline-none focus:ring-1 focus:ring-brand"
             />
           </div>
 
@@ -605,7 +605,7 @@ export function CVFormEditor({
                 });
               }}
               placeholder="e.g. English (Fluent), Hausa (Native), French (Basic)"
-              className="w-full rounded border border-neutral-300 px-3 py-2 text-xs text-neutral-900 focus:border-brand focus:outline-none"
+              className="w-full rounded border border-neutral-200/80 px-3 py-2 text-xs text-neutral-900 focus:border-brand focus:outline-none focus:ring-1 focus:ring-brand"
             />
           </div>
 
@@ -623,7 +623,7 @@ export function CVFormEditor({
                 })
               }
               placeholder="e.g. Professional references & verified credentials available upon request"
-              className="w-full rounded border border-neutral-300 px-3 py-2 text-xs text-neutral-900 focus:border-brand focus:outline-none"
+              className="w-full rounded border border-neutral-200/80 px-3 py-2 text-xs text-neutral-900 focus:border-brand focus:outline-none focus:ring-1 focus:ring-brand"
             />
           </div>
         </div>

@@ -95,7 +95,7 @@ export function AIJobFitAdvisor({
       </div>
 
       {isAnalyzing ? (
-        <div className="mt-4 flex items-center gap-3 rounded-xl bg-white p-4 text-[13px] text-neutral-600 shadow-2xs">
+        <div className="mt-4 flex items-center gap-3 rounded-xl bg-surface p-4 text-[13px] text-neutral-600 shadow-2xs ring-1 ring-neutral-200/80">
           <span className="h-4 w-4 animate-spin rounded-full border-2 border-brand border-t-transparent" />
           <span>Analyzing your CV and skills against the job requirements…</span>
         </div>
@@ -108,7 +108,7 @@ export function AIJobFitAdvisor({
       {analysis && isOpen ? (
         <div className="mt-4 space-y-4">
           {/* Score & Summary Banner */}
-          <div className="flex flex-wrap items-center justify-between gap-3 rounded-xl border border-neutral-200/80 bg-white p-4 shadow-2xs">
+          <div className="flex flex-wrap items-center justify-between gap-3 rounded-xl border border-neutral-200/80 bg-surface p-4 shadow-2xs">
             <div>
               <div className="flex items-center gap-2">
                 <span className={`inline-flex items-center rounded-lg border px-2.5 py-1 text-[13px] font-bold ${scoreColor}`}>
@@ -123,7 +123,7 @@ export function AIJobFitAdvisor({
 
           <div className="grid gap-3 sm:grid-cols-2">
             {/* Matched Strengths */}
-            <div className="rounded-xl border border-neutral-200/80 bg-white p-4 shadow-2xs">
+            <div className="rounded-xl border border-neutral-200/80 bg-surface p-4 shadow-2xs">
               <div className="flex items-center gap-2 text-emerald-700">
                 <Icon icon={CheckmarkCircle02Icon} size={17} />
                 <h4 className="text-[13px] font-semibold">Your Matching Strengths</h4>
@@ -139,7 +139,7 @@ export function AIJobFitAdvisor({
             </div>
 
             {/* Identified Gaps */}
-            <div className="rounded-xl border border-neutral-200/80 bg-white p-4 shadow-2xs">
+            <div className="rounded-xl border border-neutral-200/80 bg-surface p-4 shadow-2xs">
               <div className="flex items-center gap-2 text-amber-700">
                 <Icon icon={AlertCircleIcon} size={17} />
                 <h4 className="text-[13px] font-semibold">Areas to Address</h4>

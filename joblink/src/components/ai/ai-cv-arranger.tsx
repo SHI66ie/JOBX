@@ -226,10 +226,10 @@ export function AICVArranger({
       </button>
 
       {open ? (
-        <div className="fixed inset-0 z-50 flex items-center justify-center overflow-y-auto bg-neutral-900/50 p-4 backdrop-blur-xs">
-          <div className="relative my-8 flex max-h-[90vh] w-full max-w-3xl flex-col rounded-2xl bg-white shadow-2xl ring-1 ring-black/10">
+        <div className="app-theme fixed inset-0 z-50 flex items-center justify-center overflow-y-auto bg-neutral-950/60 p-4 backdrop-blur-xs">
+          <div className="relative my-8 flex max-h-[90vh] w-full max-w-3xl flex-col rounded-2xl border border-neutral-200/80 bg-surface text-neutral-900 shadow-2xl ring-1 ring-black/10">
             {/* Modal Header */}
-            <div className="flex shrink-0 items-center justify-between border-b border-neutral-100 px-6 py-4">
+            <div className="flex shrink-0 items-center justify-between border-b border-neutral-200/80 px-6 py-4">
               <div className="flex items-center gap-3">
                 <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-brand/10 text-brand">
                   <Icon icon={SparklesIcon} size={22} />
@@ -244,7 +244,7 @@ export function AICVArranger({
               <button
                 type="button"
                 onClick={() => setOpen(false)}
-                className="rounded-full p-1.5 text-neutral-400 hover:bg-neutral-100 hover:text-neutral-700"
+                className="rounded-full p-1.5 text-neutral-400 hover:bg-neutral-100 hover:text-neutral-900"
               >
                 <Icon icon={Cancel01Icon} size={18} />
               </button>
@@ -268,7 +268,7 @@ export function AICVArranger({
                       value={targetNiche}
                       onChange={(e) => setTargetNiche(e.target.value)}
                       placeholder="e.g. IT / ICT Officer, Cloud & Asset Control, Full-Stack"
-                      className="mt-1 h-9.5 w-full rounded-lg border border-neutral-300 bg-white px-3 text-[13px] text-neutral-900 placeholder:text-neutral-400 focus:border-brand focus:outline-none focus:ring-1 focus:ring-brand"
+                      className="mt-1 h-9.5 w-full rounded-lg border border-neutral-200/80 bg-surface px-3 text-[13px] text-neutral-900 placeholder:text-neutral-400 focus:border-brand focus:outline-none focus:ring-1 focus:ring-brand"
                     />
                   </div>
                   <div>
@@ -277,7 +277,7 @@ export function AICVArranger({
                       type="text"
                       defaultValue={initialProfile.title}
                       placeholder="e.g. ICT Officer · End-User Support"
-                      className="mt-1 h-9.5 w-full rounded-lg border border-neutral-300 bg-white px-3 text-[13px] text-neutral-900 placeholder:text-neutral-400 focus:border-brand focus:outline-none focus:ring-1 focus:ring-brand"
+                      className="mt-1 h-9.5 w-full rounded-lg border border-neutral-200/80 bg-surface px-3 text-[13px] text-neutral-900 placeholder:text-neutral-400 focus:border-brand focus:outline-none focus:ring-1 focus:ring-brand"
                     />
                   </div>
                 </div>
@@ -291,7 +291,7 @@ export function AICVArranger({
                     value={rawText}
                     onChange={(e) => setRawText(e.target.value)}
                     placeholder="Paste your resume draft, past responsibilities, projects, certifications, or rough notes here..."
-                    className="mt-1 w-full rounded-lg border border-neutral-300 bg-white p-3 text-[13px] leading-5 text-neutral-900 placeholder:text-neutral-400 focus:border-brand focus:outline-none focus:ring-1 focus:ring-brand"
+                    className="mt-1 w-full rounded-lg border border-neutral-200/80 bg-surface p-3 text-[13px] leading-5 text-neutral-900 placeholder:text-neutral-400 focus:border-brand focus:outline-none focus:ring-1 focus:ring-brand"
                   />
                 </div>
 
@@ -380,7 +380,7 @@ export function AICVArranger({
                       <button
                         type="button"
                         onClick={handleDownloadLocalPdf}
-                        className="inline-flex items-center gap-1 rounded-md border border-neutral-200 bg-white px-2.5 py-1 text-[12px] font-medium text-neutral-700 hover:bg-neutral-50 shadow-xs"
+                        className="inline-flex items-center gap-1 rounded-md border border-neutral-200 bg-surface px-2.5 py-1 text-[12px] font-medium text-neutral-700 hover:bg-neutral-50 shadow-xs"
                       >
                         <Icon icon={Download04Icon} size={13} />
                         Download PDF
@@ -389,7 +389,7 @@ export function AICVArranger({
                         <button
                           type="button"
                           onClick={handleCopyMarkdown}
-                          className="inline-flex items-center gap-1 rounded-md border border-neutral-200 bg-white px-2.5 py-1 text-[12px] font-medium text-neutral-700 hover:bg-neutral-50"
+                          className="inline-flex items-center gap-1 rounded-md border border-neutral-200 bg-surface px-2.5 py-1 text-[12px] font-medium text-neutral-700 hover:bg-neutral-50"
                         >
                           <Icon icon={copiedMd ? Tick02Icon : Copy01Icon} size={13} />
                           {copiedMd ? "Copied" : "Copy Markdown"}
@@ -411,7 +411,7 @@ export function AICVArranger({
 
                   {/* TAB 1: CV DOCUMENT PREVIEW (FINE-TUNED BENCHMARK LAYOUT) */}
                   {activeTab === "preview" ? (
-                    <div className="relative overflow-hidden rounded-xl border border-neutral-200 bg-white p-6 sm:p-8 shadow-sm">
+                    <div className="relative overflow-hidden rounded-xl border border-neutral-200 bg-surface p-6 sm:p-8 shadow-sm">
                       {/* Diagonal Watermark Overlay */}
                       <div
                         aria-hidden="true"
@@ -430,7 +430,7 @@ export function AICVArranger({
 
                       {/* 1. Header: Name, Multi-pillar Headline, Contact, Meta */}
                       <div className="relative">
-                        <h2 className="text-[21px] font-bold tracking-tight text-[#01224F] uppercase">{displayData?.fullName || fullName}</h2>
+                        <h2 className="text-[21px] font-bold tracking-tight text-brand uppercase">{displayData?.fullName || fullName}</h2>
                         <p className="mt-1 text-[13.5px] font-bold text-neutral-800">
                           {displayData?.suggestedTitle}
                         </p>
@@ -447,11 +447,11 @@ export function AICVArranger({
                         ) : null}
                       </div>
 
-                      <hr className="my-3.5 border-t-2 border-[#01224F]" />
+                      <hr className="my-3.5 border-t-2 border-brand" />
 
                       {/* 2. PROFILE */}
                       <div className="relative space-y-1.5">
-                        <h4 className="text-[12px] font-bold tracking-wider uppercase text-[#01224F]">PROFILE</h4>
+                        <h4 className="text-[12px] font-bold tracking-wider uppercase text-brand">PROFILE</h4>
                         <p className="text-[12.5px] leading-relaxed text-neutral-800">{displayData?.executiveSummary}</p>
                       </div>
 
@@ -459,7 +459,7 @@ export function AICVArranger({
 
                       {/* 3. CORE COMPETENCIES (Pillar — Scope) */}
                       <div className="relative space-y-2">
-                        <h4 className="text-[12px] font-bold tracking-wider uppercase text-[#01224F]">CORE COMPETENCIES</h4>
+                        <h4 className="text-[12px] font-bold tracking-wider uppercase text-brand">CORE COMPETENCIES</h4>
                         <div className="space-y-1.5 text-[12px] text-neutral-800">
                           {activeCompetencies.map((comp, idx) => (
                             <div key={idx} className="leading-snug">
@@ -476,7 +476,7 @@ export function AICVArranger({
                       {/* 4. PROFESSIONAL EXPERIENCE */}
                       {displayData?.structuredExperience?.length ? (
                         <div className="relative space-y-3.5">
-                          <h4 className="text-[12px] font-bold tracking-wider uppercase text-[#01224F]">PROFESSIONAL EXPERIENCE</h4>
+                          <h4 className="text-[12px] font-bold tracking-wider uppercase text-brand">PROFESSIONAL EXPERIENCE</h4>
                           {displayData.structuredExperience.map((exp, idx) => (
                             <div key={idx} className="space-y-1">
                               <div className="flex flex-wrap items-center justify-between text-[12.5px]">
@@ -503,7 +503,7 @@ export function AICVArranger({
                         <>
                           <hr className="my-3.5 border-neutral-200" />
                           <div className="relative space-y-2">
-                            <h4 className="text-[12px] font-bold tracking-wider uppercase text-[#01224F]">EDUCATION &amp; CERTIFICATIONS</h4>
+                            <h4 className="text-[12px] font-bold tracking-wider uppercase text-brand">EDUCATION &amp; CERTIFICATIONS</h4>
                             <div className="space-y-1.5 text-[12px]">
                               {displayData.education.map((edu, idx) => (
                                 <div key={idx}>
@@ -528,7 +528,7 @@ export function AICVArranger({
                         <>
                           <hr className="my-3.5 border-neutral-200" />
                           <div className="relative space-y-2">
-                            <h4 className="text-[12px] font-bold tracking-wider uppercase text-[#01224F]">SELECTED TECHNICAL WORK &amp; INTERNAL TOOLS</h4>
+                            <h4 className="text-[12px] font-bold tracking-wider uppercase text-brand">SELECTED TECHNICAL WORK &amp; INTERNAL TOOLS</h4>
                             <div className="space-y-1.5 text-[12px]">
                               {displayData.selectedWork.map((work, idx) => (
                                 <div key={idx} className="leading-snug">
@@ -547,7 +547,7 @@ export function AICVArranger({
                         <>
                           <hr className="my-3.5 border-neutral-200" />
                           <div className="relative space-y-1.5 text-[12px]">
-                            <h4 className="text-[12px] font-bold tracking-wider uppercase text-[#01224F]">ADDITIONAL INFORMATION</h4>
+                            <h4 className="text-[12px] font-bold tracking-wider uppercase text-brand">ADDITIONAL INFORMATION</h4>
                             <ul className="space-y-1 text-neutral-700">
                               {displayData.additionalInfo.locationAndRelocation ? (
                                 <li>• {displayData.additionalInfo.locationAndRelocation}</li>
@@ -617,7 +617,7 @@ export function AICVArranger({
                         <h4 className="text-[14px] font-semibold text-neutral-900">Scoped Core Competencies</h4>
                         <div className="mt-2.5 space-y-2">
                           {activeCompetencies.map((comp, idx) => (
-                            <div key={idx} className="rounded-xl border border-neutral-200 bg-white p-3 shadow-xs">
+                            <div key={idx} className="rounded-xl border border-neutral-200 bg-surface p-3 shadow-xs">
                               <h5 className="text-[13px] font-bold text-neutral-900">{comp.pillar}</h5>
                               <p className="mt-1 text-[12.5px] leading-relaxed text-neutral-600">{comp.scope}</p>
                             </div>
@@ -631,7 +631,7 @@ export function AICVArranger({
                           <h4 className="text-[14px] font-semibold text-neutral-900">Experience Highlights (STAR Bullets)</h4>
                           <div className="mt-2.5 space-y-3">
                             {result.structuredExperience.map((item, idx) => (
-                              <div key={idx} className="rounded-xl border border-neutral-200 bg-white p-4 shadow-xs">
+                              <div key={idx} className="rounded-xl border border-neutral-200 bg-surface p-4 shadow-xs">
                                 <div className="flex items-center justify-between">
                                   <h5 className="text-[14px] font-semibold text-neutral-900">{item.role}</h5>
                                   <span className="text-[12px] text-neutral-400">{item.period || item.company}</span>
@@ -753,7 +753,7 @@ export function AICVArranger({
                 <button
                   type="button"
                   onClick={() => setOpen(false)}
-                  className="rounded-lg border border-neutral-200 bg-white px-4 py-2 text-[13px] font-medium text-neutral-700 hover:bg-neutral-50"
+                  className="rounded-lg border border-neutral-200 bg-surface px-4 py-2 text-[13px] font-medium text-neutral-700 hover:bg-neutral-50"
                 >
                   Close
                 </button>

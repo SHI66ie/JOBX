@@ -177,7 +177,7 @@ export function ProfileForm({ initial, cvLink }: { initial: CandidateProfile; cv
               <button
                 type="button"
                 onClick={() => setEditorModalOpen(true)}
-                className="inline-flex items-center gap-1.5 rounded-xl border border-neutral-300 bg-white px-3.5 py-2 text-[13px] font-semibold text-neutral-700 shadow-2xs hover:bg-neutral-50 hover:text-neutral-900"
+                className="inline-flex items-center gap-1.5 rounded-xl border border-neutral-200/80 bg-surface px-3.5 py-2 text-[13px] font-semibold text-neutral-700 shadow-2xs hover:bg-neutral-100 hover:text-neutral-900"
               >
                 <Icon icon={Edit02Icon} size={15} />
                 {draft.resumeUrl ? "Edit CV (Word Tools)" : "Type Your Own CV"}

@@ -84,9 +84,9 @@ export function AIJobAssistant({
       </button>
 
       {open ? (
-        <div className="fixed inset-0 z-50 flex items-center justify-center overflow-y-auto bg-neutral-900/40 p-4 backdrop-blur-xs">
-          <div className="w-full max-w-2xl rounded-2xl bg-white p-6 shadow-2xl ring-1 ring-black/5 sm:p-7">
-            <div className="flex items-start justify-between gap-4 border-b border-neutral-100 pb-4">
+        <div className="app-theme fixed inset-0 z-50 flex items-center justify-center overflow-y-auto bg-neutral-950/60 p-4 backdrop-blur-xs">
+          <div className="w-full max-w-2xl rounded-2xl border border-neutral-200/80 bg-surface text-neutral-900 p-6 shadow-2xl ring-1 ring-black/5 sm:p-7">
+            <div className="flex items-start justify-between gap-4 border-b border-neutral-200/80 pb-4">
               <div className="flex items-center gap-2.5">
                 <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-brand/10 text-brand">
                   <Icon icon={MagicWand01Icon} size={20} />
@@ -99,7 +99,7 @@ export function AIJobAssistant({
               <button
                 type="button"
                 onClick={() => setOpen(false)}
-                className="rounded-full p-1.5 text-neutral-400 hover:bg-neutral-100 hover:text-neutral-700"
+                className="rounded-full p-1.5 text-neutral-400 hover:bg-neutral-100 hover:text-neutral-900"
               >
                 <Icon icon={Cancel01Icon} size={18} />
               </button>
@@ -134,7 +134,7 @@ export function AIJobAssistant({
                       value={promptTitle}
                       onChange={(e) => setPromptTitle(e.target.value)}
                       placeholder="e.g. Senior Backend Engineer"
-                      className="mt-1.5 w-full rounded-xl border border-neutral-200 px-3.5 py-2.5 text-[14px] text-neutral-900 placeholder:text-neutral-400 focus:border-brand focus:outline-none focus:ring-1 focus:ring-brand"
+                      className="mt-1.5 w-full rounded-xl border border-neutral-200 bg-neutral-50/70 focus:bg-surface px-3.5 py-2.5 text-[14px] text-neutral-900 placeholder:text-neutral-400 focus:border-brand focus:outline-none focus:ring-1 focus:ring-brand"
                     />
                   </div>
 
@@ -148,7 +148,7 @@ export function AIJobAssistant({
                       value={promptNotes}
                       onChange={(e) => setPromptNotes(e.target.value)}
                       placeholder="e.g. 4+ years experience, async remote team in European/Americas timezones, modern stack..."
-                      className="mt-1.5 w-full rounded-xl border border-neutral-200 px-3.5 py-2.5 text-[14px] text-neutral-900 placeholder:text-neutral-400 focus:border-brand focus:outline-none focus:ring-1 focus:ring-brand"
+                      className="mt-1.5 w-full rounded-xl border border-neutral-200 bg-neutral-50/70 focus:bg-surface px-3.5 py-2.5 text-[14px] text-neutral-900 placeholder:text-neutral-400 focus:border-brand focus:outline-none focus:ring-1 focus:ring-brand"
                     />
                   </div>
                 </div>
@@ -159,7 +159,7 @@ export function AIJobAssistant({
                   <button
                     type="button"
                     onClick={() => setOpen(false)}
-                    className="rounded-full px-4 py-2 text-[13px] font-medium text-neutral-600 hover:bg-neutral-100"
+                    className="rounded-full px-4 py-2 text-[13px] font-medium text-neutral-600 hover:bg-neutral-100 hover:text-neutral-900"
                   >
                     Cancel
                   </button>
@@ -185,7 +185,7 @@ export function AIJobAssistant({
               </div>
             ) : (
               <div className="mt-5 space-y-4">
-                <div className="max-h-[60vh] space-y-4 overflow-y-auto rounded-xl bg-neutral-50/70 p-4 text-[13.5px]">
+                <div className="max-h-[60vh] space-y-4 overflow-y-auto rounded-xl border border-neutral-200/80 bg-neutral-100/60 p-4 text-[13.5px]">
                   <div>
                     <span className="font-semibold text-neutral-900">Job Title: </span>
                     <span className="text-neutral-800">{result.title}</span>

@@ -87,17 +87,17 @@ export function AIMockInterview({
       <button
         type="button"
         onClick={handleOpen}
-        className="inline-flex h-9 items-center gap-1.5 rounded-full border border-neutral-300 bg-white px-3.5 text-[12.5px] font-medium text-neutral-800 transition-colors hover:bg-neutral-50 shadow-2xs"
+        className="inline-flex h-9 items-center gap-1.5 rounded-full border border-neutral-200/80 bg-surface px-3.5 text-[12.5px] font-medium text-neutral-800 transition-colors hover:bg-neutral-100 shadow-2xs"
       >
         <Icon icon={Mic01Icon} size={15} className="text-brand" />
         Practice Interview
       </button>
 
       {open ? (
-        <div className="fixed inset-0 z-50 flex items-center justify-center overflow-y-auto bg-neutral-900/50 p-4 backdrop-blur-xs">
-          <div className="relative my-8 flex max-h-[90vh] w-full max-w-2xl flex-col rounded-2xl bg-white shadow-2xl ring-1 ring-black/10">
+        <div className="app-theme fixed inset-0 z-50 flex items-center justify-center overflow-y-auto bg-neutral-950/60 p-4 backdrop-blur-xs">
+          <div className="relative my-8 flex max-h-[90vh] w-full max-w-2xl flex-col rounded-2xl border border-neutral-200/80 bg-surface text-neutral-900 shadow-2xl ring-1 ring-black/10">
             {/* Modal Header */}
-            <div className="flex shrink-0 items-center justify-between border-b border-neutral-100 px-6 py-4">
+            <div className="flex shrink-0 items-center justify-between border-b border-neutral-200/80 px-6 py-4">
               <div className="flex items-center gap-2.5">
                 <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-brand/10 text-brand">
                   <Icon icon={Mic01Icon} size={18} />
@@ -112,7 +112,7 @@ export function AIMockInterview({
               <button
                 type="button"
                 onClick={() => setOpen(false)}
-                className="rounded-full p-1.5 text-neutral-400 hover:bg-neutral-100 hover:text-neutral-700"
+                className="rounded-full p-1.5 text-neutral-400 hover:bg-neutral-100 hover:text-neutral-900"
               >
                 <Icon icon={Cancel01Icon} size={18} />
               </button>
@@ -173,7 +173,7 @@ export function AIMockInterview({
                       value={candidateAnswer}
                       onChange={(e) => setCandidateAnswer(e.target.value)}
                       placeholder="Type your response as you would explain it to the hiring manager..."
-                      className="mt-1.5 w-full rounded-xl border border-neutral-300 p-3 text-[13px] leading-relaxed text-neutral-900 placeholder:text-neutral-400 focus:border-brand focus:outline-none focus:ring-1 focus:ring-brand"
+                      className="mt-1.5 w-full rounded-xl border border-neutral-200/80 bg-neutral-50/70 focus:bg-surface p-3 text-[13px] leading-relaxed text-neutral-900 placeholder:text-neutral-400 focus:border-brand focus:outline-none focus:ring-1 focus:ring-brand"
                     />
                     <div className="mt-2 flex items-center justify-between">
                       <span className="text-[12px] text-neutral-400">
@@ -219,7 +219,7 @@ export function AIMockInterview({
                       </p>
 
                       <div className="grid gap-3 sm:grid-cols-2">
-                        <div className="rounded-lg border border-neutral-200 bg-white p-3">
+                        <div className="rounded-lg border border-neutral-200/80 bg-surface p-3">
                           <h5 className="text-[12px] font-semibold text-emerald-700">Strengths</h5>
                           <ul className="mt-1.5 space-y-1 text-[12px] text-neutral-600">
                             {critique.strengths.map((s, idx) => (
@@ -231,7 +231,7 @@ export function AIMockInterview({
                           </ul>
                         </div>
 
-                        <div className="rounded-lg border border-neutral-200 bg-white p-3">
+                        <div className="rounded-lg border border-neutral-200/80 bg-surface p-3">
                           <h5 className="text-[12px] font-semibold text-amber-700">Areas to Improve</h5>
                           <ul className="mt-1.5 space-y-1 text-[12px] text-neutral-600">
                             {critique.improvements.map((imp, idx) => (
@@ -264,11 +264,11 @@ export function AIMockInterview({
             </div>
 
             {/* Modal Footer */}
-            <div className="flex shrink-0 justify-end border-t border-neutral-100 bg-neutral-50/50 px-6 py-3.5">
+            <div className="flex shrink-0 justify-end border-t border-neutral-200/80 bg-neutral-100/50 px-6 py-3.5">
               <button
                 type="button"
                 onClick={() => setOpen(false)}
-                className="rounded-lg border border-neutral-200 bg-white px-4 py-1.5 text-[13px] font-medium text-neutral-700 hover:bg-neutral-50"
+                className="rounded-lg border border-neutral-200/80 bg-surface px-4 py-1.5 text-[13px] font-medium text-neutral-700 hover:bg-neutral-100 hover:text-neutral-900"
               >
                 Done Practicing
               </button>

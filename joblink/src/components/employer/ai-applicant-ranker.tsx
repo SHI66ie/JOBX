@@ -63,10 +63,10 @@ export function AIApplicantRanker({
       </button>
 
       {open ? (
-        <div className="fixed inset-0 z-50 flex items-center justify-center overflow-y-auto bg-neutral-900/50 p-4 backdrop-blur-xs">
-          <div className="relative my-8 flex max-h-[90vh] w-full max-w-3xl flex-col rounded-2xl bg-white shadow-2xl ring-1 ring-black/10">
+        <div className="app-theme fixed inset-0 z-50 flex items-center justify-center overflow-y-auto bg-neutral-950/60 p-4 backdrop-blur-xs">
+          <div className="relative my-8 flex max-h-[90vh] w-full max-w-3xl flex-col rounded-2xl border border-neutral-200/80 bg-surface text-neutral-900 shadow-2xl">
             {/* Header */}
-            <div className="flex shrink-0 items-center justify-between border-b border-neutral-100 px-6 py-4">
+            <div className="flex shrink-0 items-center justify-between border-b border-neutral-200/80 px-6 py-4">
               <div className="flex items-center gap-3">
                 <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-brand/10 text-brand">
                   <Icon icon={UserGroupIcon} size={20} />
@@ -171,11 +171,11 @@ export function AIApplicantRanker({
             </div>
 
             {/* Footer */}
-            <div className="flex shrink-0 justify-end border-t border-neutral-100 bg-neutral-50/50 px-6 py-3.5">
+            <div className="flex shrink-0 justify-end border-t border-neutral-200/80 bg-neutral-100/50 px-6 py-3.5">
               <button
                 type="button"
                 onClick={() => setOpen(false)}
-                className="rounded-lg border border-neutral-200 bg-white px-4 py-1.5 text-[13px] font-medium text-neutral-700 hover:bg-neutral-50"
+                className="rounded-lg border border-neutral-200/80 bg-surface px-4 py-1.5 text-[13px] font-medium text-neutral-700 hover:bg-neutral-100"
               >
                 Close Shortlist
               </button>
