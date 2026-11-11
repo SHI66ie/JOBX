@@ -8,6 +8,9 @@ import { ApplyButton } from "@/components/dashboard/job-card";
 import { EmptyJobsArt } from "@/components/dashboard/empty-jobs-art";
 import { JobListingView } from "@/components/jobs/job-listing-view";
 import { AIApplicationPitch } from "@/components/ai/ai-application-pitch";
+import { AIJobFitAdvisor } from "@/components/ai/ai-job-fit-advisor";
+import { AIMockInterview } from "@/components/ai/ai-mock-interview";
+import { AISalaryAdvisor } from "@/components/ai/ai-salary-advisor";
 import { Icon } from "@/components/ui/icon";
 import { applyJob, getJobListing, matchSkills } from "@/lib/jobs";
 import { candidateProfileFromMeta } from "@/lib/profile";
@@ -105,7 +108,26 @@ export default async function CandidateJobPage({ params }: { params: Promise<{ i
     <div className="mx-auto max-w-7xl px-4 pb-24 pt-6 sm:px-6 lg:px-8 lg:pt-8">
       <JobPostingSchema job={job} />
       {back}
-      <div className="mt-6">
+      <div className="mt-6 space-y-6">
+        <AIJobFitAdvisor
+          jobTitle={job.title}
+          companyName={job.company?.name || undefined}
+          jobDescription={job.description || undefined}
+          jobRequirements={job.requirements || undefined}
+          candidateTitle={profile.title}
+          candidateBio={profile.bio}
+          candidateSkills={profile.skills}
+        />
+
+        <AISalaryAdvisor
+          jobTitle={job.title}
+          companyName={job.company?.name || undefined}
+          jobDescription={job.description || undefined}
+          candidateTitle={profile.title}
+          candidateBio={profile.bio}
+          candidateSkills={profile.skills}
+        />
+
         <JobListingView
           job={job}
           company={job.company}
@@ -120,6 +142,12 @@ export default async function CandidateJobPage({ params }: { params: Promise<{ i
                 candidateName={`${profile.firstName} ${profile.lastName}`.trim() || undefined}
                 candidateTitle={profile.title}
                 candidateBio={profile.bio}
+                candidateSkills={profile.skills}
+              />
+              <AIMockInterview
+                jobTitle={job.title}
+                jobRequirements={job.requirements || undefined}
+                candidateName={`${profile.firstName} ${profile.lastName}`.trim() || undefined}
                 candidateSkills={profile.skills}
               />
               {application ? (

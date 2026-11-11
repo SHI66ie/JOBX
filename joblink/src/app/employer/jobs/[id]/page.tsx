@@ -25,6 +25,10 @@ import {
 } from "@/lib/employer";
 import { jobStatusMeta, jobTypeLabel, postedAgo } from "@/lib/jobs";
 import { signResumes } from "@/lib/resumes";
+import { AIApplicantRanker } from "@/components/employer/ai-applicant-ranker";
+import { AINoteDrafter } from "@/components/employer/ai-note-drafter";
+import { AIInclusivityAudit } from "@/components/employer/ai-inclusivity-audit";
+import type { ApplicantForRanking } from "@/lib/ai";
 
 type ApplicationRow = {
   id: string;
@@ -139,9 +143,29 @@ export default async function JobDetailsPage({
         <section aria-label="Applicants" className="mt-2">
           {apps.length ? (
             <>
-              <p className="pt-4 text-[13px] text-neutral-500">
-                {counts.pending} new · {counts.reviewed} in review · {counts.interviewing} interviewing · {counts.accepted} hired
-              </p>
+              <div className="flex flex-wrap items-center justify-between gap-3 pt-4">
+                <p className="text-[13px] text-neutral-500">
+                  {counts.pending} new · {counts.reviewed} in review · {counts.interviewing} interviewing · {counts.accepted} hired
+                </p>
+                <div className="flex items-center gap-2">
+                  <AINoteDrafter
+                    jobTitle={job.title}
+                    companyName={company.name}
+                  />
+                  <AIApplicantRanker
+                    jobTitle={job.title}
+                    jobRequirements={job.requirements || undefined}
+                    applicants={apps.map((app) => ({
+                      id: app.id,
+                      name: candidateName(app.candidate),
+                      title: app.candidate_title ?? (app.candidate as CandidateSummary | null)?.title ?? undefined,
+                      skills: app.candidate_skills?.length ? app.candidate_skills : ((app.candidate as CandidateSummary | null)?.skills ?? []),
+                      bio: app.candidate?.bio ?? (app.candidate as CandidateSummary | null)?.bio ?? undefined,
+                      coverLetter: app.cover_letter ?? undefined,
+                    }))}
+                  />
+                </div>
+              </div>
               <ul className="mt-1 divide-y divide-neutral-100">
                 {apps.map((app) => {
                   const status = applicationStatus(app.status);
@@ -194,7 +218,13 @@ export default async function JobDetailsPage({
                             </span>
                           </span>
                         </ApplicationReview>
-                        <div className="pl-[52px] sm:pl-0">
+                        <div className="pl-[52px] sm:pl-0 flex flex-wrap items-center gap-2">
+                          <AINoteDrafter
+                            jobTitle={job.title}
+                            companyName={company.name}
+                            candidateName={name}
+                            candidateTitle={profile.title || undefined}
+                          />
                           <StageActions applicationId={app.id} jobId={job.id} status={status.value} />
                         </div>
                       </div>
@@ -215,9 +245,17 @@ export default async function JobDetailsPage({
         </section>
       ) : (
         <div className="mt-8 grid gap-12 lg:grid-cols-[minmax(0,1fr)_320px]">
-          <article className="min-w-0 max-w-2xl">
-            <h2 className="text-[17px] font-semibold tracking-[-0.015em] text-neutral-900">About the role</h2>
-            <RichDescription value={job.description} />
+          <article className="min-w-0 max-w-2xl space-y-6">
+            <AIInclusivityAudit
+              jobTitle={job.title}
+              description={job.description || undefined}
+              requirements={job.requirements || undefined}
+            />
+
+            <div>
+              <h2 className="text-[17px] font-semibold tracking-[-0.015em] text-neutral-900">About the role</h2>
+              <RichDescription value={job.description} />
+            </div>
 
             <h2 className="mt-10 text-[17px] font-semibold tracking-[-0.015em] text-neutral-900">Requirements</h2>
             {job.requirements ? (

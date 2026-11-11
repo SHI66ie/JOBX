@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useTransition } from "react";
+import { useRouter } from "next/navigation";
 import {
   SparklesIcon,
   Cancel01Icon,
@@ -9,10 +10,13 @@ import {
   Tick02Icon,
   DocumentCodeIcon,
   DashboardSquare01Icon,
+  Download04Icon,
+  File01Icon,
+  EyeIcon,
 } from "@hugeicons/core-free-icons";
 import { Icon } from "@/components/ui/icon";
-import { actionArrangeCV } from "@/app/actions/ai";
-import { updateCandidateProfile } from "@/app/dashboard/actions";
+import { actionArrangeCV, actionSaveAICV } from "@/app/actions/ai";
+import { generateAICVPdf } from "@/lib/cv-pdf";
 import type { ArrangedCVResult } from "@/lib/ai";
 import type { CandidateProfile } from "@/lib/profile";
 
@@ -23,26 +27,33 @@ export function AICVArranger({
   label = "Arrange CV with AI",
 }: {
   initialProfile: CandidateProfile;
-  onProfileUpdated?: (updated: CandidateProfile) => void;
+  onProfileUpdated?: (updated: CandidateProfile, viewUrl?: string | null) => void;
   triggerClassName?: string;
   label?: string;
 }) {
+  const router = useRouter();
   const [open, setOpen] = useState(false);
   const [targetNiche, setTargetNiche] = useState("");
   const [rawText, setRawText] = useState("");
-  const [activeTab, setActiveTab] = useState<"overview" | "markdown">("overview");
+  const [activeTab, setActiveTab] = useState<"preview" | "overview" | "markdown">("preview");
   const [result, setResult] = useState<ArrangedCVResult | null>(null);
   const [error, setError] = useState("");
   const [copiedMd, setCopiedMd] = useState(false);
   const [copiedSummary, setCopiedSummary] = useState(false);
+
+  /** After successful "Apply to My Profile" */
   const [appliedSuccess, setAppliedSuccess] = useState(false);
+  const [appliedCvUrl, setAppliedCvUrl] = useState<string | null>(null);
 
   const [isArranging, startArranging] = useTransition();
   const [isApplying, startApplying] = useTransition();
 
+  const fullName = [initialProfile.firstName, initialProfile.lastName].filter(Boolean).join(" ") || "Your Profile";
+
   function handleOpen() {
     setError("");
     setAppliedSuccess(false);
+    setAppliedCvUrl(null);
     if (!rawText && initialProfile.bio) {
       setRawText(`Current Title: ${initialProfile.title}\n\nSummary:\n${initialProfile.bio}\n\nSkills:\n${initialProfile.skills.join(", ")}`);
     }
@@ -54,6 +65,8 @@ export function AICVArranger({
 
   function handleArrange() {
     setError("");
+    setAppliedSuccess(false);
+    setAppliedCvUrl(null);
     startArranging(async () => {
       const res = await actionArrangeCV({
         rawCVText: rawText,
@@ -69,7 +82,38 @@ export function AICVArranger({
       }
 
       setResult(res.data);
+      setActiveTab("preview");
     });
+  }
+
+  function handleDownloadLocalPdf() {
+    if (!result) return;
+    try {
+      const bytes = generateAICVPdf({
+        fullName,
+        targetNiche: result.targetNiche,
+        suggestedTitle: result.suggestedTitle,
+        executiveSummary: result.executiveSummary,
+        skillsByCategory: result.skillsByCategory || {},
+        recommendedSkills: result.recommendedSkills,
+        structuredExperience: result.structuredExperience || [],
+        atsKeywords: result.atsKeywords,
+        nicheStrengths: result.nicheStrengths,
+        watermark: true,
+      });
+      const blob = new Blob([bytes as unknown as BlobPart], { type: "application/pdf" });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = `JOMP-CV-${(initialProfile.firstName || "Resume").replace(/\s+/g, "_")}.pdf`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+    } catch (err) {
+      console.error("Failed to generate and download PDF:", err);
+      setError("Failed to generate PDF. Please try again.");
+    }
   }
 
   function handleApplyToProfile() {
@@ -87,16 +131,48 @@ export function AICVArranger({
         skills: mergedSkills,
       };
 
-      const saveRes = await updateCandidateProfile(nextProfile);
-      if (saveRes?.error) {
+      // Generate a watermarked PDF, upload it and save resume_url — all in one server action.
+      const saveRes = await actionSaveAICV({
+        cvData: {
+          fullName,
+          targetNiche: result.targetNiche,
+          suggestedTitle: result.suggestedTitle,
+          executiveSummary: result.executiveSummary,
+          skillsByCategory: result.skillsByCategory || {},
+          recommendedSkills: result.recommendedSkills,
+          structuredExperience: result.structuredExperience || [],
+          atsKeywords: result.atsKeywords,
+          nicheStrengths: result.nicheStrengths,
+          watermark: true,
+        },
+        profileUpdate: {
+          firstName: initialProfile.firstName,
+          lastName: initialProfile.lastName,
+          title: result.suggestedTitle || initialProfile.title,
+          bio: result.executiveSummary || initialProfile.bio,
+          skills: mergedSkills,
+        },
+      });
+
+      if (saveRes.error) {
         setError(saveRes.error);
         return;
       }
 
+      // Update local profile state with the new resume path
+      const updatedProfile: CandidateProfile = {
+        ...nextProfile,
+        resumeUrl: saveRes.resumePath || nextProfile.resumeUrl,
+      };
+
       setAppliedSuccess(true);
+      setAppliedCvUrl(saveRes.viewUrl ?? null);
+
       if (onProfileUpdated) {
-        onProfileUpdated(nextProfile);
+        onProfileUpdated(updatedProfile, saveRes.viewUrl ?? null);
       }
+
+      router.refresh();
     });
   }
 
@@ -138,9 +214,9 @@ export function AICVArranger({
                   <Icon icon={SparklesIcon} size={22} />
                 </div>
                 <div>
-                  <h3 className="text-[17px] font-semibold text-neutral-900">AI CV Arranger & Niche Optimizer</h3>
+                  <h3 className="text-[17px] font-semibold text-neutral-900">AI CV Arranger &amp; Niche Optimizer</h3>
                   <p className="text-[13px] text-neutral-500">
-                    Structure your CV, extract key niche skills, and optimize for remote recruiter search.
+                    Structure your CV, extract key niche skills, and add a professionally formatted CV to your profile.
                   </p>
                 </div>
               </div>
@@ -200,7 +276,7 @@ export function AICVArranger({
 
                 <div className="flex items-center justify-between">
                   <p className="text-[12px] text-neutral-500">
-                    AI will re-structure sections into action-oriented STAR bullets and categorize your skills.
+                    AI will re-structure sections into action-oriented STAR bullets, format a PDF with JOMP watermark, and attach it to your profile.
                   </p>
                   <button
                     type="button"
@@ -216,7 +292,7 @@ export function AICVArranger({
                     ) : (
                       <>
                         <Icon icon={SparklesIcon} size={15} />
-                        Arrange & Structure
+                        Arrange &amp; Structure
                       </>
                     )}
                   </button>
@@ -227,8 +303,20 @@ export function AICVArranger({
               {result ? (
                 <div className="mt-6 space-y-6">
                   {/* Results Subtabs */}
-                  <div className="flex items-center justify-between border-b border-neutral-200 pb-2">
-                    <div className="flex items-center gap-2">
+                  <div className="flex flex-wrap items-center justify-between gap-2 border-b border-neutral-200 pb-2">
+                    <div className="flex items-center gap-1 sm:gap-2">
+                      <button
+                        type="button"
+                        onClick={() => setActiveTab("preview")}
+                        className={`inline-flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-[13px] font-medium transition-colors ${
+                          activeTab === "preview"
+                            ? "bg-brand text-brand-fg"
+                            : "text-neutral-600 hover:bg-neutral-100"
+                        }`}
+                      >
+                        <Icon icon={EyeIcon} size={14} />
+                        CV Preview (Watermarked)
+                      </button>
                       <button
                         type="button"
                         onClick={() => setActiveTab("overview")}
@@ -251,11 +339,19 @@ export function AICVArranger({
                         }`}
                       >
                         <Icon icon={DocumentCodeIcon} size={14} />
-                        Markdown CV
+                        Markdown
                       </button>
                     </div>
 
                     <div className="flex items-center gap-2">
+                      <button
+                        type="button"
+                        onClick={handleDownloadLocalPdf}
+                        className="inline-flex items-center gap-1 rounded-md border border-neutral-200 bg-white px-2.5 py-1 text-[12px] font-medium text-neutral-700 hover:bg-neutral-50 shadow-xs"
+                      >
+                        <Icon icon={Download04Icon} size={13} />
+                        Download PDF
+                      </button>
                       {activeTab === "markdown" ? (
                         <button
                           type="button"
@@ -269,7 +365,111 @@ export function AICVArranger({
                     </div>
                   </div>
 
-                  {activeTab === "overview" ? (
+                  {/* Watermark notice callout */}
+                  <div className="flex items-start gap-2.5 rounded-xl border border-amber-300/70 bg-amber-50/80 p-3 text-[12px] text-amber-900">
+                    <span className="mt-0.5 inline-block text-[14px]">🏷️</span>
+                    <div>
+                      <span className="font-semibold">JOMP Watermark Applied (Free Tier)</span>
+                      <p className="mt-0.5 text-amber-800">
+                        A JOMP watermark is included across AI-generated CVs. Subscriptions to export clean, watermark-free CVs will be available in an upcoming update.
+                      </p>
+                    </div>
+                  </div>
+
+                  {/* TAB 1: CV DOCUMENT PREVIEW (WITH LIVE WATERMARK) */}
+                  {activeTab === "preview" ? (
+                    <div className="relative overflow-hidden rounded-xl border border-neutral-200 bg-white p-6 sm:p-8 shadow-sm">
+                      {/* Diagonal Watermark Overlay */}
+                      <div
+                        aria-hidden="true"
+                        className="pointer-events-none absolute inset-0 flex items-center justify-center select-none overflow-hidden"
+                      >
+                        <span className="rotate-[-32deg] text-center text-[42px] sm:text-[56px] font-extrabold tracking-wider text-neutral-900/[0.07] uppercase">
+                          CREATED WITH JOMP AI
+                        </span>
+                      </div>
+
+                      {/* Header Watermark Badge */}
+                      <div className="mb-4 flex items-center justify-between border-b border-neutral-100 pb-2 text-[10.5px] uppercase tracking-wider text-neutral-400">
+                        <span>JOMP AI RESUME BUILDER</span>
+                        <span className="rounded-full bg-amber-100/70 px-2 py-0.5 font-medium text-amber-800">Free Tier Watermark</span>
+                      </div>
+
+                      {/* CV Header */}
+                      <div className="relative">
+                        <h2 className="text-[22px] font-bold tracking-tight text-[#01224F]">{fullName}</h2>
+                        <div className="mt-1 flex flex-wrap items-center gap-2 text-[13px] text-neutral-700">
+                          <span className="font-medium text-neutral-900">{result.suggestedTitle}</span>
+                          <span className="text-neutral-300">·</span>
+                          <span className="rounded-md bg-brand/10 px-2 py-0.5 text-[11px] font-semibold text-brand">
+                            {result.targetNiche}
+                          </span>
+                        </div>
+                        <p className="mt-1 text-[11.5px] text-neutral-400">JOMP Verified Talent Network</p>
+                      </div>
+
+                      <hr className="my-4 border-t-2 border-[#01224F]" />
+
+                      {/* Executive Summary */}
+                      <div className="relative space-y-1.5">
+                        <h4 className="text-[12px] font-bold tracking-wider uppercase text-[#01224F]">Executive Summary</h4>
+                        <p className="text-[13px] leading-relaxed text-neutral-700">{result.executiveSummary}</p>
+                      </div>
+
+                      <hr className="my-4 border-neutral-200" />
+
+                      {/* Skills Matrix */}
+                      <div className="relative space-y-2">
+                        <h4 className="text-[12px] font-bold tracking-wider uppercase text-[#01224F]">Core Skills &amp; Proficiencies</h4>
+                        <div className="space-y-1.5 text-[12.5px]">
+                          {Object.entries(result.skillsByCategory || {}).map(([cat, skills]) => (
+                            <div key={cat} className="flex flex-wrap gap-1 text-neutral-700">
+                              <span className="font-semibold text-neutral-900">{cat}:</span>
+                              <span>{skills.join(", ")}</span>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+
+                      <hr className="my-4 border-neutral-200" />
+
+                      {/* Experience Highlights */}
+                      {result.structuredExperience?.length ? (
+                        <div className="relative space-y-3">
+                          <h4 className="text-[12px] font-bold tracking-wider uppercase text-[#01224F]">Professional Experience &amp; Key Achievements</h4>
+                          {result.structuredExperience.map((exp, idx) => (
+                            <div key={idx} className="space-y-1">
+                              <div className="flex flex-wrap items-center justify-between text-[13px]">
+                                <span className="font-semibold text-neutral-900">{exp.role}</span>
+                                <span className="text-[12px] text-neutral-500">{[exp.company, exp.period].filter(Boolean).join(" · ")}</span>
+                              </div>
+                              <ul className="space-y-1 pl-4 text-[12.5px] text-neutral-700 list-disc">
+                                {exp.highlights.map((h, hIdx) => (
+                                  <li key={hIdx}>{h}</li>
+                                ))}
+                              </ul>
+                            </div>
+                          ))}
+                        </div>
+                      ) : null}
+
+                      {/* ATS Keywords */}
+                      {result.atsKeywords?.length ? (
+                        <>
+                          <hr className="my-4 border-neutral-200" />
+                          <div className="relative space-y-1.5">
+                            <h4 className="text-[12px] font-bold tracking-wider uppercase text-[#01224F]">ATS Keywords</h4>
+                            <p className="text-[12px] text-neutral-600">{result.atsKeywords.join("  •  ")}</p>
+                          </div>
+                        </>
+                      ) : null}
+
+                      {/* Bottom Footer Watermark */}
+                      <div className="mt-6 border-t border-neutral-200 pt-3 text-center text-[11px] text-neutral-500">
+                        Created with JOMP AI • Subscribe to remove watermark • https://jomponline.com
+                      </div>
+                    </div>
+                  ) : activeTab === "overview" ? (
                     <div className="space-y-5">
                       {/* Niche & Title Card */}
                       <div className="rounded-xl border border-brand/20 bg-brand/[0.03] p-4">
@@ -324,7 +524,7 @@ export function AICVArranger({
                       {/* Experience Highlights */}
                       {result.structuredExperience?.length ? (
                         <div>
-                          <h4 className="text-[14px] font-semibold text-neutral-900">Experience & Achievements (STAR Bullets)</h4>
+                          <h4 className="text-[14px] font-semibold text-neutral-900">Experience &amp; Achievements (STAR Bullets)</h4>
                           <div className="mt-2.5 space-y-3">
                             {result.structuredExperience.map((item, idx) => (
                               <div key={idx} className="rounded-xl border border-neutral-200 bg-white p-4 shadow-xs">
@@ -387,10 +587,23 @@ export function AICVArranger({
             <div className="flex shrink-0 items-center justify-between border-t border-neutral-100 bg-neutral-50/50 px-6 py-4">
               <div className="text-[12.5px] text-neutral-500">
                 {appliedSuccess ? (
-                  <span className="inline-flex items-center gap-1 font-medium text-emerald-600">
-                    <Icon icon={Tick02Icon} size={15} />
-                    Profile updated with arranged title, bio, and skills!
-                  </span>
+                  <div className="flex flex-col gap-1.5">
+                    <span className="inline-flex items-center gap-1 font-medium text-emerald-600">
+                      <Icon icon={Tick02Icon} size={15} />
+                      Profile updated — title, bio, skills &amp; CV saved!
+                    </span>
+                    {appliedCvUrl ? (
+                      <a
+                        href={appliedCvUrl}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="inline-flex items-center gap-1.5 text-[12px] font-medium text-brand hover:underline"
+                      >
+                        <Icon icon={File01Icon} size={13} />
+                        View your AI-generated CV
+                      </a>
+                    ) : null}
+                  </div>
                 ) : (
                   "Ready to arrange your CV and niche focus"
                 )}
@@ -405,30 +618,36 @@ export function AICVArranger({
                   Close
                 </button>
 
-                {result ? (
+                {result && !appliedSuccess ? (
                   <button
                     type="button"
-                    disabled={isApplying || appliedSuccess}
+                    disabled={isApplying}
                     onClick={handleApplyToProfile}
                     className="inline-flex items-center gap-1.5 rounded-lg bg-brand px-4 py-2 text-[13px] font-medium text-brand-fg transition-colors hover:bg-brand-hover disabled:opacity-60"
                   >
                     {isApplying ? (
                       <>
                         <span className="h-4 w-4 animate-spin rounded-full border-2 border-brand-fg border-t-transparent" />
-                        Saving to Profile…
-                      </>
-                    ) : appliedSuccess ? (
-                      <>
-                        <Icon icon={Tick02Icon} size={15} />
-                        Applied to Profile
+                        Saving CV &amp; Profile…
                       </>
                     ) : (
                       <>
                         <Icon icon={CheckmarkCircle02Icon} size={15} />
-                        Apply to My Profile
+                        Apply &amp; Add CV to Profile
                       </>
                     )}
                   </button>
+                ) : appliedSuccess && appliedCvUrl ? (
+                  <a
+                    href={appliedCvUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    download
+                    className="inline-flex items-center gap-1.5 rounded-lg border border-brand/30 bg-brand/[0.07] px-4 py-2 text-[13px] font-medium text-brand hover:bg-brand/[0.14]"
+                  >
+                    <Icon icon={Download04Icon} size={15} />
+                    Download Watermarked PDF
+                  </a>
                 ) : null}
               </div>
             </div>

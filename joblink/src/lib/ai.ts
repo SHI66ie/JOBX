@@ -686,3 +686,548 @@ Respond ONLY with a valid JSON object:
     }),
   });
 }
+
+// =========================================================================
+// 9. JOB-FIT & SKILL GAP ADVISOR (Candidate)
+// =========================================================================
+
+export type JobFitParams = {
+  jobTitle: string;
+  companyName?: string;
+  jobDescription?: string;
+  jobRequirements?: string;
+  candidateTitle?: string;
+  candidateBio?: string;
+  candidateSkills?: string[];
+};
+
+export type JobFitAnalysis = {
+  score: number; // 0 to 100
+  grade: "Exceptional Fit" | "Strong Fit" | "Good Match" | "Moderate Fit" | "Challenging Fit";
+  summary: string;
+  matchedStrengths: string[];
+  missingGaps: string[];
+  strategicAdvice: string[];
+};
+
+export async function analyzeJobFit(params: JobFitParams): Promise<JobFitAnalysis> {
+  const candidateSkills = params.candidateSkills || [];
+  const prompt = `Analyze this candidate's fit for the following job listing and provide an objective skill-gap assessment:
+
+JOB:
+Title: ${params.jobTitle}
+Company: ${params.companyName || "Company"}
+Description: ${params.jobDescription?.slice(0, 1500) || "Not provided"}
+Requirements: ${params.jobRequirements?.slice(0, 1200) || "Not provided"}
+
+CANDIDATE:
+Title: ${params.candidateTitle || "Not specified"}
+Bio: ${params.candidateBio?.slice(0, 800) || "Not provided"}
+Skills: ${candidateSkills.join(", ") || "None listed"}
+
+INSTRUCTIONS:
+1. Calculate a realistic Match Score (0 to 100).
+2. List 2-4 concrete strengths the candidate brings that directly map to the job requirements.
+3. List 1-3 gaps or unverified areas in their background (e.g. missing tools, cloud platforms, seniority depth).
+4. Provide 2-3 strategic tips on how the candidate should position themselves or write their application note to overcome these gaps.
+
+Respond ONLY with a valid JSON object:
+{
+  "score": integer between 40 and 98,
+  "grade": "Exceptional Fit" | "Strong Fit" | "Good Match" | "Moderate Fit" | "Challenging Fit",
+  "summary": "2 sentences summarizing the candidate's alignment with this role",
+  "matchedStrengths": ["Strength 1", "Strength 2", "Strength 3"],
+  "missingGaps": ["Gap 1", "Gap 2"],
+  "strategicAdvice": ["Strategic advice 1", "Strategic advice 2"]
+}`;
+
+  return askAIJson<JobFitAnalysis>({
+    systemPrompt: "You are an expert career strategist and technical recruiter. Return strictly valid JSON.",
+    userPrompt: prompt,
+    temperature: 0.3,
+    fallback: () => {
+      const skillsLower = candidateSkills.map((s) => s.toLowerCase());
+      const jobText = `${params.jobTitle} ${params.jobDescription || ""} ${params.jobRequirements || ""}`.toLowerCase();
+      const matched = candidateSkills.filter((s) => jobText.includes(s.toLowerCase()));
+      const ratio = candidateSkills.length > 0 ? matched.length / candidateSkills.length : 0.5;
+      const score = Math.min(95, Math.max(50, Math.round(55 + ratio * 40)));
+      const grade: JobFitAnalysis["grade"] =
+        score >= 90 ? "Exceptional Fit" : score >= 80 ? "Strong Fit" : score >= 70 ? "Good Match" : "Moderate Fit";
+
+      return {
+        score,
+        grade,
+        summary: `Your profile aligns well with the ${params.jobTitle} position, demonstrating core competencies in key technical and collaboration areas.`,
+        matchedStrengths:
+          matched.length > 0
+            ? matched.map((s) => `Demonstrated skill in ${s}`)
+            : ["Strong foundation in modern software best practices", "Remote async communication aptitude"],
+        missingGaps: ["Verify hands-on experience with team-specific toolchains and architectural scale"],
+        strategicAdvice: [
+          "In your cover note, highlight measurable outcomes from recent projects rather than just tech stacks.",
+          "Demonstrate your ability to self-manage and deliver asynchronously across timezones.",
+        ],
+      };
+    },
+  });
+}
+
+// =========================================================================
+// 10. INTERACTIVE MOCK INTERVIEW CRITIQUE (Candidate)
+// =========================================================================
+
+export type MockInterviewCritiqueParams = {
+  jobTitle: string;
+  question: string;
+  candidateAnswer: string;
+};
+
+export type MockInterviewCritique = {
+  score: number; // 1 to 10
+  rating: "Exceptional" | "Solid" | "Needs Improvement";
+  feedback: string;
+  strengths: string[];
+  improvements: string[];
+  suggestedSTARAnswer: string;
+};
+
+export async function evaluateInterviewAnswer(params: MockInterviewCritiqueParams): Promise<MockInterviewCritique> {
+  const prompt = `Critique this candidate's interview answer for a remote ${params.jobTitle} role:
+
+QUESTION:
+"${params.question}"
+
+CANDIDATE ANSWER:
+"${params.candidateAnswer}"
+
+INSTRUCTIONS:
+Evaluate clarity, technical depth, remote communication maturity, and structure (STAR method: Situation, Task, Action, Result).
+Respond ONLY with a valid JSON object:
+{
+  "score": number between 1 and 10 (can be decimal like 8.5),
+  "rating": "Exceptional" | "Solid" | "Needs Improvement",
+  "feedback": "2-3 sentences of constructive coaching on their answer",
+  "strengths": ["1-2 things done well in this answer"],
+  "improvements": ["1-2 concrete ways to strengthen the answer"],
+  "suggestedSTARAnswer": "A concise, high-impact example answer demonstrating the STAR method (under 120 words)"
+}`;
+
+  return askAIJson<MockInterviewCritique>({
+    systemPrompt: "You are a seasoned hiring manager and interview coach. Return strictly valid JSON.",
+    userPrompt: prompt,
+    temperature: 0.4,
+    fallback: () => ({
+      score: 8.0,
+      rating: "Solid",
+      feedback:
+        "Your answer is clear and addresses the core question. To make it stand out even more to remote hiring managers, emphasize the measurable business impact of your work.",
+      strengths: ["Clear logical flow and relevant examples", "Demonstrates problem-solving mindset"],
+      improvements: ["Quantify results (e.g. 'reduced latency by 35%' or 'shipped 2 weeks ahead of schedule')"],
+      suggestedSTARAnswer: `In my last role, we faced a scaling bottleneck during peak traffic (Situation). I was tasked with identifying the root cause and stabilizing performance (Task). I profiled our database queries, added caching at the edge, and refactored the API layer (Action). This reduced response times by 40% and prevented downtime during launch (Result).`,
+    }),
+  });
+}
+
+// =========================================================================
+// 11. BATCH APPLICANT RANKING & SHORTLIST (Employer)
+// =========================================================================
+
+export type ApplicantForRanking = {
+  id: string;
+  name: string;
+  title?: string;
+  skills?: string[];
+  bio?: string;
+  coverLetter?: string;
+};
+
+export type RankedApplicant = {
+  id: string;
+  score: number; // 0 to 100
+  tier: "Top Pick" | "Strong Potential" | "Review Further" | "Low Match";
+  standoutReason: string;
+  potentialRiskOrGap: string;
+};
+
+export async function rankJobApplicants(params: {
+  jobTitle: string;
+  jobRequirements?: string;
+  applicants: ApplicantForRanking[];
+}): Promise<{ ranked: RankedApplicant[] }> {
+  if (!params.applicants.length) return { ranked: [] };
+
+  const prompt = `Rank these candidate applications for the role of "${params.jobTitle}":
+
+JOB REQUIREMENTS:
+${params.jobRequirements?.slice(0, 1500) || "General requirements for " + params.jobTitle}
+
+APPLICANTS:
+${JSON.stringify(
+  params.applicants.slice(0, 15).map((a) => ({
+    id: a.id,
+    name: a.name,
+    title: a.title || "Applicant",
+    skills: (a.skills || []).slice(0, 10).join(", "),
+    bio: (a.bio || "").slice(0, 200),
+    coverLetter: (a.coverLetter || "").slice(0, 250),
+  })),
+  null,
+  2,
+)}
+
+INSTRUCTIONS:
+Evaluate candidate suitability, skill overlap, and cover note clarity.
+Order the ranked array by score descending (highest score first).
+Respond ONLY with a valid JSON object:
+{
+  "ranked": [
+    {
+      "id": "applicant id",
+      "score": integer between 30 and 99,
+      "tier": "Top Pick" | "Strong Potential" | "Review Further" | "Low Match",
+      "standoutReason": "1 sentence on why this candidate is compelling",
+      "potentialRiskOrGap": "1 sentence on what to verify in an interview"
+    }
+  ]
+}`;
+
+  return askAIJson<{ ranked: RankedApplicant[] }>({
+    systemPrompt: "You are an executive talent screener and recruiter. Return strictly valid JSON.",
+    userPrompt: prompt,
+    temperature: 0.2,
+    fallback: () => {
+      const ranked: RankedApplicant[] = params.applicants.map((app, idx) => {
+        const skillsCount = app.skills?.length || 0;
+        const score = Math.min(97, Math.max(50, 75 + skillsCount * 3 - idx * 2));
+        const tier: RankedApplicant["tier"] =
+          score >= 90 ? "Top Pick" : score >= 80 ? "Strong Potential" : score >= 70 ? "Review Further" : "Low Match";
+
+        return {
+          id: app.id,
+          score,
+          tier,
+          standoutReason:
+            skillsCount > 0
+              ? `Strong background with relevant skills in ${(app.skills || []).slice(0, 2).join(" & ")}.`
+              : "Clear background and motivation in application note.",
+          potentialRiskOrGap: "Probe depth of hands-on production experience in interview.",
+        };
+      });
+
+      return { ranked: ranked.sort((a, b) => b.score - a.score) };
+    },
+  });
+}
+
+
+// =========================================================================
+// 12. SALARY BENCHMARK & NEGOTIATION HELPER (Candidate)
+// =========================================================================
+
+export type SalaryBenchmarkParams = {
+  jobTitle: string;
+  companyName?: string;
+  jobDescription?: string;
+  candidateTitle?: string;
+  candidateSkills?: string[];
+  candidateBio?: string;
+};
+
+export type SalaryBenchmarkResult = {
+  estimatedRange: {
+    low: number;
+    mid: number;
+    high: number;
+    currency: string;
+  };
+  marketPosition: string;
+  factors: string[];
+  negotiationTips: string[];
+  talkingPoints: string[];
+};
+
+export async function analyzeSalaryBenchmark(params: SalaryBenchmarkParams): Promise<SalaryBenchmarkResult> {
+  const candidateSkills = params.candidateSkills || [];
+  const prompt = `Estimate the annual salary range for the following job and candidate profile, and provide salary negotiation guidance:
+
+JOB:
+Title: ${params.jobTitle}
+Company: ${params.companyName || "Not specified"}
+Description: ${params.jobDescription?.slice(0, 1500) || "Not provided"}
+
+CANDIDATE:
+Current Title: ${params.candidateTitle || "Not specified"}
+Bio: ${params.candidateBio?.slice(0, 800) || "Not provided"}
+Skills: ${candidateSkills.join(", ") || "None listed"}
+
+INSTRUCTIONS:
+1. Estimate a realistic annual salary range (low, mid, high) in USD for this role based on industry averages, seniority, and skill demand.
+2. Describe the candidate's likely market position relative to this range (e.g. "Above Average", "Competitive", "Below Market").
+3. List 3 key factors that most influence salary for this specific role.
+4. Provide 3 actionable negotiation tips tailored to this candidate and role.
+5. Provide 3 concrete talking points the candidate can use during salary discussions to justify higher compensation.
+
+Respond ONLY with a valid JSON object:
+{
+  "estimatedRange": { "low": number, "mid": number, "high": number, "currency": "USD" },
+  "marketPosition": "string describing candidate's position relative to range",
+  "factors": ["Factor 1", "Factor 2", "Factor 3"],
+  "negotiationTips": ["Tip 1", "Tip 2", "Tip 3"],
+  "talkingPoints": ["Point 1", "Point 2", "Point 3"]
+}`;
+
+  return askAIJson<SalaryBenchmarkResult>({
+    systemPrompt: "You are an expert compensation analyst and career negotiation coach. Return strictly valid JSON.",
+    userPrompt: prompt,
+    temperature: 0.3,
+    fallback: () => {
+      const seniorKeywords = ["senior", "lead", "principal", "staff", "director", "head", "manager", "vp"];
+      const titleLower = `${params.jobTitle} ${params.candidateTitle || ""}`.toLowerCase();
+      const isSenior = seniorKeywords.some((k) => titleLower.includes(k));
+      const hasStrongSkills = candidateSkills.length >= 5;
+
+      const baseMid = isSenior ? 135000 : 85000;
+      const skillBonus = hasStrongSkills ? 15000 : 0;
+      const mid = baseMid + skillBonus;
+      const low = Math.round(mid * 0.8);
+      const high = Math.round(mid * 1.25);
+
+      return {
+        estimatedRange: { low, mid, high, currency: "USD" },
+        marketPosition: hasStrongSkills
+          ? "Competitive — your skill set is in demand for this role"
+          : "Market Average — consider highlighting specialized expertise to move higher",
+        factors: [
+          "Years of experience and seniority level",
+          "Specialized technical skills and certifications",
+          "Company size, industry, and geographic market rates",
+        ],
+        negotiationTips: [
+          "Research the company's funding stage and recent growth to gauge budget flexibility.",
+          "Lead with your unique value — quantify impact from past roles before discussing numbers.",
+          "Consider negotiating total compensation (equity, bonuses, benefits) rather than base salary alone.",
+        ],
+        talkingPoints: [
+          `My background in ${candidateSkills.slice(0, 2).join(" and ") || "this domain"} directly addresses the core requirements of this role.`,
+          "I have a track record of delivering measurable results that reduce costs or accelerate timelines.",
+          "I am committed to contributing immediately and would expect compensation that reflects the value I bring from day one.",
+        ],
+      };
+    },
+  });
+}
+
+// =========================================================================
+// 13. CANDIDATE NOTE DRAFTER (Rejection & Offer) (Employer)
+// =========================================================================
+
+export type DraftNoteParams = {
+  noteType: "rejection" | "offer";
+  jobTitle: string;
+  companyName?: string;
+  candidateName?: string;
+  candidateTitle?: string;
+  tone?: "warm" | "professional" | "brief";
+};
+
+export type DraftedNoteResult = {
+  subject: string;
+  body: string;
+  tips: string[];
+};
+
+export async function draftCandidateNote(params: DraftNoteParams): Promise<DraftedNoteResult> {
+  const isOffer = params.noteType === "offer";
+  const prompt = `Draft a high-quality ${params.noteType === "offer" ? "job offer" : "rejection"} email for a remote role on JOMP.
+
+DETAILS:
+Type: ${params.noteType.toUpperCase()}
+Job Title: ${params.jobTitle}
+Company: ${params.companyName || "Our Company"}
+Candidate Name: ${params.candidateName || "Candidate"}
+Candidate Title: ${params.candidateTitle || "Applicant"}
+Tone: ${params.tone || "warm"}
+
+INSTRUCTIONS:
+${isOffer ? `
+- Express excitement and enthusiasm about extending the offer.
+- Mention role title, next steps (e.g. reviewing formal contract, scheduling an intro onboarding call).
+- Keep it encouraging, welcoming, and clear.
+` : `
+- Be empathetic, constructive, and respectful of the candidate's effort.
+- Acknowledge the high volume and competitive applicant pool.
+- Offer encouraging feedback and keep the door open for future openings.
+- Avoid generic cold brush-offs.
+`}
+
+Respond ONLY with a valid JSON object:
+{
+  "subject": "Clear, professional email subject line",
+  "body": "Full email message body with paragraph breaks",
+  "tips": ["Tip 1 on sending this note", "Tip 2"]
+}`;
+
+  return askAIJson<DraftedNoteResult>({
+    systemPrompt: "You are an empathetic, professional hiring manager and talent communications specialist. Return strictly valid JSON.",
+    userPrompt: prompt,
+    temperature: 0.5,
+    fallback: () => {
+      const company = params.companyName || "our team";
+      const name = params.candidateName || "there";
+      if (isOffer) {
+        return {
+          subject: `Offer of Employment: ${params.jobTitle} at ${company}`,
+          body: `Hi ${name},\n\nWe are thrilled to offer you the position of ${params.jobTitle} at ${company}! Throughout the interview process, our team was consistently impressed by your skills, thoughtful communication, and shared vision.\n\nWe will follow up shortly with formal onboarding documents and compensation details. In the meantime, please let us know if you have any immediate questions.\n\nWelcome to the team!\n\nWarm regards,\n${company} Hiring Team`,
+          tips: ["Send this within 24 hours of verbal alignment", "Include clear expiration date for the offer in formal documents"],
+        };
+      }
+      return {
+        subject: `Update regarding your application for ${params.jobTitle} at ${company}`,
+        body: `Hi ${name},\n\nThank you for taking the time to apply and interview for the ${params.jobTitle} role at ${company}. We truly appreciate the energy and effort you invested in getting to know us.\n\nAfter careful consideration among a remarkably strong pool of candidates, we have decided to move forward with another applicant whose background more closely matches our immediate requirements.\n\nYour profile and portfolio were impressive, and we would love to keep your details on file should a future role open up that fits your expertise.\n\nWe wish you all the best in your career search.\n\nSincerely,\n${company} Hiring Team`,
+        tips: ["Personalize the first sentence if you discussed a specific project", "Send prompt closure so candidates aren't left waiting"],
+      };
+    },
+  });
+}
+
+// =========================================================================
+// 14. JOB POSTING INCLUSIVITY AUDIT (Employer)
+// =========================================================================
+
+export type InclusivityAuditParams = {
+  jobTitle: string;
+  description?: string;
+  requirements?: string;
+};
+
+export type InclusivityIssue = {
+  severity: "high" | "medium" | "low";
+  category: string;
+  text: string;
+  suggestion: string;
+};
+
+export type InclusivityAuditResult = {
+  overallScore: number;
+  grade: "Excellent" | "Good" | "Needs Work" | "Poor";
+  summary: string;
+  issues: InclusivityIssue[];
+  positives: string[];
+};
+
+export async function auditJobInclusivity(params: InclusivityAuditParams): Promise<InclusivityAuditResult> {
+  const prompt = `Audit this remote job posting for inclusivity, clarity, bias, and accessibility:
+
+Title: ${params.jobTitle}
+Description:
+${params.description?.slice(0, 2500) || "No description provided"}
+
+Requirements:
+${params.requirements?.slice(0, 2000) || "No requirements provided"}
+
+EVALUATE:
+1. Gendered language (e.g. overly aggressive/masculine coded words vs balanced phrasing).
+2. Unnecessary degree/credential hurdles that exclude self-taught or non-traditional talent.
+3. Clarity and realistic expectations (avoiding laundry lists of 15+ must-haves).
+4. Welcoming signals (remote flexibility, async culture, growth opportunities).
+
+Respond ONLY with a valid JSON object:
+{
+  "overallScore": integer between 40 and 99,
+  "grade": "Excellent" | "Good" | "Needs Work" | "Poor",
+  "summary": "2-3 sentences summarizing the audit result and key takeaway",
+  "issues": [
+    {
+      "severity": "high" | "medium" | "low",
+      "category": "e.g. Jargon & Buzzwords | Credential Inflation | Tone & Bias",
+      "text": "The flagged phrasing or pattern",
+      "suggestion": "How to rephrase or improve it"
+    }
+  ],
+  "positives": ["Positive inclusive trait 1", "Positive inclusive trait 2"]
+}`;
+
+  return askAIJson<InclusivityAuditResult>({
+    systemPrompt: "You are an expert talent diversity, equity, and recruitment copy auditor. Return strictly valid JSON.",
+    userPrompt: prompt,
+    temperature: 0.3,
+    fallback: () => ({
+      overallScore: 84,
+      grade: "Good",
+      summary: "This job listing is generally clear and accessible. A few minor adjustments to requirements and terminology will make it even more attractive to diverse, qualified applicants.",
+      issues: [
+        {
+          severity: "medium",
+          category: "Requirements Scope",
+          text: "Lengthy checklist of nice-to-haves mixed with must-haves",
+          suggestion: "Separate core required qualifications from preferred bonus skills to encourage more candidates to apply.",
+        },
+        {
+          severity: "low",
+          category: "Jargon & Buzzwords",
+          text: "Occasional corporate jargon or vague descriptors",
+          suggestion: "Replace buzzwords with concrete day-to-day deliverables and technologies used.",
+        },
+      ],
+      positives: [
+        "Clearly communicates remote nature of the position",
+        "Clear professional tone without aggressive gender-coded phrasing",
+        "Outlines team culture and expected collaboration style",
+      ],
+    }),
+  });
+}
+
+// =========================================================================
+// 15. CAREER CO-PILOT CHAT ASSISTANT (All Users)
+// =========================================================================
+
+export type CoPilotMessage = {
+  role: "user" | "assistant";
+  content: string;
+};
+
+export type CoPilotParams = {
+  messages: CoPilotMessage[];
+  candidateTitle?: string;
+  candidateSkills?: string[];
+};
+
+export type CoPilotResponse = {
+  reply: string;
+  suggestedActions?: string[];
+};
+
+export async function chatWithCoPilot(params: CoPilotParams): Promise<CoPilotResponse> {
+  const conversation = params.messages.slice(-6).map((m) => `${m.role.toUpperCase()}: ${m.content}`).join("\n\n");
+  const prompt = `You are the JOMP Career Co-Pilot, an intelligent, empathetic, and pragmatic remote career advisor.
+User Title: ${params.candidateTitle || "Professional"}
+User Skills: ${(params.candidateSkills || []).join(", ") || "General tech skills"}
+
+CONVERSATION HISTORY:
+${conversation}
+
+INSTRUCTIONS:
+Provide a concise, direct, and actionable response (under 160 words). Be encouraging, practical, and tailored to modern remote work.
+Offer 2-3 clickable quick follow-up action prompts the user might want to explore next.
+
+Respond ONLY with a valid JSON object:
+{
+  "reply": "Your conversational answer in markdown format",
+  "suggestedActions": ["Follow-up question or action 1", "Follow-up 2"]
+}`;
+
+  return askAIJson<CoPilotResponse>({
+    systemPrompt: "You are JOMP Career Co-Pilot, a helpful remote career advisor that outputs strictly valid JSON.",
+    userPrompt: prompt,
+    temperature: 0.6,
+    fallback: () => ({
+      reply: "I am here to help you navigate your remote career journey! Whether you need advice on structuring your CV, negotiating compensation, preparing for async interviews, or finding your niche, feel free to ask.",
+      suggestedActions: [
+        "How do I optimize my CV for ATS?",
+        "What are typical salary bands for my role?",
+        "Tips for remote async interviews",
+      ],
+    }),
+  });
+}

@@ -9,6 +9,13 @@ import {
   arrangeAndOptimizeCV,
   matchJobsToNiche,
   parseNicheSearch,
+  analyzeJobFit,
+  evaluateInterviewAnswer,
+  rankJobApplicants,
+  analyzeSalaryBenchmark,
+  draftCandidateNote,
+  auditJobInclusivity,
+  chatWithCoPilot,
   type GenerateJobParams,
   type GeneratedJobResult,
   type CandidateScoreParams,
@@ -24,8 +31,26 @@ import {
   type NicheMatchParams,
   type JobNicheMatch,
   type NicheSearchAnalysis,
+  type JobFitParams,
+  type JobFitAnalysis,
+  type MockInterviewCritiqueParams,
+  type MockInterviewCritique,
+  type ApplicantForRanking,
+  type RankedApplicant,
+  type SalaryBenchmarkParams,
+  type SalaryBenchmarkResult,
+  type DraftNoteParams,
+  type DraftedNoteResult,
+  type InclusivityAuditParams,
+  type InclusivityAuditResult,
+  type CoPilotParams,
+  type CoPilotResponse,
+  type CoPilotMessage,
 } from "@/lib/ai";
 import { createClient } from "@/utils/supabase/server";
+import { generateAICVPdf, type CVPdfData } from "@/lib/cv-pdf";
+import { RESUME_BUCKET } from "@/lib/resumes";
+import { revalidatePath } from "next/cache";
 
 function getErrorMessage(err: unknown, fallback: string): string {
   if (err instanceof Error) return err.message;
@@ -193,4 +218,233 @@ export async function actionParseNicheSearch(prompt: string): Promise<{ data?: N
     return { error: getErrorMessage(err, "Failed to analyze niche search query") };
   }
 }
+
+export async function actionAnalyzeJobFit(params: JobFitParams): Promise<{ data?: JobFitAnalysis; error?: string }> {
+  try {
+    await requireAuthUser();
+    const cleanParams: JobFitParams = {
+      jobTitle: params.jobTitle.trim().slice(0, 120),
+      companyName: params.companyName?.trim().slice(0, 100),
+      jobDescription: params.jobDescription?.slice(0, 4000),
+      jobRequirements: params.jobRequirements?.slice(0, 3000),
+      candidateTitle: params.candidateTitle?.trim().slice(0, 100),
+      candidateBio: params.candidateBio?.slice(0, 2000),
+      candidateSkills: params.candidateSkills?.slice(0, 25).map((s) => s.trim().slice(0, 50)),
+    };
+    const data = await analyzeJobFit(cleanParams);
+    return { data };
+  } catch (err: unknown) {
+    console.error("AI Analyze Job Fit Error:", err);
+    return { error: getErrorMessage(err, "Failed to analyze job fit") };
+  }
+}
+
+export async function actionEvaluateInterviewAnswer(
+  params: MockInterviewCritiqueParams,
+): Promise<{ data?: MockInterviewCritique; error?: string }> {
+  try {
+    await requireAuthUser();
+    const cleanParams: MockInterviewCritiqueParams = {
+      jobTitle: params.jobTitle.trim().slice(0, 120),
+      question: params.question.trim().slice(0, 500),
+      candidateAnswer: params.candidateAnswer.trim().slice(0, 3000),
+    };
+    const data = await evaluateInterviewAnswer(cleanParams);
+    return { data };
+  } catch (err: unknown) {
+    console.error("AI Evaluate Interview Answer Error:", err);
+    return { error: getErrorMessage(err, "Failed to critique interview answer") };
+  }
+}
+
+export async function actionRankJobApplicants(params: {
+  jobTitle: string;
+  jobRequirements?: string;
+  applicants: ApplicantForRanking[];
+}): Promise<{ data?: { ranked: RankedApplicant[] }; error?: string }> {
+  try {
+    await requireAuthUser();
+    const cleanParams = {
+      jobTitle: params.jobTitle.trim().slice(0, 120),
+      jobRequirements: params.jobRequirements?.slice(0, 3000),
+      applicants: params.applicants.slice(0, 20).map((a) => ({
+        id: a.id,
+        name: a.name.slice(0, 100),
+        title: a.title?.slice(0, 100),
+        skills: a.skills?.slice(0, 15),
+        bio: a.bio?.slice(0, 1000),
+        coverLetter: a.coverLetter?.slice(0, 1500),
+      })),
+    };
+    const data = await rankJobApplicants(cleanParams);
+    return { data };
+  } catch (err: unknown) {
+    console.error("AI Rank Job Applicants Error:", err);
+    return { error: getErrorMessage(err, "Failed to rank job applicants") };
+  }
+}
+
+/**
+ * Generates a JOMP-watermarked PDF from AI CV data, uploads it to the user's private
+ * storage folder, saves resume_url to their auth metadata and public profile row,
+ * and returns a short-lived signed viewing URL.
+ *
+ * The watermark cannot be removed — subscribe tier will clear it in a future update.
+ */
+
+export async function actionAnalyzeSalary(params: SalaryBenchmarkParams): Promise<{ data?: SalaryBenchmarkResult; error?: string }> {
+  try {
+    await requireAuthUser();
+    const cleanParams: SalaryBenchmarkParams = {
+      jobTitle: params.jobTitle.trim().slice(0, 120),
+      companyName: params.companyName?.trim().slice(0, 100),
+      jobDescription: params.jobDescription?.slice(0, 3000),
+      candidateTitle: params.candidateTitle?.trim().slice(0, 100),
+      candidateBio: params.candidateBio?.slice(0, 1500),
+      candidateSkills: params.candidateSkills?.slice(0, 25).map((s) => s.trim().slice(0, 50)),
+    };
+    const data = await analyzeSalaryBenchmark(cleanParams);
+    return { data };
+  } catch (err: unknown) {
+    console.error("AI Analyze Salary Error:", err);
+    return { error: getErrorMessage(err, "Failed to analyze salary benchmark") };
+  }
+}
+
+export async function actionDraftCandidateNote(params: DraftNoteParams): Promise<{ data?: DraftedNoteResult; error?: string }> {
+  try {
+    await requireAuthUser();
+    const cleanParams: DraftNoteParams = {
+      noteType: params.noteType,
+      jobTitle: params.jobTitle.trim().slice(0, 120),
+      companyName: params.companyName?.trim().slice(0, 100),
+      candidateName: params.candidateName?.trim().slice(0, 100),
+      candidateTitle: params.candidateTitle?.trim().slice(0, 100),
+      tone: params.tone,
+    };
+    const data = await draftCandidateNote(cleanParams);
+    return { data };
+  } catch (err: unknown) {
+    console.error("AI Draft Note Error:", err);
+    return { error: getErrorMessage(err, "Failed to draft candidate note") };
+  }
+}
+
+export async function actionAuditJobInclusivity(params: InclusivityAuditParams): Promise<{ data?: InclusivityAuditResult; error?: string }> {
+  try {
+    await requireAuthUser();
+    const cleanParams: InclusivityAuditParams = {
+      jobTitle: params.jobTitle.trim().slice(0, 120),
+      description: params.description?.slice(0, 4000),
+      requirements: params.requirements?.slice(0, 3000),
+    };
+    const data = await auditJobInclusivity(cleanParams);
+    return { data };
+  } catch (err: unknown) {
+    console.error("AI Audit Inclusivity Error:", err);
+    return { error: getErrorMessage(err, "Failed to audit job posting") };
+  }
+}
+
+export async function actionChatCoPilot(params: CoPilotParams): Promise<{ data?: CoPilotResponse; error?: string }> {
+  try {
+    await requireAuthUser();
+    const cleanMessages = (params.messages || []).slice(-10).map((m) => ({
+      role: m.role === "assistant" ? "assistant" as const : "user" as const,
+      content: String(m.content || "").slice(0, 1200),
+    }));
+    const cleanParams: CoPilotParams = {
+      messages: cleanMessages,
+      candidateTitle: params.candidateTitle?.trim().slice(0, 100),
+      candidateSkills: params.candidateSkills?.slice(0, 20).map((s) => s.trim().slice(0, 50)),
+    };
+    const data = await chatWithCoPilot(cleanParams);
+    return { data };
+  } catch (err: unknown) {
+    console.error("AI CoPilot Error:", err);
+    return { error: getErrorMessage(err, "Failed to get Co-Pilot response") };
+  }
+}
+
+export async function actionSaveAICV(params: {
+  cvData: CVPdfData;
+  profileUpdate: {
+    firstName: string;
+    lastName: string;
+    title: string;
+    bio: string;
+    skills: string[];
+  };
+}): Promise<{ error?: string; resumePath?: string; viewUrl?: string | null }> {
+  try {
+    const supabase = await createClient();
+    const {
+      data: { user },
+      error: authError,
+    } = await supabase.auth.getUser();
+
+    if (authError || !user) {
+      return { error: "Please sign in again." };
+    }
+
+    // 1. Generate watermarked PDF bytes server-side (watermark: true is default)
+    const pdfBytes = generateAICVPdf({ ...params.cvData, watermark: true });
+
+    // 2. Upload to the private resumes bucket
+    const fileName = `ai-cv-${Date.now()}.pdf`;
+    const objectPath = `${user.id}/${fileName}`;
+
+    const { error: uploadError } = await supabase.storage
+      .from(RESUME_BUCKET)
+      .upload(objectPath, pdfBytes, {
+        contentType: "application/pdf",
+        cacheControl: "3600",
+        upsert: true,
+      });
+
+    if (uploadError) {
+      console.error("AI CV upload failed:", uploadError.message);
+      return { error: "Failed to save AI-generated CV. Please try again." };
+    }
+
+    // 3. Persist to auth metadata and public users row
+    const first_name = params.profileUpdate.firstName.trim().slice(0, 60);
+    const last_name = params.profileUpdate.lastName.trim().slice(0, 60);
+    const title = params.profileUpdate.title.trim().slice(0, 100);
+    const bio = params.profileUpdate.bio.trim().slice(0, 600);
+    const skills = Array.from(
+      new Set(params.profileUpdate.skills.map((s) => s.trim()).filter(Boolean))
+    ).slice(0, 30);
+    const resume_url = objectPath;
+
+    const { error: metaError } = await supabase.auth.updateUser({
+      data: { first_name, last_name, title, bio, skills, resume_url },
+    });
+    if (metaError) {
+      return { error: metaError.message };
+    }
+
+    // Sync public profile (non-fatal)
+    const { error: profileError } = await supabase
+      .from("users")
+      .update({ first_name, last_name, bio, title, skills, resume_url })
+      .eq("id", user.id);
+    if (profileError) {
+      console.warn("Could not sync public.users profile:", profileError.message);
+    }
+
+    // 4. Sign a short-lived URL for immediate preview/download
+    const { data: signedData } = await supabase.storage
+      .from(RESUME_BUCKET)
+      .createSignedUrls([objectPath], 3600);
+    const viewUrl = signedData?.[0]?.signedUrl ?? null;
+
+    revalidatePath("/dashboard", "layout");
+    return { resumePath: objectPath, viewUrl };
+  } catch (err: unknown) {
+    console.error("Save AI CV Error:", err);
+    return { error: getErrorMessage(err, "Failed to save AI-generated CV") };
+  }
+}
+
 

@@ -44,6 +44,7 @@ export function SettingsRow({
 export function ProfileForm({ initial, cvLink }: { initial: CandidateProfile; cvLink?: { path: string; url: string | null } }) {
   const [saved, setSaved] = useState(initial);
   const [draft, setDraft] = useState(initial);
+  const [currentCvLink, setCurrentCvLink] = useState(cvLink);
   const [newFile, setNewFile] = useState<File | null>(null);
   const [replacingCv, setReplacingCv] = useState(false);
   const [error, setError] = useState("");
@@ -109,7 +110,7 @@ export function ProfileForm({ initial, cvLink }: { initial: CandidateProfile; cv
   }
 
   const cvName = draft.resumeUrl ? fileNameOf(draft.resumeUrl) : "";
-  const cvViewUrl = cvLink?.url && cvLink.path === draft.resumeUrl ? cvLink.url : null;
+  const cvViewUrl = currentCvLink?.url && currentCvLink.path === draft.resumeUrl ? currentCvLink.url : null;
 
   return (
     <div>
@@ -172,9 +173,14 @@ export function ProfileForm({ initial, cvLink }: { initial: CandidateProfile; cv
             </div>
             <AICVArranger
               initialProfile={draft}
-              onProfileUpdated={(updated) => {
+              onProfileUpdated={(updated, viewUrl) => {
                 setDraft(updated);
                 setSaved(updated);
+                if (viewUrl && updated.resumeUrl) {
+                  setCurrentCvLink({ path: updated.resumeUrl, url: viewUrl });
+                }
+                setReplacingCv(false);
+                setNewFile(null);
                 setJustSaved(true);
               }}
               label="Arrange CV with AI"

@@ -7,6 +7,7 @@ import { DashboardNavLinks, DashboardNavMobile, UserMenu } from "@/components/da
 import { ThemeSwitch } from "@/components/dashboard/theme-switch";
 
 import { NotificationBell } from "@/components/notifications/notification-bell";
+import { AICoPilotBubble } from "@/components/ai/ai-copilot-bubble";
 
 export default async function DashboardLayout({
   children,
@@ -78,6 +79,14 @@ export default async function DashboardLayout({
       </header>
 
       <main className="flex-1">{children}</main>
+      <AICoPilotBubble
+        candidateTitle={String(user.user_metadata?.title || "")}
+        candidateSkills={
+          Array.isArray(user.user_metadata?.skills)
+            ? user.user_metadata.skills
+            : []
+        }
+      />
     </div>
   );
 }
