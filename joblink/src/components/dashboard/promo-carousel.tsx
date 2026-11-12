@@ -102,10 +102,10 @@ function RemoteArt() {
         <path d="M6 24h36M9 15h30M9 33h30" strokeLinecap="round" />
       </svg>
       <span className="absolute -right-7 top-3 rounded-full bg-white px-2.5 py-1 text-[11px] font-semibold text-[#01224F] shadow-sm">
-        Lagos
+        On-site
       </span>
       <span className="absolute -left-9 bottom-7 rounded-full bg-white px-2.5 py-1 text-[11px] font-semibold text-[#01224F] shadow-sm">
-        London
+        Full-time
       </span>
       <span className="absolute -right-10 bottom-1 rounded-full bg-[#8fb4e8] px-2.5 py-1 text-[11px] font-semibold text-[#01224F] shadow-sm">
         Remote
@@ -157,9 +157,9 @@ function buildSlides(strength: ProfileStrength): Slide[] {
       art: <MatchArt />,
     },
     {
-      id: "remote",
-      eyebrow: "Remote-first",
-      title: "Every role on JOMP is remote. Work from wherever you are.",
+      id: "opportunities",
+      eyebrow: "All job types",
+      title: "Full-time, part-time, on-site, remote, contract, or NGO — find opportunities tailored to you.",
       cta: "Browse latest jobs",
       href: "/dashboard?tab=recent",
       art: <RemoteArt />,

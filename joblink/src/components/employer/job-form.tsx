@@ -99,7 +99,7 @@ export function JobForm({
       <input type="hidden" name="location" value="Remote" />
 
       <div className="mb-4 flex items-center justify-between">
-        <p className="text-[13px] text-neutral-500">All jobs on JOMP are remote.</p>
+        <p className="text-[13px] text-neutral-500">Reach top talent across all roles and work arrangements.</p>
         <AIJobAssistant
           onApply={(aiJob) => {
             setValues({
@@ -119,7 +119,7 @@ export function JobForm({
           <TextField id="title" name="title" label="Job title" hideLabel required value={values.title} onChange={(event) => change("title", event.target.value)} placeholder="e.g. Senior Frontend Engineer" maxLength={120} />
         </SettingsRow>
 
-        <SettingsRow label="Job type" hint="All roles on JOMP are remote.">
+        <SettingsRow label="Job type" hint="Select the arrangement for this role.">
           <fieldset>
             <legend className="sr-only">Job type</legend>
             <div className="flex flex-wrap gap-2">

@@ -154,7 +154,7 @@ export default async function JobBoardPage({ searchParams }: { searchParams: Pro
               {isFiltered ? "No jobs match your search" : "No open jobs yet"}
             </p>
             <p className="mt-1.5 max-w-sm text-[14px] leading-6 text-neutral-500">
-              {isFiltered ? "Try a broader keyword or fewer filters." : "New remote roles are posted often. Check back soon."}
+              {isFiltered ? "Try a broader keyword or fewer filters." : "New roles are posted often. Check back soon."}
             </p>
             {isFiltered ? (
               <Link
