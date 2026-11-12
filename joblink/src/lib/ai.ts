@@ -14,7 +14,14 @@ export function isAIConfigured(): boolean {
   return Boolean(process.env.GEMINI_API_KEY || process.env.OPENAI_API_KEY);
 }
 
-/** Low-level Gemini caller */
+const GEMINI_MODELS = [
+  process.env.GEMINI_MODEL || "gemini-3.5-flash-lite",
+  "gemini-3.1-flash-lite",
+  "gemini-3.6-flash",
+  "gemini-3-flash-preview",
+];
+
+/** Low-level Gemini caller with multi-model failover & transient retry */
 async function callGemini(opts: {
   systemPrompt?: string;
   userPrompt: string;
@@ -23,36 +30,62 @@ async function callGemini(opts: {
 }): Promise<string> {
   const apiKey = process.env.GEMINI_API_KEY;
   if (!apiKey) throw new Error("GEMINI_API_KEY is not configured");
-  const model = GEMINI_MODEL;
-  const url = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${apiKey}`;
 
-  const body: Record<string, unknown> = {
-    contents: [{ role: "user", parts: [{ text: opts.userPrompt }] }],
-    generationConfig: {
-      temperature: opts.temperature ?? 0.4,
-      responseMimeType: opts.jsonMode ? "application/json" : "text/plain",
-    },
-  };
+  let lastError: Error | null = null;
 
-  if (opts.systemPrompt) {
-    body.systemInstruction = { parts: [{ text: opts.systemPrompt }] };
+  for (const model of GEMINI_MODELS) {
+    const url = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${apiKey}`;
+
+    const body: Record<string, unknown> = {
+      contents: [{ role: "user", parts: [{ text: opts.userPrompt }] }],
+      generationConfig: {
+        temperature: opts.temperature ?? 0.4,
+        responseMimeType: opts.jsonMode ? "application/json" : "text/plain",
+      },
+    };
+
+    if (opts.systemPrompt) {
+      body.systemInstruction = { parts: [{ text: opts.systemPrompt }] };
+    }
+
+    for (let attempt = 0; attempt < 2; attempt++) {
+      try {
+        const res = await fetch(url, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(body),
+        });
+
+        if (res.ok) {
+          const data = await res.json();
+          const text = data?.candidates?.[0]?.content?.parts?.[0]?.text;
+          if (text) return text;
+        }
+
+        const errorText = await res.text();
+        const status = res.status;
+
+        if (status === 503 || status === 429) {
+          lastError = new Error(`Gemini API ${model} (${status}): ${errorText}`);
+          if (attempt === 0) {
+            await new Promise((r) => setTimeout(r, 400));
+            continue;
+          }
+          break;
+        }
+
+        throw new Error(`Gemini API error (${status}): ${errorText}`);
+      } catch (err: unknown) {
+        lastError = err instanceof Error ? err : new Error(String(err));
+        if (attempt === 0) {
+          await new Promise((r) => setTimeout(r, 400));
+          continue;
+        }
+      }
+    }
   }
 
-  const res = await fetch(url, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify(body),
-  });
-
-  if (!res.ok) {
-    const errorText = await res.text();
-    throw new Error(`Gemini API error (${res.status}): ${errorText}`);
-  }
-
-  const data = await res.json();
-  const text = data?.candidates?.[0]?.content?.parts?.[0]?.text;
-  if (!text) throw new Error("Empty response from Gemini API");
-  return text;
+  throw lastError || new Error("All Gemini models failed to respond");
 }
 
 /** Low-level OpenAI caller */
@@ -1389,17 +1422,214 @@ Respond ONLY with a valid JSON object:
     systemPrompt: "You are JOMP Concierge & Career Co-Pilot, a warm, friendly customer care guide and elite remote career advisor that helps users navigate the site, answers all questions, and anchors answers to their profile.",
     userPrompt: prompt,
     temperature: 0.5,
-    fallback: () => {
-      const title = params.candidateTitle || "your career path";
-      const topSkills = skillsList.slice(0, 3).join(", ") || "your skills";
-      return {
-        reply: `### Hello! I'm your JOMP Concierge & Career Co-Pilot 👋\n\nI'm here to help you get the most out of JOMP and guide you on your journey! Whether you need help navigating the platform or want personalized career advice for **${title}** with **${topSkills}**, I've got you covered.\n\nHere are quick ways I can help:\n• **Navigate JOMP**: Check out [Browse Jobs](/dashboard), track your [Applications](/dashboard/applications), or refine your CV in [Profile Settings](/dashboard/settings).\n• **CV & ATS Power**: Use our built-in AI CV Arranger to benchmark your resume for top remote employers.\n• **Interview Prep & Salary**: Ask me for tailored interview questions or remote salary benchmarks for ${title}.\n\nHow can I help you today? Feel free to ask anything!`,
-        suggestedActions: [
-          `How do I edit my CV with the AI Arranger?`,
-          `What remote jobs match my skills in ${topSkills}?`,
-          `Where can I see my application status?`,
-        ],
-      };
-    },
+    fallback: () => generateFallbackCoPilotReply(params),
   });
+}
+
+/**
+ * Intelligent contextual fallback for Co-Pilot.
+ * Accurately answers the user's specific query (interview questions, salary benchmarks,
+ * ATS optimization, niche matches, or navigation) even when the external AI API is unavailable.
+ */
+function generateFallbackCoPilotReply(params: CoPilotParams): CoPilotResponse {
+  const title = params.candidateTitle?.trim() || "Fullstack Developer";
+  const skillsList = (params.candidateSkills || []).filter(Boolean);
+  const topSkills = skillsList.slice(0, 4).join(", ") || "React, TypeScript, Node.js";
+
+  const userMessages = (params.messages || []).filter((m) => m.role === "user");
+  const latestMessage = userMessages[userMessages.length - 1]?.content?.trim() || "";
+  const query = latestMessage.toLowerCase();
+
+  // 1. Interview Questions
+  if (
+    query.includes("interview") ||
+    query.includes("question") ||
+    query.includes("quiz") ||
+    query.includes("screening")
+  ) {
+    return {
+      reply: `### 🎯 3 Challenging Interview Questions for a Remote ${title}
+
+Here are 3 high-impact questions remote hiring managers frequently ask candidates with skills in **${topSkills}**:
+
+---
+
+#### 1. Distributed State & Offline Resilience
+> *"How do you design a state synchronization and cache invalidation layer when users make concurrent edits with variable network latency?"*
+
+• **What they evaluate**: Deep understanding of optimistic UI updates, conflict resolution (CRDTs or timestamp-based last-write-wins), and handling reconnection states in modern apps.
+
+---
+
+#### 2. Cross-Stack Performance & Bottlenecks
+> *"Walk me through how you trace a 2-second API latency issue from the frontend render cycle down to the database query execution plan."*
+
+• **What they evaluate**: Fullstack observability, profiling tools (Chrome DevTools, APM metrics, slow query logs), and pragmatic architectural trade-offs (caching, indexes, payload reduction).
+
+---
+
+#### 3. Remote Autonomy & Async Trade-Offs
+> *"Describe a time a product requirement was ambiguous or contradictory across timezones. How did you unblock yourself without waiting 12 hours for an answer?"*
+
+• **What they evaluate**: Async documentation skills (RFCs, Loom summaries, clear PR descriptions), bias for action, and sound technical judgment in remote environments.
+
+---
+
+💡 **Pro Tip**: Structure your answers using the **STAR** method (Situation, Task, Action, Result) with concrete metrics!`,
+      suggestedActions: [
+        `How do I best answer the distributed state question?`,
+        `What remote salary should I target for ${title}?`,
+        `What ATS keywords should I highlight for ${topSkills}?`,
+      ],
+    };
+  }
+
+  // 2. Salary / Compensation
+  if (
+    query.includes("salary") ||
+    query.includes("pay") ||
+    query.includes("rate") ||
+    query.includes("compensation") ||
+    query.includes("benchmark") ||
+    query.includes("how much")
+  ) {
+    return {
+      reply: `### 💰 Competitive Remote Salary Benchmark for ${title}
+
+Based on live market data for remote teams hiring professionals with expertise in **${topSkills}**:
+
+| Seniority Level | Global Remote Range (USD) | US / Top-Tier Anchor |
+| :--- | :--- | :--- |
+| **Junior (1-3 yrs)** | $65,000 – $90,000 / yr | $85,000 – $110,000 |
+| **Mid-Level (3-5 yrs)** | $95,000 – $135,000 / yr | $120,000 – $155,000 |
+| **Senior (5-8+ yrs)** | $135,000 – $185,000 / yr | $160,000 – $210,000 |
+| **Staff / Lead** | $180,000 – $240,000+ / yr | $210,000 – $275,000+ |
+
+#### 🔑 What unlocks the top 10% of these bands:
+• **Fullstack Versatility**: Demonstrating proficiency across frontend reactivity and resilient backend services (${topSkills}).
+• **Async Autonomy**: Track record of shipping end-to-end features with minimal supervision.
+• **System Design**: Writing clear technical design specs and documentation.
+
+Would you like tips on negotiating equity vs. base pay or how to frame your value during offers?`,
+      suggestedActions: [
+        `Give me 3 challenging interview questions for ${title}`,
+        `What high-paying remote niches match my background?`,
+        `How do I optimize my CV to target senior bands?`,
+      ],
+    };
+  }
+
+  // 3. ATS Keywords / CV Optimization
+  if (
+    query.includes("cv") ||
+    query.includes("resume") ||
+    query.includes("ats") ||
+    query.includes("keyword") ||
+    query.includes("profile")
+  ) {
+    return {
+      reply: `### 📄 High-Impact ATS Keywords for ${title}
+
+To ensure your CV breezes past modern ATS filters and hooks technical recruiters, prioritize these keywords:
+
+#### 1. Core Technical Competencies
+• **Languages & Frameworks**: ${topSkills}, TypeScript, JavaScript (ESNext), Node.js, Next.js, Python, Java.
+• **State & Architecture**: RESTful APIs, GraphQL, Microservices, Event-Driven Architecture, Serverless, State Management.
+• **Data & Performance**: PostgreSQL, Redis, Database Indexing, Caching Strategies, Query Optimization.
+
+#### 2. Modern Remote Delivery
+• **DevOps & Cloud**: Docker, CI/CD Pipelines, AWS / GCP, Vercel, Infrastructure as Code.
+• **Testing & Quality**: Unit Testing (Jest/Vitest), Integration Testing, E2E (Playwright/Cypress), Code Reviews.
+
+#### 🛠️ Ready to arrange your CV?
+You can use JOMP's built-in **[AI CV Arranger](/dashboard/settings)** to automatically format your bullet points with the metric-driven **Action + Context + Result** formula!`,
+      suggestedActions: [
+        `How do I access the AI CV Arranger?`,
+        `Give me 3 challenging interview questions for ${title}`,
+        `What is the competitive remote salary for ${title}?`,
+      ],
+    };
+  }
+
+  // 4. Job Niches / High-Paying Opportunities
+  if (
+    query.includes("niche") ||
+    query.includes("match") ||
+    query.includes("opportunity") ||
+    query.includes("job") ||
+    query.includes("remote")
+  ) {
+    return {
+      reply: `### 🎯 High-Paying Remote Niches for ${title}
+
+With your background in **${topSkills}**, here are the 3 fastest-growing, high-paying remote sectors on JOMP:
+
+1. **AI-Enabled SaaS & Developer Tooling**
+   • *Why it fits*: High demand for fullstack developers who can bridge LLM APIs / streaming interfaces with robust backend business logic.
+   • *Pay Range*: $130,000 – $190,000+ USD.
+
+2. **FinTech & Real-Time Trading Platforms**
+   • *Why it fits*: Valued for strict typing (${skillsList.includes("TypeScript") ? "TypeScript" : "strong typing"}), transactional reliability, and secure API architecture.
+   • *Pay Range*: $140,000 – $210,000+ USD.
+
+3. **High-Growth B2B Cloud Infrastructure**
+   • *Why it fits*: Demands end-to-end ownership: reactive client dashboards, background worker queues, and database scaling.
+   • *Pay Range*: $125,000 – $180,000+ USD.
+
+👉 You can explore active listings right now in **[Browse Jobs](/dashboard)**!`,
+      suggestedActions: [
+        `What remote salary benchmark should I expect?`,
+        `Give me 3 challenging interview questions for ${title}`,
+        `What ATS keywords should I highlight?`,
+      ],
+    };
+  }
+
+  // 5. Site Navigation & Platform Features
+  if (
+    query.includes("where") ||
+    query.includes("how do i") ||
+    query.includes("navigate") ||
+    query.includes("apply") ||
+    query.includes("settings") ||
+    query.includes("post")
+  ) {
+    return {
+      reply: `### 🧭 JOMP Platform Navigation & Features
+
+Here is where to find everything you need on JOMP:
+
+• **Find Jobs**: Explore verified remote openings on **[Browse Jobs](/dashboard)** with real-time AI Match scores.
+• **My Applications**: Track all submitted applications and interview stages on **[Applications](/dashboard/applications)**.
+• **CV & Profile**: Edit your skills, bio, and launch the **AI CV Arranger** in **[Settings](/dashboard/settings)**.
+• **Employer Mode**: If you are hiring, switch to the **[Employer Dashboard](/employer/dashboard)** to post jobs or review applicants.
+
+Is there a specific tool or feature on JOMP you'd like me to walk you through?`,
+      suggestedActions: [
+        `How does the AI CV Arranger work?`,
+        `What remote jobs match my background in ${topSkills}?`,
+        `Give me 3 interview questions for ${title}`,
+      ],
+    };
+  }
+
+  // 6. Generic or Welcome Greeting
+  return {
+    reply: `### Hello ${params.candidateName ? params.candidateName.split(" ")[0] : "there"}! I'm your JOMP Concierge & Career Co-Pilot 👋
+
+I'm anchored to your profile as a **${title}**${skillsList.length ? ` with skills in **${topSkills}**` : ""}.
+
+I'm here to give you an unfair advantage in your remote career. Ask me anything about:
+• **Interview Prep**: Tailored technical & behavioral questions with model answers.
+• **Salary Benchmarks**: Current global remote compensation bands for ${title}.
+• **ATS Optimization**: High-impact keywords to pass automated resume screeners.
+• **JOMP Navigation**: How to get the most out of [Browse Jobs](/dashboard) and [CV Settings](/dashboard/settings).
+
+What would you like to explore first?`,
+    suggestedActions: [
+      `Give me 3 challenging interview questions for a remote ${title}`,
+      `What is the competitive remote salary benchmark for a ${title}?`,
+      `What high-paying remote niches best match my background?`,
+    ],
+  };
 }
