@@ -361,6 +361,8 @@ export async function actionChatCoPilot(params: CoPilotParams): Promise<{ data?:
       candidateSkills: params.candidateSkills?.slice(0, 25).map((s) => s.trim().slice(0, 50)),
       hasResume: Boolean(params.hasResume),
       ignoreProfile: Boolean(params.ignoreProfile),
+      userRole: params.userRole,
+      currentPage: params.currentPage?.trim().slice(0, 100),
     };
     const data = await chatWithCoPilot(cleanParams);
     return { data };

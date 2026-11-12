@@ -9,6 +9,7 @@ import { ThemeSwitch } from "@/components/dashboard/theme-switch";
 import { Icon } from "@/components/ui/icon";
 import { LiveApplications } from "@/components/employer/live-applications";
 import { NotificationBell } from "@/components/notifications/notification-bell";
+import { AICoPilotBubble } from "@/components/ai/ai-copilot-bubble";
 
 const NAV = [
   { href: "/employer/dashboard", label: "Overview", exact: true },
@@ -88,6 +89,11 @@ export default async function EmployerLayout({ children }: { children: React.Rea
 
       <main className="flex-1">{children}</main>
       <LiveApplications userId={user.id} />
+      <AICoPilotBubble
+        candidateName={name}
+        candidateTitle={company?.name ? `Hiring Manager at ${company.name}` : "Hiring Manager"}
+        userRole="employer"
+      />
     </div>
   );
 }

@@ -1,6 +1,8 @@
 "use client";
 
 import { useState, useRef, useEffect, useMemo, type ReactNode } from "react";
+import Link from "next/link";
+import { usePathname } from "next/navigation";
 import {
   AiChat02Icon,
   Cancel01Icon,
@@ -10,6 +12,7 @@ import {
   CheckIcon,
   Target02Icon,
   RefreshIcon,
+  CompassIcon,
 } from "@hugeicons/core-free-icons";
 import { Icon } from "@/components/ui/icon";
 import { actionChatCoPilot } from "@/app/actions/ai";
@@ -22,6 +25,7 @@ export type AICoPilotBubbleProps = {
   candidateBio?: string;
   candidateSkills?: string[];
   hasResume?: boolean;
+  userRole?: "candidate" | "employer" | "admin" | "guest";
 };
 
 const STORAGE_KEY = "jomp_copilot_history_v1";
@@ -39,7 +43,9 @@ export function AICoPilotBubble({
   candidateBio,
   candidateSkills,
   hasResume,
+  userRole = "candidate",
 }: AICoPilotBubbleProps) {
+  const pathname = usePathname();
   const [isOpen, setIsOpen] = useState(false);
   const [input, setInput] = useState("");
   const [loading, setLoading] = useState(false);
@@ -224,34 +230,47 @@ export function AICoPilotBubble({
     } catch {}
   };
 
-  // Build profile-tailored starter prompts
+  // Build profile- & site-tailored starter prompts
   const starterPrompts = useMemo(() => {
     const title = candidateTitle?.trim() || "my role";
     const skills = (candidateSkills || []).slice(0, 3).join(", ");
+    
+    if (userRole === "employer") {
+      return [
+        `✍️ How do I write an attractive remote job posting?`,
+        `🔍 How do I screen and shortlist applicants with AI on JOMP?`,
+        `🧭 Guide me around the employer portal and applicant tracking tools.`,
+        `💬 Draft an interview invitation message for a strong candidate.`,
+      ];
+    }
+
     return [
       `🎯 What high-paying remote niches best match my background in ${title}?`,
       skills
         ? `📄 What ATS resume keywords should I highlight for ${skills}?`
         : `📄 How do I optimize my CV to pass modern ATS filters?`,
+      `🧭 How do I navigate JOMP and use the AI CV Arranger?`,
       `💰 What is the competitive remote salary benchmark for a ${title}?`,
       `🎤 Give me 3 challenging interview questions for a remote ${title}.`,
     ];
-  }, [candidateTitle, candidateSkills]);
+  }, [candidateTitle, candidateSkills, userRole]);
 
   // Initial welcome message tailored to user
   const initialWelcome: CoPilotMessage = useMemo(() => {
-    const greeting = candidateName ? `Hi ${candidateName.split(" ")[0]}!` : "Hi there!";
+    const greeting = candidateName ? `Hi ${candidateName.split(" ")[0]}! 👋` : "Hi there! 👋";
     const contextNote = candidateTitle
       ? `I'm automatically anchored to your profile as **${candidateTitle}**${
           candidateSkills?.length ? ` with expertise in **${candidateSkills.slice(0, 3).join(", ")}**` : ""
         }.`
-      : "I'm your dedicated JOMP Career Co-Pilot.";
+      : userRole === "employer"
+      ? "I'm your JOMP Hiring Concierge & Co-Pilot."
+      : "I'm your JOMP Concierge & Career Co-Pilot.";
 
     return {
       role: "assistant",
-      content: `${greeting} ${contextNote}\n\nAsk me anything about remote job matches, salary benchmarks, ATS keywords, or interview preparation — or pick a starter below.`,
+      content: `${greeting} ${contextNote}\n\nI'm here as your personal guide and customer care assistant! I can help you **navigate anywhere on JOMP**, provide **personalized career guidance**, benchmark salaries, prep for interviews, or answer any question you have. Feel free to ask me anything or click a prompt below!`,
     };
-  }, [candidateName, candidateTitle, candidateSkills]);
+  }, [candidateName, candidateTitle, candidateSkills, userRole]);
 
   const [messages, setMessages] = useState<CoPilotMessage[]>([initialWelcome]);
   const [suggestedActions, setSuggestedActions] = useState<string[]>(starterPrompts);
@@ -318,6 +337,8 @@ export function AICoPilotBubble({
         candidateSkills,
         hasResume,
         ignoreProfile: !useProfileContext,
+        userRole,
+        currentPage: pathname || "JOMP",
       });
 
       if (res.data) {
@@ -334,7 +355,7 @@ export function AICoPilotBubble({
           {
             role: "assistant",
             content:
-              "I ran into an issue connecting to the career model. Please try again or rephrase your question.",
+              "I apologize, but I had a slight hiccup retrieving that answer. Please give it another try, or let me know what page or topic you'd like help with! 😊",
           },
         ]);
       }
@@ -343,7 +364,7 @@ export function AICoPilotBubble({
         ...newMessages,
         {
           role: "assistant",
-          content: "Sorry, I couldn't connect right now. Please try again in a moment.",
+          content: "Sorry about that! I couldn't connect right now. Please try again in just a moment. 🙏",
         },
       ]);
     } finally {
@@ -431,14 +452,14 @@ export function AICoPilotBubble({
                 <div>
                   <div className="flex items-center gap-1.5">
                     <h3 className="text-[13.5px] font-semibold text-neutral-900 leading-tight">
-                      JOMP Career Co-Pilot
+                      JOMP Concierge &amp; Co-Pilot
                     </h3>
                     <span className="rounded-full bg-emerald-500/15 px-1.5 py-0.5 text-[10px] font-semibold text-emerald-600 dark:text-emerald-400">
-                      AI Live
+                      Live Guide
                     </span>
                   </div>
                   <p className="text-[11px] text-neutral-500">
-                    {candidateTitle ? `Tuned for ${candidateTitle}` : "Remote Career Advisor"}
+                    {candidateTitle ? `Tuned for ${candidateTitle} · Site Concierge` : "Friendly Site & Career Concierge"}
                   </p>
                 </div>
               </div>
@@ -541,7 +562,7 @@ export function AICoPilotBubble({
             {!loading && suggestedActions.length > 0 && (
               <div className="pt-2">
                 <span className="text-[11px] font-semibold text-neutral-400 uppercase tracking-wider block mb-2">
-                  Suggested Questions For Your Profile:
+                  {userRole === "employer" ? "Suggested Employer Inquiries:" : "Suggested Questions & Site Guides:"}
                 </span>
                 <div className="flex flex-col gap-1.5">
                   {suggestedActions.map((action, i) => (
@@ -562,6 +583,35 @@ export function AICoPilotBubble({
             )}
           </div>
 
+          {/* Quick Nav Shortcut Bar */}
+          <div className="flex items-center gap-1.5 overflow-x-auto border-t border-neutral-200/60 bg-neutral-100/50 px-3 py-1.5 text-[11px] text-neutral-600 no-scrollbar">
+            <span className="flex items-center gap-1 shrink-0 font-medium text-neutral-500">
+              <Icon icon={CompassIcon} size={12} className="text-brand" />
+              Quick:
+            </span>
+            {userRole === "employer" ? (
+              <>
+                <Link href="/employer/dashboard" onClick={() => setIsOpen(false)} className="rounded px-1.5 py-0.5 hover:bg-neutral-200/60 hover:text-neutral-900 shrink-0">Overview</Link>
+                <span>·</span>
+                <Link href="/employer/jobs/create" onClick={() => setIsOpen(false)} className="rounded px-1.5 py-0.5 hover:bg-neutral-200/60 hover:text-neutral-900 shrink-0">Post Job</Link>
+                <span>·</span>
+                <Link href="/employer/applicants" onClick={() => setIsOpen(false)} className="rounded px-1.5 py-0.5 hover:bg-neutral-200/60 hover:text-neutral-900 shrink-0">Applicants</Link>
+                <span>·</span>
+                <Link href="/employer/settings" onClick={() => setIsOpen(false)} className="rounded px-1.5 py-0.5 hover:bg-neutral-200/60 hover:text-neutral-900 shrink-0">Settings</Link>
+              </>
+            ) : (
+              <>
+                <Link href="/dashboard" onClick={() => setIsOpen(false)} className="rounded px-1.5 py-0.5 hover:bg-neutral-200/60 hover:text-neutral-900 shrink-0">Jobs</Link>
+                <span>·</span>
+                <Link href="/dashboard/applications" onClick={() => setIsOpen(false)} className="rounded px-1.5 py-0.5 hover:bg-neutral-200/60 hover:text-neutral-900 shrink-0">Applications</Link>
+                <span>·</span>
+                <Link href="/dashboard/settings" onClick={() => setIsOpen(false)} className="rounded px-1.5 py-0.5 hover:bg-neutral-200/60 hover:text-neutral-900 shrink-0">CV Studio</Link>
+                <span>·</span>
+                <button type="button" onClick={() => handleSend("How do I use the AI CV Arranger?")} className="rounded px-1.5 py-0.5 text-brand hover:bg-neutral-200/60 shrink-0 font-medium">How to use AI CV?</button>
+              </>
+            )}
+          </div>
+
           {/* Input Form */}
           <div className="border-t border-neutral-200/80 bg-surface p-3">
             <form
@@ -578,8 +628,8 @@ export function AICoPilotBubble({
                 onChange={(e) => setInput(e.target.value)}
                 placeholder={
                   candidateTitle
-                    ? `Ask about ${candidateTitle}, CV, salary, or interviews...`
-                    : "Ask Career Co-Pilot anything..."
+                    ? `Ask about ${candidateTitle}, site features, CV, or interviews...`
+                    : "Ask anything about JOMP, jobs, or career advice..."
                 }
                 disabled={loading}
                 className="flex-1 rounded-full border border-neutral-200/80 bg-neutral-100 px-4 py-2 text-[13px] text-neutral-900 placeholder-neutral-400 focus:border-brand focus:bg-surface focus:outline-none transition shadow-2xs"
@@ -688,13 +738,42 @@ function FormattedMarkdown({ text }: { text: string }) {
 }
 
 /**
- * Parses bold (**word**), code (`code`), and italics (*word*) into React spans
+ * Parses bold (**word**), code (`code`), italics (*word*), and markdown links ([text](url)) into React spans
  */
 function renderInlineSpans(text: string): ReactNode {
-  // Regex to split on bold (**...**), code (`...`), and italic (*...*)
-  const tokens = text.split(/(\*\*.*?\*\*|`.*?`|\*.*?\*)/g);
+  // Regex to split on markdown links ([label](href)), bold (**...**), code (`...`), and italic (*...*)
+  const tokens = text.split(/(\[.*?\]\(.*?\)|\*\*.*?\*\*|`.*?`|\*.*?\*)/g);
 
   return tokens.map((token, i) => {
+    // Markdown link: [Label](url)
+    const linkMatch = token.match(/^\[(.*?)\]\((.*?)\)$/);
+    if (linkMatch) {
+      const [, label, href] = linkMatch;
+      const isInternal = href.startsWith("/");
+      if (isInternal) {
+        return (
+          <Link
+            key={i}
+            href={href}
+            className="inline-flex items-center font-semibold text-brand underline decoration-brand/30 hover:decoration-brand hover:text-brand-hover transition"
+          >
+            {label}
+          </Link>
+        );
+      }
+      return (
+        <a
+          key={i}
+          href={href}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="inline-flex items-center font-semibold text-brand underline decoration-brand/30 hover:decoration-brand hover:text-brand-hover transition"
+        >
+          {label}
+        </a>
+      );
+    }
+
     if (token.startsWith("**") && token.endsWith("**")) {
       return (
         <strong key={i} className="font-semibold text-neutral-950">
