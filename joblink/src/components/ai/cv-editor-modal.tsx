@@ -269,13 +269,13 @@ export function CVEditorModal({
               ) : (
                 /* PDF PREVIEW */
                 <div className="relative overflow-hidden rounded-xl border border-neutral-200/80 bg-surface p-6 sm:p-8 shadow-sm text-neutral-900">
-                  {/* Diagonal Watermark */}
+                  {/* Diagonal Watermark: Faint, faded, embedded at the back of the document */}
                   <div
                     aria-hidden="true"
-                    className="pointer-events-none absolute inset-0 flex items-center justify-center select-none overflow-hidden"
+                    className="pointer-events-none absolute inset-0 z-0 flex items-center justify-center select-none overflow-hidden"
                   >
-                    <span className="rotate-[-32deg] text-center text-[42px] sm:text-[56px] font-extrabold tracking-wider text-neutral-900/[0.07] uppercase">
-                      CREATED WITH JOMP
+                    <span className="rotate-[-54deg] text-center text-[100px] sm:text-[140px] font-black tracking-widest text-[#01224F]/[0.06] uppercase select-none">
+                      JOMP
                     </span>
                   </div>
 

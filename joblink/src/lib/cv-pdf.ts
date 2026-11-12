@@ -151,16 +151,17 @@ export function generateAICVPdf(data: CVPdfData): Uint8Array {
 
   function renderPageDecorations(page: PageStream, pageNum: number) {
     if (data.watermark !== false) {
-      // 1. Diagonal Watermark across the page
+      // 1. Diagonal Watermark across the page background:
+      // Faint, faded, embedded at the back of the document behind text
       page.commands.push(
         "q",
         "/GS1 gs",
-        "0.78 0.82 0.88 rg",
+        "0.75 0.78 0.86 rg", // Subtle light bluish-gray tint matching brand tone
         "BT",
-        "/F2 38 Tf",
-        // Rotate ~35 degrees: cos(35)=0.819, sin(35)=0.5735
-        `0.819 0.5735 -0.5735 0.819 110 320 Tm`,
-        `(${escapePdfText("CREATED WITH JOMP AI")}) Tj`,
+        "/F2 135 Tf", // Prominent large "JOMP" across the page
+        // Rotated ~54 degrees diagonal: cos(54)=0.5878, sin(54)=0.8090
+        `0.5878 0.8090 -0.8090 0.5878 120 230 Tm`,
+        `(${escapePdfText("JOMP")}) Tj`,
         "ET",
         "Q",
       );
@@ -585,8 +586,8 @@ export function generateAICVPdf(data: CVPdfData): Uint8Array {
   objects.push(`<<\n  /Type /Font\n  /Subtype /Type1\n  /BaseFont /Helvetica-Bold\n  /Encoding /WinAnsiEncoding\n>>`);
   // Obj 5: Font F3 (Helvetica-Oblique)
   objects.push(`<<\n  /Type /Font\n  /Subtype /Type1\n  /BaseFont /Helvetica-Oblique\n  /Encoding /WinAnsiEncoding\n>>`);
-  // Obj 6: ExtGState GS1 for 12% opacity watermark
-  objects.push(`<<\n  /Type /ExtGState\n  /ca 0.12\n  /CA 0.12\n>>`);
+  // Obj 6: ExtGState GS1 for faint background watermark (~7% opacity)
+  objects.push(`<<\n  /Type /ExtGState\n  /ca 0.07\n  /CA 0.07\n>>`);
 
   // Next objects will be Page and Contents streams
   let nextObjIndex = 7;
