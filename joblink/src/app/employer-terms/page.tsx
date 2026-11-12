@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import { LegalLayout } from "@/components/legal/LegalLayout";
 
 export const metadata: Metadata = {
-  title: "Employer Terms | JOMP",
+  title: "Employer Terms & Conditions",
   description: "Terms and verification requirements for employers and recruiting organisations posting vacancies on JOMP.",
 };
 

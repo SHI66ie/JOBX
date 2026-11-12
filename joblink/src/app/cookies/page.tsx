@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import { LegalLayout } from "@/components/legal/LegalLayout";
 
 export const metadata: Metadata = {
-  title: "Cookie Policy | JOMP",
+  title: "Cookie Policy",
   description: "Explanation of how JOMP uses cookies and similar technologies in compliance with NDPC guidelines.",
 };
 

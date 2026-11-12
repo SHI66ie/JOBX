@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import { LegalLayout } from "@/components/legal/LegalLayout";
 
 export const metadata: Metadata = {
-  title: "Privacy Policy | JOMP",
+  title: "Privacy Policy",
   description: "Learn how JOMP collects, uses, stores, protects, and discloses personal information in compliance with the Nigeria Data Protection Act 2023.",
 };
 

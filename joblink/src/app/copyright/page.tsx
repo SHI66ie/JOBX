@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import { LegalLayout } from "@/components/legal/LegalLayout";
 
 export const metadata: Metadata = {
-  title: "Copyright & Intellectual Property Policy | JOMP",
+  title: "Copyright & Intellectual Property Policy",
   description: "Learn how JOMP respects intellectual property rights, manages user-uploaded materials, and handles copyright infringement notices.",
 };
 

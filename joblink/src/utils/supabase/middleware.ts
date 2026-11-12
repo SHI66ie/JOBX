@@ -10,9 +10,7 @@ const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY || process.
  */
 export async function updateSession(request: NextRequest) {
   let supabaseResponse = NextResponse.next({
-    request: {
-      headers: request.headers,
-    },
+    request,
   });
 
   const supabase = createServerClient(supabaseUrl!, supabaseKey!, {

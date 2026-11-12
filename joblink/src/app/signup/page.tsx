@@ -155,7 +155,7 @@ function SignupForm() {
           placeholder="Create a password"
           autoComplete="new-password"
           required
-          pattern={'(?=.*[A-Z])(?=.*[!@#$%^&*(),.?":{}|<>]).{8,}'}
+          minLength={8}
           title="At least 8 characters, one uppercase letter and one special character."
           hint="At least 8 characters, with an uppercase letter and a symbol."
         />

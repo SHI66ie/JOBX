@@ -24,20 +24,24 @@ export function JompMark({
   className,
   tone = "navy",
   title = APP_NAME,
+  "aria-hidden": ariaHidden,
 }: {
   className?: string;
   tone?: LogoTone;
   title?: string;
+  "aria-hidden"?: boolean | "true" | "false";
 }) {
+  const isHidden = ariaHidden ?? !title;
   return (
     <svg
       xmlns="http://www.w3.org/2000/svg"
       viewBox="0 0 124 125"
       className={cn("shrink-0", className)}
-      role="img"
-      aria-label={title}
+      role={isHidden ? undefined : "img"}
+      aria-label={isHidden ? undefined : title}
+      aria-hidden={isHidden ? true : undefined}
     >
-      <title>{title}</title>
+      {!isHidden && title ? <title>{title}</title> : null}
       <g
         transform="translate(0,125) scale(0.1,-0.1)"
         fill={TONE[tone]}
@@ -97,7 +101,7 @@ export function Logo({
   if (variant === "stacked") {
     return (
       <div className={cn("flex flex-col items-center gap-1.5", className)}>
-        <JompMark className={cn("h-12 w-12", markClassName)} tone={tone} />
+        <JompMark className={cn("h-12 w-12", markClassName)} tone={tone} aria-hidden />
         <JompWordmark className="h-7 w-auto" tone={tone} />
         {tagline && (
           <p
@@ -113,7 +117,7 @@ export function Logo({
 
   return (
     <div className={cn("flex items-center gap-3", className)}>
-      <JompMark className={cn("h-9 w-9", markClassName)} tone={tone} />
+      <JompMark className={cn("h-9 w-9", markClassName)} tone={tone} aria-hidden />
       <span
         aria-hidden
         className="hidden h-8 w-px sm:block"
