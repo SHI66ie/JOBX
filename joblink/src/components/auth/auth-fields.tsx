@@ -129,19 +129,31 @@ export function SubmitButton({
   );
 }
 
-export function GoogleButton({ label = "Continue with Google" }: { label?: string }) {
+export function GoogleButton({
+  label = "Continue with Google",
+  onClick,
+  isLoading,
+  type = "submit",
+}: {
+  label?: string;
+  onClick?: () => void;
+  isLoading?: boolean;
+  type?: "submit" | "button";
+}) {
   const { pending } = useFormStatus();
+  const busy = isLoading ?? pending;
 
   return (
     <button
-      type="submit"
-      disabled={pending}
+      type={type}
+      onClick={onClick}
+      disabled={busy}
       className={cn(
         "flex h-11 w-full items-center justify-center gap-3 rounded-xl border border-neutral-200 bg-surface text-sm font-medium text-neutral-800 transition-[background-color,border-color,transform] duration-200 hover:border-neutral-300 hover:bg-neutral-50 active:scale-[0.985] disabled:opacity-70",
         FOCUS_RING,
       )}
     >
-      {pending ? <Icon icon={Loading03Icon} className="size-4 animate-spin text-neutral-500" /> : <GoogleIcon />}
+      {busy ? <Icon icon={Loading03Icon} className="size-4 animate-spin text-neutral-500" /> : <GoogleIcon />}
       {label}
     </button>
   );

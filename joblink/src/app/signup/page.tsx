@@ -3,7 +3,8 @@
 import Link from "next/link";
 import { Suspense, useState } from "react";
 import { useSearchParams } from "next/navigation";
-import { signup, signInWithGoogle } from "../login/actions";
+import { signup } from "../login/actions";
+import { createClient } from "@/utils/supabase/client";
 import { cn } from "@/lib/utils";
 import { AuthHeading, AuthShell } from "@/components/auth/auth-shell";
 import {
@@ -26,6 +27,32 @@ function SignupForm() {
   const role = searchParams.get("role") === "employer" ? "employer" : "candidate";
   const isEmployer = role === "employer";
   const [acceptedTerms, setAcceptedTerms] = useState(false);
+  const [googleLoading, setGoogleLoading] = useState(false);
+  const [googleError, setGoogleError] = useState<string | null>(null);
+
+  const handleGoogleSignUp = async () => {
+    try {
+      setGoogleLoading(true);
+      setGoogleError(null);
+      const supabase = createClient();
+      const origin = window.location.origin;
+      const callback = `${origin}/auth/callback?intent=${role}`;
+      const { error } = await supabase.auth.signInWithOAuth({
+        provider: "google",
+        options: {
+          redirectTo: callback,
+          queryParams: { prompt: "select_account" },
+        },
+      });
+      if (error) {
+        setGoogleError(error.message);
+        setGoogleLoading(false);
+      }
+    } catch (err: unknown) {
+      setGoogleError(err instanceof Error ? err.message : "Failed to connect to Google");
+      setGoogleLoading(false);
+    }
+  };
 
   return (
     <AuthShell
@@ -74,10 +101,12 @@ function SignupForm() {
       </nav>
 
       <div className="auth-rise mt-6 [animation-delay:120ms]">
-        <form action={signInWithGoogle}>
-          <input type="hidden" name="role" value={role} />
-          <GoogleButton label="Sign up with Google" />
-        </form>
+        <GoogleButton
+          type="button"
+          label="Sign up with Google"
+          onClick={handleGoogleSignUp}
+          isLoading={googleLoading}
+        />
         <p className="mt-2 text-center text-[11px] text-neutral-500">
           By continuing with Google, you agree to the{" "}
           <Link
@@ -178,7 +207,7 @@ function SignupForm() {
           )}
         </div>
 
-        <FormMessage message={message} />
+        <FormMessage message={googleError || message} />
 
         <div className="pt-2">
           <SubmitButton
