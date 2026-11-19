@@ -4,7 +4,7 @@ import Link from "next/link";
 import { Suspense, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import { login } from "./actions";
-import { createClient } from "@/utils/supabase/client";
+import { signIn } from "next-auth/react";
 import { AuthHeading, AuthShell } from "@/components/auth/auth-shell";
 import {
   FormMessage,
@@ -25,19 +25,10 @@ function LoginFormInner() {
     try {
       setGoogleLoading(true);
       setGoogleError(null);
-      const supabase = createClient();
-      const origin = window.location.origin;
-      const { error } = await supabase.auth.signInWithOAuth({
-        provider: "google",
-        options: {
-          redirectTo: `${origin}/auth/callback`,
-          queryParams: { prompt: "select_account" },
-        },
+      // This now goes through Auth.js → Google shows jomponline.com
+      await signIn("google", {
+        callbackUrl: "/auth/bridge",   // we will create this next
       });
-      if (error) {
-        setGoogleError(error.message);
-        setGoogleLoading(false);
-      }
     } catch (err: unknown) {
       setGoogleError(err instanceof Error ? err.message : "Failed to connect to Google");
       setGoogleLoading(false);
