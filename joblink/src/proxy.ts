@@ -2,11 +2,19 @@ import { type NextRequest, NextResponse } from "next/server";
 import { updateSession } from "@/utils/supabase/middleware";
 
 export async function proxy(request: NextRequest) {
-  // If an OAuth code or provider error lands anywhere other than /auth/callback
-  // (e.g. Supabase fallback to Site URL or another configured landing page),
-  // immediately route it to /auth/callback so the session can be created.
   const { pathname, searchParams } = request.nextUrl;
-  if (pathname !== "/auth/callback" && (searchParams.has("code") || searchParams.has("error_description"))) {
+
+  // Do NOT intercept Auth.js callbacks
+  if (pathname.startsWith("/api/auth")) {
+    return await updateSession(request);
+  }
+
+  // Only forward stray OAuth codes that are meant for the old Supabase callback
+  if (
+    pathname !== "/auth/callback" &&
+    !pathname.startsWith("/api/auth") &&
+    (searchParams.has("code") || searchParams.has("error_description"))
+  ) {
     const callback = request.nextUrl.clone();
     callback.pathname = "/auth/callback";
     return NextResponse.redirect(callback);
