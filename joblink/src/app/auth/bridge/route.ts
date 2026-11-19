@@ -4,11 +4,15 @@ import { createServerClient } from "@supabase/ssr"
 import { cookies } from "next/headers"
 import { getUserRoles, hasCompletedOnboarding, onboardingPath } from "@/utils/auth"
 
-export async function GET() {
+export async function GET(request: Request) {
+  const requestUrl = new URL(request.url)
+  const baseUrl = process.env.AUTH_URL || requestUrl.origin
+  const intent = requestUrl.searchParams.get("intent")
+
   const session = await auth()
 
   if (!session || !(session as any).supabaseAccessToken) {
-    return NextResponse.redirect(new URL("/login?message=Google+sign-in+failed", process.env.AUTH_URL || "https://jomponline.com"))
+    return NextResponse.redirect(new URL("/login?message=Google+sign-in+failed", baseUrl))
   }
 
   const cookieStore = await cookies()
@@ -38,10 +42,46 @@ export async function GET() {
 
   if (error || !data.user) {
     console.error("Bridge setSession error:", error)
-    return NextResponse.redirect(new URL("/login?message=Could+not+create+session", process.env.AUTH_URL || "https://jomponline.com"))
+    return NextResponse.redirect(new URL("/login?message=Could+not+create+session", baseUrl))
   }
 
-  const user = data.user
+  let user = data.user
+
+  // If user signed up with an intent (employer or candidate), ensure metadata is set
+  if (intent === "employer" && !hasCompletedOnboarding(user, "employer")) {
+    const fullName = String(user.user_metadata?.full_name || user.user_metadata?.name || "").trim()
+    const [first_name, ...rest] = fullName.split(" ")
+    const updated = await supabase.auth.updateUser({
+      data: {
+        first_name: user.user_metadata?.first_name || first_name || "",
+        last_name: user.user_metadata?.last_name || rest.join(" "),
+        role: "employer",
+        roles: Array.from(new Set(["employer", ...getUserRoles(user)])),
+        onboarded: false,
+        employer_onboarded: false,
+      },
+    })
+    if (updated.data.user) user = updated.data.user
+    return NextResponse.redirect(new URL(onboardingPath("employer"), baseUrl))
+  }
+
+  if (intent === "candidate" && !hasCompletedOnboarding(user, "candidate")) {
+    const fullName = String(user.user_metadata?.full_name || user.user_metadata?.name || "").trim()
+    const [first_name, ...rest] = fullName.split(" ")
+    const updated = await supabase.auth.updateUser({
+      data: {
+        first_name: user.user_metadata?.first_name || first_name || "",
+        last_name: user.user_metadata?.last_name || rest.join(" "),
+        role: "candidate",
+        roles: Array.from(new Set(["candidate", ...getUserRoles(user)])),
+        onboarded: false,
+        candidate_onboarded: false,
+      },
+    })
+    if (updated.data.user) user = updated.data.user
+    return NextResponse.redirect(new URL(onboardingPath("candidate"), baseUrl))
+  }
+
   const roles = getUserRoles(user)
 
   let redirectPath = "/dashboard"
@@ -56,6 +96,5 @@ export async function GET() {
     redirectPath = "/employer/dashboard"
   }
 
-  return NextResponse.redirect(new URL(redirectPath, process.env.AUTH_URL || "https://jomponline.com"))
+  return NextResponse.redirect(new URL(redirectPath, baseUrl))
 }
-

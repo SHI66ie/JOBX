@@ -4,7 +4,7 @@ import Link from "next/link";
 import { Suspense, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import { signup } from "../login/actions";
-import { createClient } from "@/utils/supabase/client";
+import { signIn } from "next-auth/react";
 import { cn } from "@/lib/utils";
 import { AuthHeading, AuthShell } from "@/components/auth/auth-shell";
 import {
@@ -34,20 +34,9 @@ function SignupForm() {
     try {
       setGoogleLoading(true);
       setGoogleError(null);
-      const supabase = createClient();
-      const origin = window.location.origin;
-      const callback = `${origin}/auth/callback?intent=${role}`;
-      const { error } = await supabase.auth.signInWithOAuth({
-        provider: "google",
-        options: {
-          redirectTo: callback,
-          queryParams: { prompt: "select_account" },
-        },
+      await signIn("google", {
+        callbackUrl: `/auth/bridge?intent=${role}`,
       });
-      if (error) {
-        setGoogleError(error.message);
-        setGoogleLoading(false);
-      }
     } catch (err: unknown) {
       setGoogleError(err instanceof Error ? err.message : "Failed to connect to Google");
       setGoogleLoading(false);
