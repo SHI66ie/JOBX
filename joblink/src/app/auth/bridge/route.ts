@@ -45,6 +45,14 @@ export async function GET(request: Request) {
     return NextResponse.redirect(new URL("/login?message=Could+not+create+session", baseUrl))
   }
 
+  // Clear temporary Auth.js cookies now that Supabase session is safely established.
+  // This prevents the Cookie header from bloating and hitting Netlify's 8KB HTTP 400 limit.
+  for (const c of cookieStore.getAll()) {
+    if (c.name.includes("authjs")) {
+      cookieStore.delete(c.name);
+    }
+  }
+
   let user = data.user
 
   // If user signed up with an intent (employer or candidate), ensure metadata is set
@@ -62,7 +70,7 @@ export async function GET(request: Request) {
       },
     })
     if (updated.data.user) user = updated.data.user
-    return NextResponse.redirect(new URL(onboardingPath("employer"), baseUrl))
+    return NextResponse.redirect(new URL(onboardingPath("employer"), baseUrl), 303)
   }
 
   if (intent === "candidate" && !hasCompletedOnboarding(user, "candidate")) {
@@ -79,7 +87,7 @@ export async function GET(request: Request) {
       },
     })
     if (updated.data.user) user = updated.data.user
-    return NextResponse.redirect(new URL(onboardingPath("candidate"), baseUrl))
+    return NextResponse.redirect(new URL(onboardingPath("candidate"), baseUrl), 303)
   }
 
   const roles = getUserRoles(user)
@@ -96,5 +104,7 @@ export async function GET(request: Request) {
     redirectPath = "/employer/dashboard"
   }
 
-  return NextResponse.redirect(new URL(redirectPath, baseUrl))
+  const targetUrl = new URL(redirectPath, baseUrl)
+  targetUrl.search = ""
+  return NextResponse.redirect(targetUrl, 303)
 }
